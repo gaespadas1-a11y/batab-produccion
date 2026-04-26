@@ -308,21 +308,73 @@ textarea.fn{resize:none;font-size:14px;min-height:70px}
       <div class="fi"><label class="fl">Artículo a fabricar <span style="font-size:9px;color:var(--tx3);font-weight:400">(solo ensambles)</span></label>
         <select class="fn" id="f-ti">
           <option value="">— seleccionar artículo —</option>
-          <optgroup label="Avance">
-            <option>Avance BH-10</option><option>Avance BH-12</option>
-            <option>Avance BH-15</option><option>Avance BH-20</option>
+          <optgroup label="BLOCK AVANCE">
+            <option>BLOCK AVANCE - BH10</option>
+            <option>BLOCK AVANCE - BH12</option>
+            <option>BLOCK AVANCE - BH15</option>
+            <option>BLOCK AVANCE - BH20</option>
+            <option>BLOCK AVANCE - BT10</option>
+            <option>BLOCK AVANCE - BT12</option>
           </optgroup>
-          <optgroup label="Vitta">
-            <option>Vitta BH-10</option><option>Vitta BH-12</option>
-            <option>Vitta BH-15</option><option>Vitta BH-20</option>
+          <optgroup label="BLOCK EMBLEMA">
+            <option>BLOCK EMBLEMA - BH10</option>
+            <option>BLOCK EMBLEMA - BH12</option>
+            <option>BLOCK EMBLEMA - BH15</option>
+            <option>BLOCK EMBLEMA - BH20</option>
+            <option>BLOCK EMBLEMA - BT10</option>
+            <option>BLOCK EMBLEMA - BT12</option>
           </optgroup>
-          <optgroup label="Emblema">
-            <option>Emblema BH-10</option><option>Emblema BH-12</option>
-            <option>Emblema BH-15</option><option>Emblema BH-20</option>
+          <optgroup label="BLOCK FORTALEZA">
+            <option>BLOCK FORTALEZA - BH10 R-90</option>
+            <option>BLOCK FORTALEZA - BH10 R-120</option>
+            <option>BLOCK FORTALEZA - BH10 R-150</option>
+            <option>BLOCK FORTALEZA - BH12 R-90</option>
+            <option>BLOCK FORTALEZA - BH12 R-120</option>
+            <option>BLOCK FORTALEZA - BH12 R-150</option>
+            <option>BLOCK FORTALEZA - BH15 R-90</option>
+            <option>BLOCK FORTALEZA - BH15 R-120</option>
+            <option>BLOCK FORTALEZA - BH15 R-150</option>
+            <option>BLOCK FORTALEZA - BH20 R-90</option>
+            <option>BLOCK FORTALEZA - BH20 R-120</option>
+            <option>BLOCK FORTALEZA - BH20 R-150</option>
+            <option>BLOCK FORTALEZA - BS10</option>
+            <option>BLOCK FORTALEZA - BS12</option>
+            <option>BLOCK FORTALEZA - BS15</option>
+            <option>BLOCK FORTALEZA - BS20</option>
           </optgroup>
-          <optgroup label="Fortaleza">
-            <option>Fortaleza BH-10</option><option>Fortaleza BH-12</option>
-            <option>Fortaleza BH-15</option><option>Fortaleza BH-20</option>
+          <optgroup label="BLOCK VITTA — Panadero">
+            <option>BLOCK VITTA - BP12 NATURAL</option>
+            <option>BLOCK VITTA - BP12 A-1300</option>
+            <option>BLOCK VITTA - BP12 C-800</option>
+            <option>BLOCK VITTA - BP12 C-879</option>
+            <option>BLOCK VITTA - BP12 N-1400</option>
+            <option>BLOCK VITTA - BP12 R-1120</option>
+            <option>BLOCK VITTA - BP15 NATURAL</option>
+            <option>BLOCK VITTA - BP15 A-1300</option>
+            <option>BLOCK VITTA - BP15 C-800</option>
+            <option>BLOCK VITTA - BP15 C-879</option>
+            <option>BLOCK VITTA - BP15 N-1400</option>
+            <option>BLOCK VITTA - BP15 R-1120</option>
+            <option>BLOCK VITTA - BP20 NATURAL</option>
+            <option>BLOCK VITTA - BP20 A-1300</option>
+            <option>BLOCK VITTA - BP20 C-800</option>
+            <option>BLOCK VITTA - BP20 C-879</option>
+            <option>BLOCK VITTA - BP20 N-1400</option>
+            <option>BLOCK VITTA - BP20 R-1120</option>
+          </optgroup>
+          <optgroup label="BLOCK VITTA — Larguero">
+            <option>BLOCK VITTA - BL10 NATURAL</option>
+            <option>BLOCK VITTA - BL12 NATURAL</option>
+            <option>BLOCK VITTA - BL15 NATURAL</option>
+          </optgroup>
+          <optgroup label="BLOCK VITTA — Medio">
+            <option>BLOCK VITTA - BM10 NATURAL</option>
+            <option>BLOCK VITTA - BM12 NATURAL</option>
+            <option>BLOCK VITTA - BM15 NATURAL</option>
+            <option>BLOCK VITTA - BM20 NATURAL</option>
+          </optgroup>
+          <optgroup label="BLOCK VITTA — Especial">
+            <option>BLOCK VITTA- BTAB10</option>
           </optgroup>
         </select></div>
       <div class="fi">
@@ -442,7 +494,7 @@ textarea.fn{resize:none;font-size:14px;min-height:70px}
               <option value="MATERIAS PRIMAS - ADITIVOS - EUCOLITH R">Eucolith R</option>
               <option value="EUCOLITHR GRANEL">Eucolithr Granel</option>
             </select></td>
-            <td class="ti"><input class="fn" type="number" id="m-ad" placeholder="0" step="0.01" oninput="recalc()"></td>
+            <td class="ti"><input class="fn" type="number" id="m-ad" placeholder="0" step="1" oninput="recalc()"></td>
             <td class="tu">kg</td>
           </tr>
           <!-- PIGMENTOS (solo para blocks de color) -->
@@ -956,7 +1008,7 @@ function buildEst(){
     {n:'Tolva 2: '+(c.t2mat||'Agregado'), v:c.tT2, u:'kg'},
     {n:'Tolva 3: '+(c.t3mat||'Agregado'), v:c.tT3, u:'kg'},
     {n:'Agua', v:c.tAg, u:'L'},
-    {n:(c.matAd||'Aditivo'), v:c.tAd, u:'kg'},
+    {n:(c.matAd||'Aditivo'), v:c.tAd, u:'cc'},
     {n:(c.matPig||'Pigmento'), v:c.tPig, u:'kg'},
   ].filter(r=>r.v>0);
   document.getElementById('tbc').innerHTML=matRows.map(r=>`
