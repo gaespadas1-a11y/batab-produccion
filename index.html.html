@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Producción">
+<meta name="theme-color" content="#F5A623">
+<link rel="apple-touch-icon" href="data:image/png;base64,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">
+<title>BATAB · Control de Producción</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg0:#090B10;--bg1:#10141F;--bg2:#161C2C;--bg3:#1D2538;
+  --bdr:#222C42;--bdr2:#2C3A58;
+  --tx:#CDD5E8;--tx2:#627099;--tx3:#2E3C58;
+  --amb:#F5A623;--ambL:#FDDFA0;
+  --tea:#0FB5A4;--red:#F04E4E;--grn:#2DD4B0;
+  --sb:env(safe-area-inset-bottom,0px);--st:env(safe-area-inset-top,0px);
+}
+html,body{height:100%;overflow:hidden;background:var(--bg0);color:var(--tx);
+  font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:16px}
+.screen{position:fixed;inset:0;display:none;flex-direction:column;
+  background:var(--bg0);padding-top:var(--st)}
+.screen.active{display:flex}
+@keyframes up{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+.enter{animation:up .3s cubic-bezier(.2,.8,.3,1) both}
+/* TOPBAR */
+.topbar{height:52px;display:flex;align-items:center;padding:0 16px;gap:10px;
+  border-bottom:1px solid var(--bdr);flex-shrink:0}
+.tl{width:28px;height:28px;background:var(--amb);border-radius:7px;font-size:12px;
+  font-weight:800;color:#000;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.tt{font-size:14px;font-weight:600;flex:1;letter-spacing:-.01em}
+.tr{font-size:11px;color:var(--tx2)}
+.bk{width:34px;height:34px;border-radius:9px;background:var(--bg2);border:1px solid var(--bdr);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;
+  color:var(--tx2);font-size:18px;flex-shrink:0}
+.bk:active{background:var(--bg3)}
+/* SCROLL */
+.scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px;
+  padding-bottom:calc(16px + var(--sb))}
+.sp{padding-bottom:calc(80px + var(--sb))}
+.scroll::-webkit-scrollbar{width:3px}
+.scroll::-webkit-scrollbar-thumb{background:var(--bdr2);border-radius:2px}
+/* LOGIN */
+#sl{align-items:center;justify-content:center}
+.lg{position:absolute;inset:0;background:radial-gradient(ellipse 80% 50% at 50% 110%,rgba(245,166,35,.1),transparent 70%)}
+.li{width:68px;height:68px;background:var(--amb);border-radius:18px;font-size:30px;
+  display:flex;align-items:center;justify-content:center;margin-bottom:18px;
+  box-shadow:0 0 40px rgba(245,166,35,.25)}
+.lt{font-size:21px;font-weight:700;margin-bottom:3px;letter-spacing:-.01em}
+.ls{font-size:13px;color:var(--tx2);margin-bottom:36px}
+.pd-row{display:flex;gap:14px;margin-bottom:28px}
+.pd{width:17px;height:17px;border-radius:50%;border:2px solid var(--bdr2);background:transparent;transition:all .18s}
+.pd.on{background:var(--amb);border-color:var(--amb);box-shadow:0 0 8px rgba(245,166,35,.4)}
+.pd.err{background:var(--red);border-color:var(--red)}
+.pp{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:252px}
+.pk{height:62px;border-radius:13px;border:1px solid var(--bdr2);background:var(--bg2);
+  color:var(--tx);font-size:22px;font-weight:600;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .12s;-webkit-user-select:none;user-select:none;
+  -webkit-tap-highlight-color:transparent;
+  -webkit-appearance:none;appearance:none;outline:none;
+  font-family:inherit;}
+.pk:active{background:var(--bg3);transform:scale(.93);border-color:var(--amb)}
+.pk.sm{font-size:11px;font-weight:700;color:var(--tx2);letter-spacing:.03em}
+.pm{font-size:12px;color:var(--red);margin-top:14px;height:16px;opacity:0;transition:opacity .2s}
+.pm.on{opacity:1}
+/* HOME */
+.hh{margin-bottom:18px}
+.hg{font-size:19px;font-weight:700;letter-spacing:-.01em}
+.hd{font-size:11px;color:var(--tx2);margin-top:2px}
+.kpi-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px}
+.kc{background:var(--bg2);border:1px solid var(--bdr);border-radius:13px;padding:14px}
+.kv{font-size:28px;font-weight:700;color:var(--amb);font-family:'Courier New',monospace;line-height:1}
+.kl{font-size:9px;color:var(--tx2);text-transform:uppercase;letter-spacing:.05em;margin-top:4px}
+.stl{font-size:11px;font-weight:700;color:var(--tx2);text-transform:uppercase;
+  letter-spacing:.06em;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.ag{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:22px}
+.ac{background:var(--bg2);border:1px solid var(--bdr);border-radius:14px;
+  padding:16px;cursor:pointer;transition:all .14s;-webkit-user-select:none}
+.ac:active{transform:scale(.96);background:var(--bg3)}
+.ac.h{border-color:rgba(245,166,35,.3);background:rgba(245,166,35,.05)}
+.ac.s{border-color:rgba(15,181,164,.25);background:rgba(15,181,164,.04)}
+.ai{font-size:26px;margin-bottom:8px}
+.al2{font-size:13px;font-weight:600}
+.as{font-size:11px;color:var(--tx2);margin-top:2px}
+.ri{background:var(--bg2);border:1px solid var(--bdr);border-radius:12px;
+  padding:12px 14px;display:flex;align-items:center;gap:12px;margin-bottom:8px}
+.rid{width:34px;height:34px;border-radius:9px;font-size:15px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center}
+.ri .p{background:rgba(245,166,35,.12)}
+.ri .d{background:rgba(45,212,176,.1)}
+.rit{font-size:13px;font-weight:600}
+.ris{font-size:11px;color:var(--tx2);margin-top:1px}
+.ril{font-size:9px;color:var(--tx3);font-family:'Courier New',monospace;margin-top:2px}
+.pil{font-size:9px;font-weight:700;padding:3px 8px;border-radius:7px;flex-shrink:0}
+.pip{background:rgba(245,166,35,.15);color:var(--amb)}
+.pid{background:rgba(45,212,176,.12);color:var(--grn)}
+.pir{background:rgba(240,78,78,.15);color:var(--red)}
+.emp{text-align:center;color:var(--tx3);font-size:13px;padding:24px 0}
+/* STEPS */
+.sdots{display:flex;gap:4px;padding:10px 16px 0;flex-shrink:0}
+.sd{flex:1;height:3px;border-radius:2px;background:var(--bdr2);transition:background .3s}
+.sd.done{background:var(--tea)}
+.sd.act{background:var(--amb)}
+/* FORM */
+.fs{margin-bottom:20px}
+.fst{font-size:11px;font-weight:700;color:var(--tx2);text-transform:uppercase;
+  letter-spacing:.07em;margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.fst::before{content:'';width:3px;height:12px;background:var(--amb);border-radius:2px}
+.fi{margin-bottom:11px}
+.fl{font-size:11px;color:var(--tx2);font-weight:500;margin-bottom:5px;
+  display:flex;align-items:center;gap:6px}
+.fn{width:100%;background:var(--bg2);border:1px solid var(--bdr2);border-radius:10px;
+  color:var(--tx);font-size:16px;padding:11px 13px;outline:none;
+  -webkit-appearance:none;transition:border .18s}
+.fn:focus{border-color:var(--amb)}
+.fn[readonly]{color:var(--tea);font-weight:700;background:var(--bg1);
+  font-family:'Courier New',monospace;letter-spacing:.04em}
+select.fn option{background:var(--bg2)}
+textarea.fn{resize:none;font-size:14px;min-height:70px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.lh{font-size:10px;color:var(--tx3);margin-top:3px}
+.imm{font-size:9px;background:rgba(240,78,78,.15);color:var(--red);
+  padding:2px 6px;border-radius:5px;font-weight:700;letter-spacing:.04em}
+/* CAPTURE */
+.cz{border:2px dashed var(--bdr2);border-radius:14px;padding:22px 16px;
+  text-align:center;cursor:pointer;transition:all .2s;position:relative;margin-bottom:10px}
+.cz.ok{border-color:rgba(245,166,35,.4);background:rgba(245,166,35,.04)}
+.cz input[type=file]{position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer}
+.ci{font-size:32px;margin-bottom:6px}
+.ct{font-size:14px;font-weight:600;color:var(--tx2)}
+.ch{font-size:11px;color:var(--tx3);margin-top:3px}
+.cp{width:100%;border-radius:10px;max-height:180px;object-fit:cover;margin-top:8px;display:none}
+.cp.on{display:block}
+/* TABLE */
+.dt{width:100%;border-collapse:collapse}
+.dt th{font-size:10px;color:var(--tx3);text-transform:uppercase;letter-spacing:.05em;
+  padding:5px 8px;text-align:left;border-bottom:1px solid var(--bdr)}
+.dt td{padding:9px 8px;border-bottom:1px solid rgba(34,44,66,.6);font-size:14px}
+.dt tr:last-child td{border-bottom:none}
+.tm{color:var(--tx);font-weight:500}
+.tn{color:var(--amb);font-family:'Courier New',monospace;font-weight:700;text-align:right}
+.tu{color:var(--tx3);font-size:11px;text-align:right}
+.ti .fn{padding:6px 8px;font-size:14px;border-radius:7px;text-align:right;width:88px}
+/* STATS */
+.sts{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:10px 0}
+.st{background:var(--bg3);border:1px solid var(--bdr);border-radius:10px;padding:10px}
+.sv{font-size:19px;font-weight:700;color:var(--amb);font-family:'Courier New',monospace;line-height:1.1}
+.sl{font-size:9px;color:var(--tx2);text-transform:uppercase;letter-spacing:.04em;margin-top:2px}
+.st.ok .sv{color:var(--grn)}
+.st.bad .sv{color:var(--red)}
+/* ALERT */
+.a{border-radius:10px;padding:11px 13px;font-size:13px;margin:8px 0;
+  display:flex;gap:9px;align-items:flex-start;line-height:1.5}
+.ag2{background:rgba(45,212,176,.07);border:1px solid rgba(45,212,176,.22);color:#7EFFD0}
+.aa{background:rgba(245,166,35,.07);border:1px solid rgba(245,166,35,.22);color:var(--ambL)}
+.ar{background:rgba(240,78,78,.07);border:1px solid rgba(240,78,78,.22);color:#FFB0B0}
+.ab{background:rgba(91,156,246,.07);border:1px solid rgba(91,156,246,.22);color:#A8C8FF}
+/* FORMULA */
+.fmla{background:var(--bg0);border:1px solid var(--bdr);border-radius:8px;
+  padding:10px 12px;font-family:'Courier New',monospace;font-size:12px;
+  color:var(--tx2);margin:8px 0;line-height:1.8}
+.fmla b{color:var(--amb)}
+/* LOADING */
+.lp{display:inline-flex;align-items:center;gap:7px;background:rgba(245,166,35,.1);
+  border:1px solid rgba(245,166,35,.2);border-radius:20px;padding:8px 14px;font-size:13px;color:var(--amb)}
+.sp2{width:13px;height:13px;border:2px solid rgba(245,166,35,.3);border-top-color:var(--amb);
+  border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
+.sp2.w{border-color:rgba(255,255,255,.2);border-top-color:#fff}
+@keyframes spin{to{transform:rotate(360deg)}}
+/* BOTTOM BTNS */
+.bot{position:fixed;bottom:0;left:0;right:0;padding:10px 16px;
+  padding-bottom:calc(10px + var(--sb));
+  background:linear-gradient(to top,var(--bg0) 55%,transparent);
+  display:flex;gap:8px;z-index:10}
+.btn{height:52px;border-radius:13px;border:none;font-size:15px;font-weight:700;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:all .14s}
+.btn:active{transform:scale(.96)}
+.btn:disabled{opacity:.35;cursor:default;transform:none}
+.bm{flex:1;background:var(--amb);color:#000}
+.bs{padding:0 16px;background:transparent;color:var(--tx2);border:1px solid var(--bdr2)!important}
+.bt{background:var(--tea);color:#000}
+/* SUPERVISOR */
+.sk2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px}
+.skc{background:var(--bg2);border:1px solid var(--bdr);border-radius:13px;padding:14px}
+.skv{font-size:26px;font-weight:700;font-family:'Courier New',monospace}
+.skl{font-size:9px;color:var(--tx2);text-transform:uppercase;letter-spacing:.04em;margin-top:3px}
+.rc{background:var(--bg2);border:1px solid var(--bdr);border-radius:13px;padding:14px;margin-bottom:10px}
+.rct{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.rcn{font-size:15px;font-weight:700}
+.rcl{font-size:10px;color:var(--tea);font-family:'Courier New',monospace;
+  background:rgba(15,181,164,.1);padding:2px 8px;border-radius:6px;border:1px solid rgba(15,181,164,.2)}
+.rg{display:grid;grid-template-columns:1fr 1fr;gap:4px 12px}
+.rk{font-size:11px;color:var(--tx2)}
+.rv{font-size:12px;font-weight:600;color:var(--tx);font-family:'Courier New',monospace}
+.rba{display:flex;gap:8px;margin-top:12px}
+.rb{flex:1;height:40px;border-radius:9px;border:none;font-size:12px;font-weight:700;cursor:pointer;transition:all .12s}
+.rb:active{transform:scale(.95)}
+.rba1{background:var(--tea);color:#000}
+.rba2{background:var(--bg3);color:var(--tx2);border:1px solid var(--bdr2)!important}
+.div{border:none;border-top:1px solid var(--bdr);margin:14px 0}
+.bc{background:rgba(240,78,78,.2);color:var(--red);font-size:10px;font-weight:700;
+  padding:2px 8px;border-radius:8px;min-width:22px;text-align:center}
+/* PESAJE CARDS */
+.pj-card{background:var(--bg2);border:1px solid var(--bdr);border-radius:12px;padding:12px;margin-bottom:10px}
+.pj-header{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.pj-num{width:22px;height:22px;background:var(--amb);border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:800;color:#000;flex-shrink:0}
+.pj-title{font-size:13px;font-weight:600;flex:1}
+.pj-del{width:28px;height:28px;border-radius:7px;background:rgba(240,78,78,.1);
+  border:1px solid rgba(240,78,78,.2);color:var(--red);font-size:13px;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
+.pj-del:active{background:rgba(240,78,78,.25)}
+.pj-foto{border:1.5px dashed var(--bdr2);border-radius:10px;padding:14px;
+  text-align:center;cursor:pointer;position:relative;margin-bottom:8px;transition:all .2s}
+.pj-foto.ok{border-color:rgba(245,166,35,.4);background:rgba(245,166,35,.04)}
+.pj-foto input[type=file]{position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer}
+.pj-prev{width:100%;border-radius:8px;max-height:120px;object-fit:cover;margin-top:6px;display:none}
+.pj-prev.on{display:block}
+.pj-result{font-size:12px;color:var(--tea);font-family:'Courier New',monospace;
+  font-weight:700;margin-top:4px;min-height:18px}
+.pj-ocr{font-size:11px;color:var(--tx2);margin-top:4px}
+/* SUCCESS */
+#ss{align-items:center;justify-content:center;text-align:center;padding:32px}
+.si{font-size:70px;margin-bottom:18px;animation:pop .45s cubic-bezier(.2,1.4,.4,1)}
+@keyframes pop{from{transform:scale(0)}to{transform:scale(1)}}
+.stt{font-size:22px;font-weight:700;margin-bottom:8px}
+.ssb{font-size:13px;color:var(--tx2);line-height:1.6;max-width:280px}
+.slo{font-family:'Courier New',monospace;font-size:13px;color:var(--tea);
+  background:var(--bg2);border:1px solid rgba(15,181,164,.3);
+  border-radius:8px;padding:8px 16px;margin:14px 0;display:inline-block}
+.sbts{display:flex;flex-direction:column;gap:10px;width:100%;max-width:280px;margin:16px auto 0}
+.sbt{height:50px;border-radius:12px;border:none;font-size:14px;font-weight:700;cursor:pointer}
+.sbp{background:var(--amb);color:#000}
+.sbs{background:var(--bg2);color:var(--tx);border:1px solid var(--bdr2)!important}
+/* OVERLAY */
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:200;
+  display:none;align-items:center;justify-content:center;flex-direction:column;gap:14px;padding:32px}
+.ov.on{display:flex}
+.ovt{font-size:15px;font-weight:700}
+.ovs{font-size:12px;color:var(--tx2);margin-top:-6px}
+.ova{width:100%;max-width:300px}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="screen active" id="sl">
+  <div class="lg"></div>
+  <div class="li">🏭</div>
+  <div class="lt">BATAB · Producción</div>
+  <div class="ls">Solo personal autorizado</div>
+  <div class="pd-row"><div class="pd" id="p0"></div><div class="pd" id="p1"></div><div class="pd" id="p2"></div><div class="pd" id="p3"></div></div>
+  <div class="pp">
+    <button class="pk" ontouchstart="pp('1')">1</button><button class="pk" ontouchstart="pp('2')">2</button><button class="pk" ontouchstart="pp('3')">3</button>
+    <button class="pk" ontouchstart="pp('4')">4</button><button class="pk" ontouchstart="pp('5')">5</button><button class="pk" ontouchstart="pp('6')">6</button>
+    <button class="pk" ontouchstart="pp('7')">7</button><button class="pk" ontouchstart="pp('8')">8</button><button class="pk" ontouchstart="pp('9')">9</button>
+    <button class="pk" ontouchstart="pp('0')" style="font-size:22px;font-weight:600;color:var(--tx)">0</button>
+    <button class="pk sm" ontouchstart="showSup()">SUP</button>
+    <button class="pk sm" style="font-size:20px;color:var(--tx2)" ontouchstart="pp('⌫')">⌫</button>
+  </div>
+  <div class="pm" id="perr">PIN incorrecto — intenta de nuevo</div>
+</div>
+
+<!-- HOME -->
+<div class="screen" id="sh">
+  <div class="topbar"><div class="tl">B</div><div class="tt">Control de Producción</div><div class="tr" id="tbu">—</div></div>
+  <div class="scroll enter">
+    <div class="hh"><div class="hg" id="hgr">Bienvenido</div><div class="hd" id="hdt"></div></div>
+    <div class="kpi-row">
+      <div class="kc"><div class="kv" id="kp">—</div><div class="kl">Pzas hoy</div></div>
+      <div class="kc"><div class="kv" id="kpd" style="color:var(--red)">—</div><div class="kl">Pendientes aprobación</div></div>
+    </div>
+    <div class="stl">Acciones</div>
+    <div class="ag">
+      <div class="ac h" onclick="startForm()"><div class="ai">📸</div><div class="al2">Nueva captura</div><div class="as">Foto · Calcular · Guardar</div></div>
+      <div class="ac s" onclick="openSup()"><div class="ai">✅</div><div class="al2">Supervisor</div><div class="as">Revisar · Aprobar · ERP</div></div>
+    </div>
+    <div class="stl">Registros recientes</div>
+    <div id="hlist"></div>
+  </div>
+</div>
+
+<!-- FORM -->
+<div class="screen" id="sf">
+  <div class="topbar"><div class="bk" onclick="goHome()">←</div><div class="tt" id="ftt">Datos generales (1/5)</div><div class="pil pip" id="fpil">—</div></div>
+  <div class="sdots"><div class="sd act" id="sd0"></div><div class="sd" id="sd1"></div><div class="sd" id="sd2"></div><div class="sd" id="sd3"></div><div class="sd" id="sd4"></div></div>
+
+  <!-- STEP 0: General data -->
+  <div class="scroll sp enter" id="f0">
+    <div class="fs">
+      <div class="fst">Datos generales</div>
+      <div class="g2">
+        <div class="fi"><label class="fl">Fecha</label><input class="fn" type="date" id="f-fe"></div>
+        <div class="fi"><label class="fl">Turno</label>
+          <select class="fn" id="f-tu" onchange="onTurno()">
+            <option value="M">M · Matutino</option>
+            <option value="V">V · Vespertino</option>
+          </select></div>
+      </div>
+      <div class="fi"><label class="fl">Línea de producción</label>
+        <select class="fn" id="f-li" onchange="onLinea()">
+          <option>BESSER 1</option><option>BESSER 2</option><option>COLUMBIA</option></select></div>
+      <div class="fi"><label class="fl">Artículo a fabricar <span style="font-size:9px;color:var(--tx3);font-weight:400">(solo ensambles)</span></label>
+        <select class="fn" id="f-ti">
+          <option value="">— seleccionar artículo —</option>
+          <optgroup label="Avance">
+            <option>Avance BH-10</option><option>Avance BH-12</option>
+            <option>Avance BH-15</option><option>Avance BH-20</option>
+          </optgroup>
+          <optgroup label="Vitta">
+            <option>Vitta BH-10</option><option>Vitta BH-12</option>
+            <option>Vitta BH-15</option><option>Vitta BH-20</option>
+          </optgroup>
+          <optgroup label="Emblema">
+            <option>Emblema BH-10</option><option>Emblema BH-12</option>
+            <option>Emblema BH-15</option><option>Emblema BH-20</option>
+          </optgroup>
+          <optgroup label="Fortaleza">
+            <option>Fortaleza BH-10</option><option>Fortaleza BH-12</option>
+            <option>Fortaleza BH-15</option><option>Fortaleza BH-20</option>
+          </optgroup>
+        </select></div>
+      <div class="fi"><label class="fl">Folio / Orden de trabajo</label><input class="fn" type="text" id="f-fo" placeholder="Ej. OT-2026-043"></div>
+      <div class="fi"><label class="fl">ID Orden NetSuite <span style="color:var(--tx3)">(workOrder)</span></label><input class="fn" type="number" id="f-wo" placeholder="Ej. 142500"></div>
+      <div class="fi">
+        <label class="fl">Número de lote <span class="imm">INMUTABLE</span></label>
+        <input class="fn" type="text" id="f-lo" readonly>
+        <div class="lh">🔒 Generado automáticamente. Identificador de trazabilidad de por vida — nunca cambia.</div>
+      </div>
+    </div>
+    <div class="fs">
+      <div class="fst">Datos de laboratorio</div>
+      <div class="g2">
+        <div class="fi"><label class="fl">Módulo de finura</label><input class="fn" type="number" id="f-mf" value="2.70" step="0.01"></div>
+        <div class="fi"><label class="fl">Humedad interna %</label><input class="fn" type="number" id="f-hu" value="0" step="0.1"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 1: Pesajes durante el proceso (múltiples) -->
+  <div class="scroll sp enter" id="f1" style="display:none">
+    <div class="fs">
+      <div class="fst">Pesajes de placa — durante el proceso</div>
+      <div class="a ab" style="margin-bottom:10px">
+        <span>⚖️</span>
+        <div>Agrega un pesaje cada vez que tomes una foto durante el turno.<br>
+        <strong>El sistema promediará automáticamente todos los kg/pieza.</strong></div>
+      </div>
+      <!-- Lista de pesajes -->
+      <div id="pesajes-list"></div>
+      <!-- Botón agregar pesaje -->
+      <button class="btn bm" onclick="agregarPesaje()" style="width:100%;margin-top:4px;height:46px;font-size:14px">
+        + Agregar pesaje de placa
+      </button>
+    </div>
+    <!-- Promedio calculado -->
+    <div class="fs" id="prom-section" style="display:none">
+      <div class="fst">Resultado — promedio de pesajes</div>
+      <div class="sts" id="stc">
+        <div class="st"><div class="sv" id="sv-prom">—</div><div class="sl">kg/pieza prom.</div></div>
+        <div class="st"><div class="sv" id="sv-n">—</div><div class="sl">Pesajes</div></div>
+        <div class="st ok"><div class="sv" id="sv-rng">—</div><div class="sl">Variación</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 2: Hoja de dosificación — AL FINAL DEL TURNO -->
+  <div class="scroll sp enter" id="f2" style="display:none">
+    <div class="fs">
+      <div class="fst">Hoja de dosificación — al final del turno</div>
+      <div class="a aa" style="margin-bottom:10px">
+        <span>📋</span>
+        <div>Esta fotografía se toma <strong>al terminar el turno</strong>.<br>
+        Contiene el resumen de materias primas utilizadas y número de bachadas.</div>
+      </div>
+      <div class="cz" id="cz2"><input type="file" accept="image/*" capture="environment" onchange="captura(event,'dos')">
+        <div class="ci">📄</div><div class="ct">Fotografiar la hoja de dosificación</div>
+        <div class="ch">Reporte de materias primas y bachadas del turno</div>
+        <img class="cp" id="pv2"></div>
+      <div id="ocr2"></div>
+    </div>
+    <div class="fs">
+      <div class="fst">Materias primas — cantidad por bachada</div>
+      <table class="dt">
+        <thead><tr><th>Material</th><th style="text-align:right">Cantidad</th><th style="text-align:right">Un.</th></tr></thead>
+        <tbody>
+          <tr><td class="tm">Cemento CPC</td><td class="ti"><input class="fn" type="number" id="m-ce" placeholder="0" oninput="recalc()"></td><td class="tu">kg</td></tr>
+          <tr><td class="tm">Arena</td><td class="ti"><input class="fn" type="number" id="m-ar" placeholder="0" oninput="recalc()"></td><td class="tu">kg</td></tr>
+          <tr><td class="tm">Grava</td><td class="ti"><input class="fn" type="number" id="m-gr" placeholder="0" oninput="recalc()"></td><td class="tu">kg</td></tr>
+          <tr><td class="tm">Agua</td><td class="ti"><input class="fn" type="number" id="m-ag" placeholder="0" oninput="recalc()"></td><td class="tu">L</td></tr>
+          <tr><td class="tm">Aditivo</td><td class="ti"><input class="fn" type="number" id="m-ad" placeholder="0" step="0.01" oninput="recalc()"></td><td class="tu">kg</td></tr>
+        </tbody>
+      </table>
+      <div class="g2" style="margin-top:10px">
+        <div class="fi"><label class="fl">Bachadas realizadas</label><input class="fn" type="number" id="m-ba" placeholder="0" oninput="recalc()"></div>
+        <div class="fi"><label class="fl">Prod. reportada (pzas)</label><input class="fn" type="number" id="m-pr" placeholder="0"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 3: Cálculos y estimación -->
+  <div class="scroll sp enter" id="f3" style="display:none">
+    <div class="fs">
+      <div class="fst">Estimación de producción</div>
+      <div class="g2">
+        <div class="fi"><label class="fl">Teórica (calculado)</label><input class="fn" type="number" id="e-te" readonly></div>
+        <div class="fi"><label class="fl">Real empacada (pzas)</label><input class="fn" type="number" id="e-re" placeholder="0" oninput="calcM()"></div>
+      </div>
+      <div class="sts" id="ste">
+        <div class="st"><div class="sv">—</div><div class="sl">Merma pzas</div></div>
+        <div class="st"><div class="sv">—</div><div class="sl">% Merma</div></div>
+        <div class="st ok"><div class="sv">—</div><div class="sl">Eficiencia</div></div>
+      </div>
+      <div id="ma"></div>
+    </div>
+    <div class="fs">
+      <div class="fst">Consumos totales de la orden</div>
+      <table class="dt"><thead><tr><th>Material</th><th style="text-align:right">Total</th><th style="text-align:right">Un.</th></tr></thead><tbody id="tbc"></tbody></table>
+    </div>
+    <div class="fs">
+      <div class="fst">Observaciones</div>
+      <textarea class="fn" id="f-no" placeholder="Incidencias, observaciones de calidad, etc."></textarea>
+    </div>
+  </div>
+
+  <!-- STEP 4: Confirmar -->
+  <div class="scroll sp enter" id="f4" style="display:none">
+    <div class="fs">
+      <div class="fst">Resumen — confirmar y guardar</div>
+      <div id="rsm"></div>
+      <div class="a ab" style="margin-top:12px">
+        <span>ℹ️</span>
+        <div><strong>Este registro quedará pendiente de aprobación.</strong><br>
+        El supervisor revisará los datos y lo subirá a NetSuite. No puede modificarse después de guardado.</div>
+      </div>
+    </div>
+    <div id="svst"></div>
+  </div>
+
+  <div class="bot">
+    <button class="btn bs" id="bbk" onclick="prevStep()" style="display:none">← Atrás</button>
+    <button class="btn bm" id="bfwd" onclick="nextStep()">Siguiente →</button>
+  </div>
+</div>
+
+<!-- SUPERVISOR -->
+<div class="screen" id="ssu">
+  <div class="topbar"><div class="bk" onclick="goHome()">←</div><div class="tt">Vista Supervisor</div><div class="pil pid">SUPER</div></div>
+  <div class="scroll enter">
+    <div class="sk2" id="skpis"></div>
+    <div class="stl">Pendientes de aprobación <span class="bc" id="bpc" style="display:none">0</span></div>
+    <div id="spnd"></div>
+    <div class="div"></div>
+    <div class="stl">Aprobados — subidos a NetSuite</div>
+    <div id="sdne"></div>
+  </div>
+</div>
+
+<!-- SUCCESS -->
+<div class="screen" id="ss">
+  <div class="si">📋</div>
+  <div class="stt">¡Registro guardado!</div>
+  <div class="ssb" id="smsg">Tu captura quedó guardada y está pendiente de aprobación del supervisor.</div>
+  <div class="slo" id="slote">—</div>
+  <div class="sbts">
+    <button class="sbt sbp" onclick="startForm()">+ Nueva captura</button>
+    <button class="sbt sbs" onclick="goHome()">Ir al inicio</button>
+  </div>
+</div>
+
+<!-- SUPERVISOR PIN OVERLAY -->
+<div class="ov" id="ovs">
+  <div class="ovt">Acceso supervisor</div><div class="ovs">Ingresa tu PIN de acceso</div>
+  <div class="pd-row"><div class="pd" id="s0"></div><div class="pd" id="s1"></div><div class="pd" id="s2"></div><div class="pd" id="s3"></div></div>
+  <div class="pp">
+    <button class="pk" ontouchstart="spp('1')">1</button><button class="pk" ontouchstart="spp('2')">2</button><button class="pk" ontouchstart="spp('3')">3</button>
+    <button class="pk" ontouchstart="spp('4')">4</button><button class="pk" ontouchstart="spp('5')">5</button><button class="pk" ontouchstart="spp('6')">6</button>
+    <button class="pk" ontouchstart="spp('7')">7</button><button class="pk" ontouchstart="spp('8')">8</button><button class="pk" ontouchstart="spp('9')">9</button>
+    <button class="pk sm" ontouchstart="closeOv()">✕</button>
+    <button class="pk" ontouchstart="spp('0')" style="font-size:22px;font-weight:600;color:var(--tx)">0</button>
+    <button class="pk sm" style="font-size:20px;color:var(--tx2)" ontouchstart="spp('⌫')">⌫</button>
+  </div>
+  <div class="pm" id="serr">PIN incorrecto</div>
+</div>
+
+<!-- APPROVE OVERLAY -->
+<div class="ov" id="ova">
+  <div class="ovt" id="oat">Aprobar y subir a NetSuite</div>
+  <div class="ovs" id="oas">Lote: —</div>
+  <div class="ova" id="oast"></div>
+  <div class="ova" id="oare"></div>
+  <div style="display:flex;gap:8px;margin-top:8px;width:100%;max-width:300px">
+    <button class="btn bt" id="oabtn" onclick="doApprove()" style="flex:1;height:46px;border-radius:11px;font-size:14px">
+      <span class="sp2 w" id="oasp" style="display:none"></span> Subir a NetSuite
+    </button>
+    <button class="btn bs" onclick="closeOva()" id="oacl" style="height:46px;border-radius:11px;padding:0 14px;font-size:13px">Cancelar</button>
+  </div>
+</div>
+
+<script>
+// ══ CONFIG ══
+const CFG={
+  sb:'https://szrcmvlgxxpmvgrfmxak.supabase.co',
+  sk:'sb_publishable_VOhn9Z2Ev8gYK3nFKr44Sw_VngbAX4N',
+  ns:'https://7905968.suitetalk.api.netsuite.com/services/mcp/v1/suiteapp/com.netsuite.mcpstandardtools',
+  // PINES OPERADORES — agregar/cambiar según personal real
+  ops:{'1111':{n:'Operador Dosif. Matutino',r:'op'},'2222':{n:'Operador Dosif. Vespertino',r:'op'},'3333':{n:'Operador Dosif. Aux',r:'op'}},
+  // PINES AUTORIZADOS (supervisor) — los únicos que pueden aprobar y subir a NetSuite
+  sups:{'9999':{n:'Supervisor General',r:'sup'},'8888':{n:'Jefe de Producción',r:'sup'},'0314':{n:'Gerardo Espadas',r:'sup'}},
+};
+
+// ══ STATE ══
+let U=null,pinB='',spinB='',step=0,fd={},recs=[],seq={},appTgt=null;
+
+// ══ NAV ══
+const show=id=>{document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');};
+function goHome(){show('sh');refreshHome();}
+
+// ══ OPERATOR LOGIN ══
+function pp(v){
+  if(v==='⌫')pinB=pinB.slice(0,-1);
+  else if(pinB.length<4)pinB+=v;
+  dots(pinB,'p');
+  if(pinB.length===4)setTimeout(chkPin,150);
+}
+function dots(b,pre){for(let i=0;i<4;i++){const d=document.getElementById(pre+i);d.classList.toggle('on',i<b.length);d.classList.remove('err');}}
+function chkPin(){
+  const u=CFG.ops[pinB];
+  if(u){U={...u};pinB='';dots('','p');loginOK();}
+  else{for(let i=0;i<4;i++){const d=document.getElementById('p'+i);d.classList.remove('on');d.classList.add('err');}
+    document.getElementById('perr').classList.add('on');
+    setTimeout(()=>{dots('','p');document.getElementById('perr').classList.remove('on');pinB='';},1300);}
+}
+function loginOK(){
+  const h=new Date().getHours(),gr=h<12?'Buenos días':h<19?'Buenas tardes':'Buenas noches';
+  document.getElementById('hgr').textContent=gr+', '+U.n.split(' ').slice(-1)[0];
+  document.getElementById('hdt').textContent=new Date().toLocaleDateString('es-MX',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  document.getElementById('tbu').textContent=U.n;
+  refreshHome();show('sh');
+}
+
+// ══ SUPERVISOR PIN ══
+function showSup(){spinB='';dots('','s');document.getElementById('serr').style.opacity='0';document.getElementById('ovs').classList.add('on');}
+function closeOv(){document.getElementById('ovs').classList.remove('on');spinB='';}
+function closeOva(){document.getElementById('ova').classList.remove('on');appTgt=null;}
+function spp(v){
+  if(v==='⌫')spinB=spinB.slice(0,-1);
+  else if(spinB.length<4)spinB+=v;
+  dots(spinB,'s');
+  if(spinB.length===4)setTimeout(chkSup,150);
+}
+function chkSup(){
+  const u=CFG.sups[spinB];
+  if(u){U={...u};spinB='';dots('','s');
+    document.getElementById('tbu').textContent=U.n;
+    document.getElementById('hgr').textContent='Supervisor: '+U.n;
+    document.getElementById('hdt').textContent=new Date().toLocaleDateString('es-MX',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+    closeOv();refreshHome();show('sh');}
+  else{for(let i=0;i<4;i++){const d=document.getElementById('s'+i);d.classList.remove('on');d.classList.add('err');}
+    document.getElementById('serr').style.opacity='1';
+    setTimeout(()=>{dots('','s');document.getElementById('serr').style.opacity='0';spinB='';},1300);}
+}
+function openSup(){if(U?.r==='sup'){renderSup();show('ssu');}else showSup();}
+
+// ══ HOME ══
+function refreshHome(){
+  const td=new Date().toISOString().slice(0,10);
+  const h=recs.filter(r=>r.fecha===td);
+  const pz=h.reduce((a,r)=>a+(r.prod_real||0),0);
+  const pn=recs.filter(r=>r.status==='pendiente').length;
+  document.getElementById('kp').textContent=pz.toLocaleString();
+  document.getElementById('kpd').textContent=pn;
+  const l=document.getElementById('hlist');
+  if(!recs.length){l.innerHTML='<div class="emp">Sin registros todavía.<br>Comienza una nueva captura.</div>';return;}
+  l.innerHTML=[...recs].reverse().slice(0,5).map(r=>`
+    <div class="ri">
+      <div class="rid ${r.status==='subido'?'d':'p'}">${r.status==='subido'?'✓':'⏳'}</div>
+      <div style="flex:1">
+        <div class="rit">${r.tipo_block||'—'} · ${r.linea||'—'} · T${r.turno||'—'}</div>
+        <div class="ris">${r.bachadas||0} bach · ${(r.prod_real||0).toLocaleString()} pzas · ${r.merma_pct||0}% merma</div>
+        <div class="ril">${r.lote||'—'}</div>
+      </div>
+      <span class="pil ${r.status==='subido'?'pid':'pip'}">${r.status==='subido'?'Subido':'Pendiente'}</span>
+    </div>`).join('');
+}
+
+// ══ LOTE — INMUTABLE ══
+// Formato BATAB: {Línea}{Año2}{MesLetra}{Turno}{Día2}
+// Ejemplo: 1B26AM01 = BESSER1 · 2026 · Enero · Matutino · día 01
+// Ejemplo: 3C26BV15 = COLUMBIA · 2026 · Febrero · Vespertino · día 15
+// Mismo lote para distintos productos del mismo día/turno/línea — el artículo los diferencia.
+// Se genera UNA SOLA VEZ. Al avanzar del paso 0 queda BLOQUEADO PARA SIEMPRE.
+function genLote(linea, turno){
+  const lin = linea==='BESSER 1'?'1B': linea==='BESSER 2'?'2B': '3C';
+  const now  = new Date();
+  const anio = String(now.getFullYear()).slice(2);           // "26"
+  const mes  = 'ABCDEFGHIJKL'[now.getMonth()];              // A=Ene … L=Dic
+  const turn = turno || gv('f-tu') || 'M';                  // M o V
+  const dia  = String(now.getDate()).padStart(2,'0');        // "01"–"31"
+  return `${lin}${anio}${mes}${turn}${dia}`;
+  // e.g. "1B26AM01"
+}
+
+// ══ FORM ══
+function startForm(){
+  fd={lote:null,locked:false,ppzProm:0};
+  pesajes=[]; pjCount=0;
+  step=0;
+  document.getElementById('f-fe').value=new Date().toISOString().slice(0,10);
+// AUTO-LOGIN temporal — quitar PIN para prueba
+U={n:'Gerardo Espadas',r:'sup'};
+document.getElementById('tbu').textContent=U.n;
+document.getElementById('hgr').textContent='Gerardo';
+document.getElementById('hdt').textContent=new Date().toLocaleDateString('es-MX',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+refreshHome();
+show('sh');
+  const li=document.getElementById('f-li').value;
+  const tu=document.getElementById('f-tu').value;
+  fd.lote=genLote(li,tu);
+  document.getElementById('f-lo').value=fd.lote;
+  document.getElementById('fpil').textContent=li.split(' ')[0];
+  renderStep(0);show('sf');
+}
+function onLinea(){
+  const li=document.getElementById('f-li').value;
+  const tu=document.getElementById('f-tu').value;
+  document.getElementById('fpil').textContent=li.split(' ')[0];
+  if(!fd.locked){fd.lote=genLote(li,tu);document.getElementById('f-lo').value=fd.lote;}
+}
+function onTurno(){
+  const li=document.getElementById('f-li').value;
+  const tu=document.getElementById('f-tu').value;
+  if(!fd.locked){fd.lote=genLote(li,tu);document.getElementById('f-lo').value=fd.lote;}
+}
+const SLBLS=['Datos generales','Pesajes de placa','Hoja de dosificación','Estimación','Confirmar'];
+function renderStep(n){
+  for(let i=0;i<5;i++){
+    document.getElementById('f'+i).style.display=i===n?'block':'none';
+    const d=document.getElementById('sd'+i);d.className='sd'+(i<n?' done':i===n?' act':'');
+  }
+  document.getElementById('ftt').textContent=`${SLBLS[n]} (${n+1}/5)`;
+  document.getElementById('bbk').style.display=n>0?'flex':'none';
+  const b=document.getElementById('bfwd');
+  if(n===3){b.innerHTML='💾 Guardar registro';b.className='btn bt';}
+  else{b.innerHTML='Siguiente →';b.className='btn bm';}
+  b.style.display=n===4?'none':'flex';
+  step=n;
+  if(n===1) renderPesajes();   // initialize pesaje list
+  if(n===3) buildEst();
+  if(n===4){buildRes();doSave();}
+}
+function nextStep(){
+  if(step===0)fd.locked=true; // 🔒 LOTE LOCKED FOREVER
+  if(step<4)renderStep(step+1);
+}
+function prevStep(){if(step>0)renderStep(step-1);}
+
+// ══ MULTI-PESAJE ══
+// Array of pesajes: [{id, ppz, to, pl, pzs, img}]
+// Supports N captures during shift → auto-average → kg/pieza final
+let pesajes = [];
+let pjCount  = 0;
+
+function agregarPesaje(){
+  pjCount++;
+  const id = pjCount;
+  pesajes.push({id, ppz:0, to:0, pl:0, pzs:0, img:null});
+  renderPesajes();
+}
+
+function renderPesajes(){
+  const list = document.getElementById('pesajes-list');
+  if(!pesajes.length){
+    list.innerHTML='<div class="emp" style="padding:16px 0">Sin pesajes registrados.<br>Toca el botón para agregar el primero.</div>';
+    document.getElementById('prom-section').style.display='none';
+    return;
+  }
+  list.innerHTML = pesajes.map((p,i)=>`
+    <div class="pj-card" id="pjc-${p.id}">
+      <div class="pj-header">
+        <div class="pj-num">${i+1}</div>
+        <div class="pj-title">Pesaje #${i+1}</div>
+        <div class="pj-del" onclick="eliminarPesaje(${p.id})">✕</div>
+      </div>
+      <div class="pj-foto ${p.img?'ok':''}" id="pjf-${p.id}">
+        <input type="file" accept="image/*" capture="environment" onchange="capturaPesaje(event,${p.id})">
+        ${p.img?'':'<div style="font-size:22px;margin-bottom:4px">⚖️</div><div style="font-size:13px;font-weight:600;color:var(--tx2)">Fotografiar pesaje</div>'}
+        <img class="pj-prev ${p.img?'on':''}" id="pjpv-${p.id}" ${p.img?`src="${p.img}"`:''}></div>
+      <div class="g2">
+        <div class="fi"><label class="fl">Peso total (kg)</label>
+          <input class="fn" type="number" placeholder="0.0" step="0.1" value="${p.to||''}"
+            oninput="updatePesaje(${p.id},'to',this.value)"></div>
+        <div class="fi"><label class="fl">Peso placa (kg)</label>
+          <input class="fn" type="number" placeholder="0.0" step="0.1" value="${p.pl||''}"
+            oninput="updatePesaje(${p.id},'pl',this.value)"></div>
+      </div>
+      <div class="fi" style="margin-top:6px"><label class="fl">Piezas en placa</label>
+        <input class="fn" type="number" placeholder="0" value="${p.pzs||''}"
+          oninput="updatePesaje(${p.id},'pzs',this.value)"></div>
+      <div class="pj-result" id="pjr-${p.id}">${p.ppz>0?`kg/pieza: ${p.ppz.toFixed(3)}`:'—'}</div>
+      <div class="pj-ocr" id="pjocr-${p.id}"></div>
+    </div>`).join('');
+  calcPromedio();
+}
+
+function eliminarPesaje(id){
+  pesajes=pesajes.filter(p=>p.id!==id);
+  renderPesajes();
+}
+
+function updatePesaje(id,campo,val){
+  const p=pesajes.find(x=>x.id===id);if(!p)return;
+  p[campo]=parseFloat(val)||0;
+  const ne=p.to-p.pl;
+  p.ppz=p.pzs>0?ne/p.pzs:0;
+  const el=document.getElementById('pjr-'+id);
+  if(el)el.textContent=p.ppz>0?`kg/pieza: ${p.ppz.toFixed(3)}`:'—';
+  calcPromedio();
+}
+
+function calcPromedio(){
+  const validos=pesajes.filter(p=>p.ppz>0);
+  if(!validos.length){
+    document.getElementById('prom-section').style.display='none';
+    fd.ppzProm=0;return;
+  }
+  const prom=validos.reduce((a,p)=>a+p.ppz,0)/validos.length;
+  const max=Math.max(...validos.map(p=>p.ppz));
+  const min=Math.min(...validos.map(p=>p.ppz));
+  const rng=max-min;
+  fd.ppzProm=prom;
+  document.getElementById('prom-section').style.display='block';
+  document.getElementById('sv-prom').textContent=prom.toFixed(3);
+  document.getElementById('sv-n').textContent=validos.length;
+  document.getElementById('sv-rng').textContent=rng.toFixed(3);
+  // Recalculate theoretical production
+  if(fd.c&&prom>0){fd.pt=Math.floor(fd.c.tot/prom);sv('e-te',fd.pt);}
+}
+
+async function capturaPesaje(evt,id){
+  const file=evt.target.files[0];if(!file)return;
+  const b64f=await toB64(file);
+  const b64=b64f.split(',')[1],mime=file.type;
+  const p=pesajes.find(x=>x.id===id);if(!p)return;
+  p.img=b64f;
+  // Update preview without full re-render
+  const pv=document.getElementById('pjpv-'+id);
+  if(pv){pv.src=b64f;pv.classList.add('on');}
+  document.getElementById('pjf-'+id)?.classList.add('ok');
+  // Run OCR
+  const ocrEl=document.getElementById('pjocr-'+id);
+  if(ocrEl)ocrEl.innerHTML='<span style="color:var(--amb)">⏳ Leyendo…</span>';
+  try{
+    const txt=await claude(
+      'OCR para registro de pesaje de bloques. Solo JSON puro.',
+      [{type:'image',source:{type:'base64',media_type:mime,data:b64}},
+       {type:'text',text:'Extrae y devuelve SOLO este JSON: {"peso_total_kg":0,"peso_placa_kg":0,"num_piezas":0}'}]
+    );
+    const d=JSON.parse(txt.replace(/```json|```/g,'').trim());
+    p.to=d.peso_total_kg||0;p.pl=d.peso_placa_kg||0;p.pzs=d.num_piezas||0;
+    const ne=p.to-p.pl;p.ppz=p.pzs>0?ne/p.pzs:0;
+    renderPesajes();
+    if(ocrEl)ocrEl.innerHTML='<span style="color:var(--grn)">✓ Datos extraídos</span>';
+  }catch(e){
+    renderPesajes();
+    if(ocrEl)ocrEl.innerHTML='<span style="color:var(--amb)">⚠ Ingresa manualmente</span>';
+  }
+}
+
+// ══ DOSIFICACION OCR (step 2) ══
+async function captura(evt,key){
+  const file=evt.target.files[0];if(!file)return;
+  const b64f=await toB64(file),b64=b64f.split(',')[1],mime=file.type;
+  const pv=document.getElementById('pv2');
+  pv.src=b64f;pv.classList.add('on');
+  document.getElementById('cz2').classList.add('ok');
+  fd.idos={b64,mime};
+  await runOCR_dos();
+}
+async function runOCR_dos(){
+  const el=document.getElementById('ocr2');
+  el.innerHTML='<div class="lp"><div class="sp2"></div> Leyendo hoja de dosificación…</div>';
+  try{
+    const txt=await claude(
+      'OCR para hoja de dosificación de producción de blocks. Solo JSON puro.',
+      [{type:'image',source:{type:'base64',media_type:fd.idos.mime,data:fd.idos.b64}},
+       {type:'text',text:`Extrae y devuelve SOLO este JSON:
+{"tipo_block":"","linea":"","turno":"","num_bachadas":0,"materias_primas":{"cemento_kg":0,"arena_kg":0,"grava_kg":0,"agua_l":0,"aditivo_kg":0},"produccion_piezas":0}`}]
+    );
+    const d=JSON.parse(txt.replace(/```json|```/g,'').trim());
+    selV('f-ti',d.tipo_block);selV('f-li',d.linea);
+    const m=d.materias_primas||{};
+    sv('m-ce',m.cemento_kg);sv('m-ar',m.arena_kg);sv('m-gr',m.grava_kg);
+    sv('m-ag',m.agua_l);sv('m-ad',m.aditivo_kg);
+    sv('m-ba',d.num_bachadas);sv('m-pr',d.produccion_piezas);
+    recalc();
+    el.innerHTML='<div class="a ag2"><span>✓</span> Datos extraídos. Verifica antes de continuar.</div>';
+  }catch(e){
+    el.innerHTML='<div class="a aa"><span>⚠</span> No se leyó automáticamente. Ingresa los datos manualmente.</div>';
+  }
+}
+
+// ══ CALCULATIONS ══
+function recalc(){
+  const hu=+gv('f-hu')||0,ce=+gv('m-ce')||0,ar=+gv('m-ar')||0,
+    gr=+gv('m-gr')||0,ag=+gv('m-ag')||0,ad=+gv('m-ad')||0,
+    ba=+gv('m-ba')||0,mf=+gv('f-mf')||2.7;
+  const arA=ar*(1+hu/100),agA=(ag-(ar*hu/100))*(mf<2.4?.97:mf>3.0?1.03:1);
+  fd.c={ce,ar:arA,gr,ag:agA,ad,ba,hu,mf,
+    tCe:ce*ba,tAr:arA*ba,tGr:gr*ba,tAg:agA*ba,tAd:ad*ba,
+    tot:(ce+arA+gr+agA+ad)*ba};
+  // Use promedio from pesajes (multi-capture average)
+  const prom=fd.ppzProm||0;
+  if(fd.c&&prom>0){fd.pt=Math.floor(fd.c.tot/prom);sv('e-te',fd.pt);}
+}
+function buildEst(){
+  recalc();
+  const prom=fd.ppzProm||0;
+  const te=fd.pt||0,re=+gv('e-re')||0,me=te-re,mp=te>0?(me/te*100):0;
+  fd.m={te,re,me,mp};sv('e-te',te);
+  document.getElementById('ste').innerHTML=`
+    <div class="st ${mp>8?'bad':''}"><div class="sv">${me}</div><div class="sl">Merma pzas</div></div>
+    <div class="st ${mp>8?'bad':mp>4?'':'ok'}"><div class="sv">${mp.toFixed(1)}%</div><div class="sl">% Merma</div></div>
+    <div class="st ok"><div class="sv">${re>0?(100-mp).toFixed(1):0}%</div><div class="sl">Eficiencia</div></div>`;
+  document.getElementById('ma').innerHTML=mp>8?'<div class="a ar">🔴 Merma alta — revisar dosificación y compactación.</div>':
+    mp>4?'<div class="a aa">🟡 Merma moderada — dentro del rango aceptable.</div>':
+    re>0?'<div class="a ag2">🟢 Eficiencia óptima.</div>':'';
+  const c=fd.c||{};
+  document.getElementById('tbc').innerHTML=[
+    {n:'Cemento CPC',v:c.tCe,u:'kg'},{n:'Arena',v:c.tAr,u:'kg'},
+    {n:'Grava',v:c.tGr,u:'kg'},{n:'Agua',v:c.tAg,u:'L'},{n:'Aditivo',v:c.tAd,u:'kg'},
+  ].filter(r=>r.v>0).map(r=>`<tr><td class="tm">${r.n}</td><td class="tn">${r.v.toFixed(1)}</td><td class="tu">${r.u}</td></tr>`).join('');
+}
+function calcM(){buildEst();}
+
+// ══ RESUMEN OPERADOR ══
+function buildRes(){
+  recalc();buildEst();
+  const c=fd.c||{},m=fd.m||{};
+  const nPesajes=pesajes.filter(p=>p.ppz>0).length;
+  document.getElementById('rsm').innerHTML=`
+    <div style="background:rgba(15,181,164,.07);border:1px solid rgba(15,181,164,.2);border-radius:12px;padding:14px;margin-bottom:12px">
+      <div style="font-size:10px;color:var(--tea);font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">🔒 Número de lote — asignado y bloqueado</div>
+      <div style="font-family:'Courier New',monospace;font-size:16px;font-weight:700;color:var(--tea);letter-spacing:.04em">${fd.lote}</div>
+      <div style="font-size:10px;color:var(--tx3);margin-top:4px">Identificador permanente de trazabilidad — no puede modificarse</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px 12px;font-size:12px">
+      <span style="color:var(--tx2)">Artículo:</span><b>${gv('f-ti')||'—'}</b>
+      <span style="color:var(--tx2)">Línea:</span><b>${gv('f-li')||'—'}</b>
+      <span style="color:var(--tx2)">Turno:</span><b>${gv('f-tu')||'—'}</b>
+      <span style="color:var(--tx2)">Fecha:</span><b>${gv('f-fe')||'—'}</b>
+      <span style="color:var(--tx2)">Folio:</span><b>${gv('f-fo')||'—'}</b>
+      <span style="color:var(--tx2)">Bachadas:</span><b>${c.ba||0}</b>
+      <span style="color:var(--tx2)">Pesajes capturados:</span><b style="color:var(--tea)">${nPesajes}</b>
+      <span style="color:var(--tx2)">kg/pieza promedio:</span><b>${(fd.ppzProm||0).toFixed(3)}</b>
+      <span style="color:var(--tx2)">Pzas reales:</span><b style="color:var(--grn)">${m.re||0}</b>
+      <span style="color:var(--tx2)">Merma:</span><b style="color:${(m.mp||0)>8?'var(--red)':(m.mp||0)>4?'var(--amb)':'var(--grn)'}">${(m.mp||0).toFixed(1)}%</b>
+    </div>`;
+}
+
+// ══ SAVE TO SUPABASE (status: pendiente — awaiting supervisor approval) ══
+async function doSave(){
+  document.getElementById('svst').innerHTML='<div class="lp"><div class="sp2"></div> Guardando en base de datos…</div>';
+  document.getElementById('bfwd').style.display='none';
+  const c=fd.c||{},m=fd.m||{};
+  const nPj=pesajes.filter(p=>p.ppz>0).length;
+  const rec={
+    lote:fd.lote,                        // INMUTABLE
+    operador:U?.n||'Desconocido',
+    fecha:gv('f-fe'),turno:gv('f-tu'),linea:gv('f-li'),
+    tipo_block:gv('f-ti'),folio:gv('f-fo'),
+    wo_id:gv('f-wo')||null,
+    bachadas:c.ba||0,prod_real:m.re||0,prod_teo:m.te||0,
+    merma_pct:parseFloat((m.mp||0).toFixed(2)),
+    peso_ppz:parseFloat((fd.ppzProm||0).toFixed(4)),
+    num_pesajes:nPj,
+    modulo_finura:parseFloat(gv('f-mf')||2.7),
+    humedad_interna:parseFloat(gv('f-hu')||0),
+    consumo_cemento:parseFloat((c.tCe||0).toFixed(2)),
+    consumo_arena:parseFloat((c.tAr||0).toFixed(2)),
+    consumo_grava:parseFloat((c.tGr||0).toFixed(2)),
+    consumo_agua:parseFloat((c.tAg||0).toFixed(2)),
+    consumo_aditivo:parseFloat((c.tAd||0).toFixed(2)),
+    notas:gv('f-no')||'',
+    status:'pendiente',  // ← operator saves, supervisor approves
+    ns_id:null,
+  };
+  try{const r=await sbPost('registros_produccion',rec);recs.push({...rec,id:r?.[0]?.id});}
+  catch(e){recs.push({...rec,id:'LOC-'+Date.now()});}
+  document.getElementById('slote').textContent=fd.lote;
+  document.getElementById('smsg').textContent='Captura guardada como pendiente. El supervisor la revisará y la subirá a NetSuite.';
+  setTimeout(()=>show('ss'),800);
+}
+
+// ══ SUPERVISOR VIEW ══
+function renderSup(){
+  const td=new Date().toISOString().slice(0,10);
+  const h=recs.filter(r=>r.fecha===td);
+  const pz=h.reduce((a,r)=>a+(r.prod_real||0),0);
+  const pn=recs.filter(r=>r.status==='pendiente');
+  const dn=recs.filter(r=>r.status==='subido');
+  const ma=h.length?h.reduce((a,r)=>a+(r.merma_pct||0),0)/h.length:0;
+  const bp=document.getElementById('bpc');
+  bp.textContent=pn.length;bp.style.display=pn.length?'inline-block':'none';
+  document.getElementById('skpis').innerHTML=`
+    <div class="skc"><div class="skv" style="color:var(--grn)">${pz.toLocaleString()}</div><div class="skl">Pzas producidas hoy</div></div>
+    <div class="skc"><div class="skv" style="color:var(--amb)">${pn.length}</div><div class="skl">Pendientes aprobación</div></div>
+    <div class="skc"><div class="skv" style="color:var(--tea)">${dn.length}</div><div class="skl">Subidos a NetSuite</div></div>
+    <div class="skc"><div class="skv" style="color:${ma>8?'var(--red)':ma>4?'var(--amb)':'var(--grn)'}">${ma.toFixed(1)}%</div><div class="skl">Merma promedio</div></div>`;
+  document.getElementById('spnd').innerHTML=pn.length?pn.map(r=>card(r,true)).join(''):'<div class="emp">Sin pendientes ✓</div>';
+  document.getElementById('sdne').innerHTML=dn.length?dn.map(r=>card(r,false)).join(''):'<div class="emp">Sin registros subidos hoy.</div>';
+}
+
+function card(r,canApp){
+  const mp=r.merma_pct||0;
+  return `<div class="rc">
+    <div class="rct">
+      <div class="rcn">${r.tipo_block||'—'} · ${r.linea||'—'}</div>
+      <div class="rcl">${r.lote||'—'}</div>
+      <span class="pil ${r.status==='subido'?'pid':'pip'}" style="margin-left:auto">${r.status==='subido'?'Subido':'Pendiente'}</span>
+    </div>
+    <div class="rg">
+      <span class="rk">Turno / Fecha</span><span class="rv">T${r.turno||'—'} · ${r.fecha||'—'}</span>
+      <span class="rk">Operador</span><span class="rv">${r.operador||'—'}</span>
+      <span class="rk">Bachadas</span><span class="rv">${r.bachadas||0}</span>
+      <span class="rk">Pzas reales</span><span class="rv" style="color:var(--grn)">${(r.prod_real||0).toLocaleString()}</span>
+      <span class="rk">Merma</span><span class="rv" style="color:${mp>8?'var(--red)':mp>4?'var(--amb)':'var(--grn)'}">${mp.toFixed(1)}%</span>
+      <span class="rk">kg / pieza</span><span class="rv">${(r.peso_ppz||0).toFixed(3)}</span>
+      ${r.ns_id?`<span class="rk">NetSuite ID</span><span class="rv" style="color:var(--tea)">${r.ns_id}</span>`:''}
+    </div>
+    ${canApp?`<div class="rba">
+      <button class="rb rba1" onclick="openApp('${r.lote}')">✓ Aprobar y subir a NetSuite</button>
+      <button class="rb rba2" style="border:1px solid var(--bdr2)">Rechazar</button>
+    </div>`:''}
+  </div>`;
+}
+
+// ══ APPROVE → NETSUITE ══
+function openApp(lote){
+  appTgt=recs.find(r=>r.lote===lote);if(!appTgt)return;
+  document.getElementById('oas').textContent='Lote: '+lote;
+  document.getElementById('oast').innerHTML='';document.getElementById('oare').innerHTML='';
+  document.getElementById('oabtn').style.display='flex';document.getElementById('oacl').textContent='Cancelar';
+  document.getElementById('ova').classList.add('on');
+}
+
+async function doApprove(){
+  if(!appTgt)return;
+  const r=appTgt,btn=document.getElementById('oabtn'),sp=document.getElementById('oasp');
+  btn.disabled=true;sp.style.display='inline-block';
+  document.getElementById('oast').innerHTML='<div class="lp" style="margin-top:8px"><div class="sp2"></div> Enviando a NetSuite…</div>';
+
+  const prompt=`Registra este assemblyBuild en NetSuite para BATAB (subsidiaria 2):
+
+workOrder ID: ${r.wo_id||'(pendiente asignar)'}
+Lote BATAB: ${r.lote}
+Fecha: ${r.fecha} · Turno: ${r.turno} · Línea: ${r.linea}
+Tipo block: ${r.tipo_block}
+Folio interno: ${r.folio||'—'}
+Cantidad producida (quantity): ${r.prod_real}
+Bachadas: ${r.bachadas}
+Aprobado por: ${U?.n}
+
+Consumos de materiales:
+- Cemento CPC: ${r.consumo_cemento} kg
+- Arena: ${r.consumo_arena} kg
+- Grava: ${r.consumo_grava} kg
+- Agua: ${r.consumo_agua} L
+- Aditivo: ${r.consumo_aditivo} kg
+
+Control de calidad:
+- Peso húmedo/pieza: ${r.peso_ppz} kg
+- Módulo de finura: ${r.modulo_finura}
+- Humedad interna: ${r.humedad_interna}%
+- Merma: ${r.merma_pct}%
+
+Memo: ${r.lote} | ${r.tipo_block} | T${r.turno} | ${r.linea}
+Notas: ${r.notas||'—'}
+
+Usa ns_createRecord type "assemblyBuild", subsidiaryId=2, quantity=${r.prod_real}. Confirma el ID del registro creado.`;
+
+  try{
+    const txt=await claude('Asistente NetSuite BATAB. Ejecuta y confirma.',
+      [{type:'text',text:prompt}],[{type:'url',url:CFG.ns,name:'netsuite'}]);
+    const nsId=txt.match(/\b\d{4,7}\b/)?.[0]||'NS-OK';
+    const idx=recs.findIndex(x=>x.lote===r.lote);
+    if(idx>=0){recs[idx].status='subido';recs[idx].ns_id=nsId;}
+    try{await sbPatch(`registros_produccion?lote=eq.${r.lote}`,{status:'subido',ns_id:nsId,aprobado_por:U?.n});}catch(e){}
+    document.getElementById('oast').innerHTML=`<div class="a ag2" style="margin-top:8px">✅ Subido exitosamente. NetSuite ID: <b>${nsId}</b></div>`;
+    document.getElementById('oabtn').style.display='none';
+    document.getElementById('oacl').textContent='Cerrar';
+    renderSup();
+  }catch(e){
+    document.getElementById('oast').innerHTML=`<div class="a ar" style="margin-top:8px">✕ Error: ${e.message}</div>`;
+  }finally{btn.disabled=false;sp.style.display='none';}
+}
+
+// ══ API HELPERS ══
+async function claude(sys,content,mcp){
+  const b={model:'claude-sonnet-4-20250514',max_tokens:800,system:sys,messages:[{role:'user',content}]};
+  if(mcp)b.mcp_servers=mcp;
+  const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)});
+  const d=await r.json();
+  return(d.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('');
+}
+async function sbPost(t,data){
+  const r=await fetch(`${CFG.sb}/rest/v1/${t}`,{method:'POST',
+    headers:{'Content-Type':'application/json','apikey':CFG.sk,'Authorization':`Bearer ${CFG.sk}`,'Prefer':'return=representation'},
+    body:JSON.stringify(data)});
+  return r.json();
+}
+async function sbPatch(path,data){
+  await fetch(`${CFG.sb}/rest/v1/${path}`,{method:'PATCH',
+    headers:{'Content-Type':'application/json','apikey':CFG.sk,'Authorization':`Bearer ${CFG.sk}`},
+    body:JSON.stringify(data)});
+}
+const gv=id=>document.getElementById(id)?.value||'';
+const sv=(id,v)=>{const e=document.getElementById(id);if(e&&v!=null&&v!==0)e.value=v;};
+function selV(id,val){const s=document.getElementById(id);if(!s)return;for(const o of s.options)if(o.value.toLowerCase()===String(val||'').toLowerCase()||o.text.toLowerCase()===String(val||'').toLowerCase()){s.value=o.value;return;}}
+document.getElementById('f-fe').value=new Date().toISOString().slice(0,10);
+// AUTO-LOGIN temporal — quitar PIN para prueba
+U={n:'Gerardo Espadas',r:'sup'};
+document.getElementById('tbu').textContent=U.n;
+document.getElementById('hgr').textContent='Gerardo';
+document.getElementById('hdt').textContent=new Date().toLocaleDateString('es-MX',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+refreshHome();
+show('sh');
+</script>
+</body>
+</html>
