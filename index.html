@@ -12,11 +12,11 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 :root{
-  --bg0:#090B10;--bg1:#10141F;--bg2:#161C2C;--bg3:#1D2538;
-  --bdr:#222C42;--bdr2:#2C3A58;
-  --tx:#CDD5E8;--tx2:#627099;--tx3:#2E3C58;
-  --amb:#F5A623;--ambL:#FDDFA0;
-  --tea:#0FB5A4;--red:#F04E4E;--grn:#2DD4B0;
+  --bg0:#F5F5F0;--bg1:#FFFFFF;--bg2:#FAFAF8;--bg3:#F0EFE8;
+  --bdr:#D3D1C7;--bdr2:#B4B2A9;
+  --tx:#2C2C2A;--tx2:#5F5E5A;--tx3:#888780;
+  --amb:#F5A623;--ambL:#7A4E0A;
+  --tea:#0F6E56;--red:#A32D2D;--grn:#0F6E56;
   --sb:env(safe-area-inset-bottom,0px);--st:env(safe-area-inset-top,0px);
 }
 html,body{height:100%;overflow:hidden;background:var(--bg0);color:var(--tx);
@@ -48,7 +48,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg0);color:var(--tx);
 .lg{position:absolute;inset:0;background:radial-gradient(ellipse 80% 50% at 50% 110%,rgba(245,166,35,.1),transparent 70%)}
 .li{width:68px;height:68px;background:var(--amb);border-radius:18px;font-size:30px;
   display:flex;align-items:center;justify-content:center;margin-bottom:18px;
-  box-shadow:0 0 40px rgba(245,166,35,.25)}
+  box-shadow:0 4px 20px rgba(245,166,35,.4)}
 .lt{font-size:24px;font-weight:700;margin-bottom:3px;letter-spacing:-.01em}
 .ls{font-size:15px;color:var(--tx2);margin-bottom:36px}
 .pd-row{display:flex;gap:14px;margin-bottom:28px}
@@ -325,12 +325,19 @@ textarea.fn{resize:none;font-size:14px;min-height:70px}
             <option>Fortaleza BH-15</option><option>Fortaleza BH-20</option>
           </optgroup>
         </select></div>
-      <div class="fi"><label class="fl">Folio / Orden de trabajo</label><input class="fn" type="text" id="f-fo" placeholder="Ej. OT-2026-043"></div>
-      <div class="fi"><label class="fl">ID Orden NetSuite <span style="color:var(--tx3)">(workOrder)</span></label><input class="fn" type="number" id="f-wo" placeholder="Ej. 142500"></div>
+      <div class="fi">
+        <label class="fl">Folio de producción <span style="font-size:12px;color:var(--tea)">● auto</span></label>
+        <input class="fn" type="text" id="f-fo" readonly
+          style="font-family:'Courier New',monospace;font-weight:700;color:var(--amb)">
+        <div class="lh">Generado automáticamente por línea. Consecutivo por línea.</div>
+      </div>
+      <!-- ID Orden NetSuite: solo supervisor la asigna al aprobar -->
+      <input type="hidden" id="f-wo" value="">
       <div class="fi">
         <label class="fl">Número de lote <span class="imm">INMUTABLE</span></label>
-        <input class="fn" type="text" id="f-lo" readonly>
-        <div class="lh">🔒 Generado automáticamente. Identificador de trazabilidad de por vida — nunca cambia.</div>
+        <input class="fn" type="text" id="f-lo" placeholder="Ej. 1B26AM01"
+          style="font-family:'Courier New',monospace;font-size:18px;font-weight:700;color:var(--tea);letter-spacing:.05em">
+        <div class="lh">🔒 Confirma o edita el número de lote. Una vez enviado al supervisor NO puede modificarse.</div>
       </div>
     </div>
     <div class="fs">
@@ -387,15 +394,77 @@ textarea.fn{resize:none;font-size:14px;min-height:70px}
     <div class="fs">
       <div class="fst">Materias primas — cantidad por bachada</div>
       <table class="dt">
-        <thead><tr><th>Material</th><th style="text-align:right">Cantidad</th><th style="text-align:right">Un.</th></tr></thead>
+        <thead><tr><th>Material</th><th style="text-align:right">Cant.</th><th style="text-align:right">Un.</th></tr></thead>
         <tbody>
-          <tr><td class="tm">Cemento CPC</td><td class="ti"><input class="fn" type="number" id="m-ce" placeholder="0" oninput="recalc()"></td><td class="tu">kg</td></tr>
-          <tr><td class="tm">Arena</td><td class="ti"><input class="fn" type="number" id="m-ar" placeholder="0" oninput="recalc()"></td><td class="tu">kg</td></tr>
-          <tr><td class="tm">Grava</td><td class="ti"><input class="fn" type="number" id="m-gr" placeholder="0" oninput="recalc()"></td><td class="tu">kg</td></tr>
-          <tr><td class="tm">Agua</td><td class="ti"><input class="fn" type="number" id="m-ag" placeholder="0" oninput="recalc()"></td><td class="tu">L</td></tr>
-          <tr><td class="tm">Aditivo</td><td class="ti"><input class="fn" type="number" id="m-ad" placeholder="0" step="0.01" oninput="recalc()"></td><td class="tu">kg</td></tr>
+          <tr>
+            <td><select class="fn" id="mp-ce-sel" style="font-size:14px;padding:6px 8px" onchange="recalc()">
+              <option value="">— Cemento —</option>
+              <option value="MATERIAS PRIMA - CEMENTO PORTLAND - CPC-30">CPC-30</option>
+              <option value="MATERIAS PRIMA - CEMENTO PORTLAND - CPC-30R-RS">CPC-30R-RS</option>
+              <option value="MATERIAS PRIMA - CEMENTO PORTLAND - CPC-40">CPC-40</option>
+              <option value="MATERIAS PRIMA - CEMENTO PORTLAND - CPC-40R">CPC-40R</option>
+              <option value="MATERIAS PRIMA - CEMENTO PORTLAND - CPC-40-RS">CPC-40-RS</option>
+              <option value="CEMENTO CPC 40 RS GRANEL">CPC 40 RS Granel</option>
+            </select></td>
+            <td class="ti"><input class="fn" type="number" id="m-ce" placeholder="0" oninput="recalc()"></td>
+            <td class="tu">kg</td>
+          </tr>
+          <tr>
+            <td><select class="fn" id="mp-ar-sel" style="font-size:14px;padding:6px 8px" onchange="recalc()">
+              <option value="">— Agregado fino —</option>
+              <option value="MATERIAS PRIMAS - AGREGADOS - ARENA 3/16 AFI">Arena 3/16 AFI</option>
+              <option value="MATERIAS PRIMAS - AGREGADOS - POLVO 3/16 AFI">Polvo 3/16 AFI</option>
+              <option value="MATERIAS PRIMAS - AGREGADOS - SELLO1/4">Sello 1/4</option>
+              <option value="MATERIAS PRIMAS - AGREGADOS - SELLO3/8">Sello 3/8</option>
+            </select></td>
+            <td class="ti"><input class="fn" type="number" id="m-ar" placeholder="0" oninput="recalc()"></td>
+            <td class="tu">kg</td>
+          </tr>
+          <tr>
+            <td><select class="fn" id="mp-gr-sel" style="font-size:14px;padding:6px 8px" onchange="recalc()">
+              <option value="">— Grava —</option>
+              <option value="GRAVA 3/8">Grava 3/8</option>
+              <option value="GRAVA 3/4">Grava 3/4</option>
+              <option value="BATAB INTEGRAL AGREGADOS-GRAVA DE 1/2 PARA CONCRETO">Grava 1/2</option>
+            </select></td>
+            <td class="ti"><input class="fn" type="number" id="m-gr" placeholder="0" oninput="recalc()"></td>
+            <td class="tu">kg</td>
+          </tr>
+          <tr>
+            <td class="tm">Agua</td>
+            <td class="ti"><input class="fn" type="number" id="m-ag" placeholder="0" oninput="recalc()"></td>
+            <td class="tu">L</td>
+          </tr>
+          <tr>
+            <td><select class="fn" id="mp-ad-sel" style="font-size:14px;padding:6px 8px" onchange="recalc()">
+              <option value="">— Aditivo —</option>
+              <option value="MATERIAS PRIMAS - ADITIVOS - EUCOLITH DC">Eucolith DC</option>
+              <option value="MATERIAS PRIMAS - ADITIVOS - EUCOLITH R">Eucolith R</option>
+              <option value="EUCOLITHR GRANEL">Eucolithr Granel</option>
+            </select></td>
+            <td class="ti"><input class="fn" type="number" id="m-ad" placeholder="0" step="0.01" oninput="recalc()"></td>
+            <td class="tu">kg</td>
+          </tr>
+          <!-- PIGMENTOS (solo para blocks de color) -->
+          <tr id="row-pig" style="display:none">
+            <td><select class="fn" id="mp-pig-sel" style="font-size:14px;padding:6px 8px">
+              <option value="">— Pigmento —</option>
+              <option value="MATERIAS PRIMAS - PIGMENTOS - ADOBE C-800">Adobe C-800</option>
+              <option value="MATERIAS PRIMAS - PIGMENTOS - AMARILLO A-1300">Amarillo A-1300</option>
+              <option value="MATERIAS PRIMAS - PIGMENTOS - CHOCOLATE C-879">Chocolate C-879</option>
+              <option value="MATERIAS PRIMAS - PIGMENTOS - NEGRO N-1400">Negro N-1400</option>
+              <option value="MATERIAS PRIMAS - PIGMENTOS - ROJO R-1120">Rojo R-1120</option>
+            </select></td>
+            <td class="ti"><input class="fn" type="number" id="m-pig" placeholder="0" step="0.01" oninput="recalc()"></td>
+            <td class="tu">kg</td>
+          </tr>
         </tbody>
       </table>
+      <!-- Toggle pigmento -->
+      <div style="margin-top:10px;display:flex;align-items:center;gap:10px">
+        <input type="checkbox" id="chk-pig" onchange="togglePigmento(this.checked)" style="width:20px;height:20px;accent-color:var(--amb)">
+        <label for="chk-pig" style="font-size:16px;color:var(--tx2);font-weight:600">Block de color — agregar pigmento</label>
+      </div>
       <div class="g2" style="margin-top:10px">
         <div class="fi"><label class="fl">Bachadas realizadas</label><input class="fn" type="number" id="m-ba" placeholder="0" oninput="recalc()"></div>
         <div class="fi"><label class="fl">Prod. reportada (pzas)</label><input class="fn" type="number" id="m-pr" placeholder="0"></div>
@@ -492,6 +561,16 @@ textarea.fn{resize:none;font-size:14px;min-height:70px}
 <div class="ov" id="ova">
   <div class="ovt" id="oat">Aprobar y subir a NetSuite</div>
   <div class="ovs" id="oas">Lote: —</div>
+  <div class="ova" style="width:100%;max-width:300px;margin-bottom:8px">
+    <label style="font-size:14px;color:var(--tx2);font-weight:600;display:block;margin-bottom:6px">
+      ID Orden NetSuite (workOrder)
+    </label>
+    <input type="number" id="ov-wo-id" placeholder="Ej. 142500"
+      style="width:100%;background:var(--bg2);border:1px solid var(--bdr2);border-radius:10px;
+      color:var(--amb);font-family:'Courier New',monospace;font-size:18px;font-weight:700;
+      padding:12px 14px;outline:none;">
+    <div style="font-size:11px;color:var(--tx3);margin-top:4px">El supervisor asigna la orden de NetSuite al aprobar.</div>
+  </div>
   <div class="ova" id="oast"></div>
   <div class="ova" id="oare"></div>
   <div style="display:flex;gap:8px;margin-top:8px;width:100%;max-width:300px">
@@ -504,6 +583,10 @@ textarea.fn{resize:none;font-size:14px;min-height:70px}
 
 <script>
 // ══ CONFIG ══
+// IMPORTANTE: Configura tu API key de Anthropic aquí para que funcione el OCR
+// Puedes obtenerla en console.anthropic.com
+const ANTHROPIC_KEY = ''; // ← Pega tu API key aquí
+
 const CFG={
   sb:'https://szrcmvlgxxpmvgrfmxak.supabase.co',
   sk:'sb_publishable_VOhn9Z2Ev8gYK3nFKr44Sw_VngbAX4N',
@@ -589,6 +672,17 @@ function refreshHome(){
     </div>`).join('');
 }
 
+// ══ FOLIO AUTOMÁTICO CONSECUTIVO POR LÍNEA ══
+// Formato: BAT-{prefijo}-{NNN}
+// Prefijos: BESSER 1=1B, BESSER 2=2B, COLUMBIA=3C
+// Consecutivo por línea — reinicia en 001 al inicio de cada sesión
+const folioSeq={'BESSER 1':0,'BESSER 2':0,'COLUMBIA':0};
+function genFolio(linea){
+  const pre=linea==='BESSER 1'?'1B':linea==='BESSER 2'?'2B':'3C';
+  folioSeq[linea]=(folioSeq[linea]||0)+1;
+  return `BAT-${pre}-${String(folioSeq[linea]).padStart(3,'0')}`;
+}
+
 // ══ LOTE — INMUTABLE ══
 // Formato BATAB: {Línea}{Año2}{MesLetra}{Turno}{Día2}
 // Ejemplo: 1B26AM01 = BESSER1 · 2026 · Enero · Matutino · día 01
@@ -630,7 +724,14 @@ function onLinea(){
   const li=document.getElementById('f-li').value;
   const tu=document.getElementById('f-tu').value;
   document.getElementById('fpil').textContent=li.split(' ')[0];
-  if(!fd.locked){fd.lote=genLote(li,tu);document.getElementById('f-lo').value=fd.lote;}
+  if(!fd.locked){
+    fd.lote=genLote(li,tu);
+    document.getElementById('f-lo').value=fd.lote;
+    // Also update folio when line changes (before locking)
+    const folio=genFolio(li);
+    document.getElementById('f-fo').value=folio;
+    fd.folio=folio;
+  }
 }
 function onTurno(){
   const li=document.getElementById('f-li').value;
@@ -806,15 +907,33 @@ async function runOCR_dos(){
 }
 
 // ══ CALCULATIONS ══
+function togglePigmento(on){
+  document.getElementById('row-pig').style.display = on ? 'table-row' : 'none';
+  if(!on){ document.getElementById('m-pig').value=''; document.getElementById('mp-pig-sel').value=''; }
+  recalc();
+}
+
 function recalc(){
-  const hu=+gv('f-hu')||0,ce=+gv('m-ce')||0,ar=+gv('m-ar')||0,
-    gr=+gv('m-gr')||0,ag=+gv('m-ag')||0,ad=+gv('m-ad')||0,
-    ba=+gv('m-ba')||0,mf=+gv('f-mf')||2.7;
-  const arA=ar*(1+hu/100),agA=(ag-(ar*hu/100))*(mf<2.4?.97:mf>3.0?1.03:1);
-  fd.c={ce,ar:arA,gr,ag:agA,ad,ba,hu,mf,
-    tCe:ce*ba,tAr:arA*ba,tGr:gr*ba,tAg:agA*ba,tAd:ad*ba,
-    tot:(ce+arA+gr+agA+ad)*ba};
-  // Use promedio from pesajes (multi-capture average)
+  const hu=+gv('f-hu')||0, mf=+gv('f-mf')||2.7;
+  const ce=+gv('m-ce')||0;
+  const ag=+gv('m-ag')||0;
+  const ad=+gv('m-ad')||0;
+  const pig=+gv('m-pig')||0;
+  const ba=+gv('m-ba')||0;
+  // 3 tolvas de agregados
+  const t1=+gv('t1-kg')||0, t1mat=gv('t1-mat')||'';
+  const t2=+gv('t2-kg')||0, t2mat=gv('t2-mat')||'';
+  const t3=+gv('t3-kg')||0, t3mat=gv('t3-mat')||'';
+  const totalAg = t1+t2+t3;
+  const areAdj = totalAg*(1+hu/100);
+  const factorMF = mf<2.4?0.97:mf>3.0?1.03:1;
+  const agAdj = (ag-(totalAg*hu/100))*factorMF;
+  fd.c={ce,t1,t2,t3,t1mat,t2mat,t3mat,totalAg,
+    ar:areAdj,ag:agAdj,ad,pig,ba,hu,mf,
+    tCe:ce*ba,tT1:t1*ba,tT2:t2*ba,tT3:t3*ba,
+    tAr:areAdj*ba,tAg:agAdj*ba,tAd:ad*ba,tPig:pig*ba,
+    matCe:gv('m-ce-tipo'),matAd:gv('m-ad-tipo'),matPig:gv('m-pig-tipo'),
+    tot:(ce+areAdj+agAdj+ad+pig)*ba};
   const prom=fd.ppzProm||0;
   if(fd.c&&prom>0){fd.pt=Math.floor(fd.c.tot/prom);sv('e-te',fd.pt);}
 }
@@ -831,10 +950,18 @@ function buildEst(){
     mp>4?'<div class="a aa">🟡 Merma moderada — dentro del rango aceptable.</div>':
     re>0?'<div class="a ag2">🟢 Eficiencia óptima.</div>':'';
   const c=fd.c||{};
-  document.getElementById('tbc').innerHTML=[
-    {n:'Cemento CPC',v:c.tCe,u:'kg'},{n:'Arena',v:c.tAr,u:'kg'},
-    {n:'Grava',v:c.tGr,u:'kg'},{n:'Agua',v:c.tAg,u:'L'},{n:'Aditivo',v:c.tAd,u:'kg'},
-  ].filter(r=>r.v>0).map(r=>`<tr><td class="tm">${r.n}</td><td class="tn">${r.v.toFixed(1)}</td><td class="tu">${r.u}</td></tr>`).join('');
+  const matRows=[
+    {n:(c.matCe||'Cemento')+' '+c.matCe, v:c.tCe, u:'kg'},
+    {n:'Tolva 1: '+(c.t1mat||'Agregado'), v:c.tT1, u:'kg'},
+    {n:'Tolva 2: '+(c.t2mat||'Agregado'), v:c.tT2, u:'kg'},
+    {n:'Tolva 3: '+(c.t3mat||'Agregado'), v:c.tT3, u:'kg'},
+    {n:'Agua', v:c.tAg, u:'L'},
+    {n:(c.matAd||'Aditivo'), v:c.tAd, u:'kg'},
+    {n:(c.matPig||'Pigmento'), v:c.tPig, u:'kg'},
+  ].filter(r=>r.v>0);
+  document.getElementById('tbc').innerHTML=matRows.map(r=>`
+    <tr><td class="tm" style="font-size:15px">${r.n}</td>
+        <td class="tn">${r.v.toFixed(1)}</td><td class="tu">${r.u}</td></tr>`).join('');
 }
 function calcM(){buildEst();}
 
@@ -881,13 +1008,19 @@ async function doSave(){
     num_pesajes:nPj,
     modulo_finura:parseFloat(gv('f-mf')||2.7),
     humedad_interna:parseFloat(gv('f-hu')||0),
+    tipo_cemento:c.matCe||gv('m-ce-tipo')||'',
     consumo_cemento:parseFloat((c.tCe||0).toFixed(2)),
+    tolva1_mat:c.t1mat||'', tolva1_kg:parseFloat((c.tT1||0).toFixed(2)),
+    tolva2_mat:c.t2mat||'', tolva2_kg:parseFloat((c.tT2||0).toFixed(2)),
+    tolva3_mat:c.t3mat||'', tolva3_kg:parseFloat((c.tT3||0).toFixed(2)),
     consumo_arena:parseFloat((c.tAr||0).toFixed(2)),
-    consumo_grava:parseFloat((c.tGr||0).toFixed(2)),
     consumo_agua:parseFloat((c.tAg||0).toFixed(2)),
+    tipo_aditivo:c.matAd||'',
     consumo_aditivo:parseFloat((c.tAd||0).toFixed(2)),
+    tipo_pigmento:c.matPig||'',
+    consumo_pigmento:parseFloat((c.tPig||0).toFixed(2)),
     notas:gv('f-no')||'',
-    status:'pendiente',  // ← operator saves, supervisor approves
+    status:'pendiente',
     ns_id:null,
   };
   try{const r=await sbPost('registros_produccion',rec);recs.push({...rec,id:r?.[0]?.id});}
@@ -957,7 +1090,7 @@ async function doApprove(){
 
   const prompt=`Registra este assemblyBuild en NetSuite para BATAB (subsidiaria 2):
 
-workOrder ID: ${r.wo_id||'(pendiente asignar)'}
+workOrder ID: ${document.getElementById('ov-wo-id')?.value||r.wo_id||'(sin asignar)'}
 Lote BATAB: ${r.lote}
 Fecha: ${r.fecha} · Turno: ${r.turno} · Línea: ${r.linea}
 Tipo block: ${r.tipo_block}
@@ -1004,8 +1137,11 @@ Usa ns_createRecord type "assemblyBuild", subsidiaryId=2, quantity=${r.prod_real
 async function claude(sys,content,mcp){
   const b={model:'claude-sonnet-4-20250514',max_tokens:800,system:sys,messages:[{role:'user',content}]};
   if(mcp)b.mcp_servers=mcp;
-  const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)});
+  const headers={'Content-Type':'application/json','anthropic-dangerous-direct-browser-access':'true'};
+  if(ANTHROPIC_KEY) headers['x-api-key']=ANTHROPIC_KEY;
+  const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers,body:JSON.stringify(b)});
   const d=await r.json();
+  if(d.error) throw new Error(d.error.message||'API error');
   return(d.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('');
 }
 async function sbPost(t,data){
