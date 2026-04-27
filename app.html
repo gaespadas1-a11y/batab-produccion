@@ -673,44 +673,44 @@ html,body{height:100%;background:var(--bg);color:var(--text);
       </div>
       <!-- TOTALES ACUMULADOS DEL TURNO (de Foto 2 OCR) -->
       <div id="totales-ocr-section" style="display:none;margin-bottom:18px;">
-        <div style="background:#E4ECF7;border:2px solid #093F89;border-radius:var(--radius);overflow:hidden;">
-          <div style="background:#093F89;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;">
-            <span style="color:#FFCD24;font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;">📊 Consumos totales del turno</span>
-            <span style="color:#FFCD24;font-size:12px;font-weight:600;" id="totales-validacion-status">—</span>
+        <div style="background:#FFFFFF;border:2px solid #093F89;border-radius:var(--radius);overflow:hidden;box-shadow:0 2px 12px rgba(9,63,137,.12);">
+          <div style="background:#093F89;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;">
+            <span style="color:#FFCD24;font-size:15px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;">📊 Consumos totales del turno</span>
+            <span style="color:#FFCD24;font-size:13px;font-weight:700;" id="totales-validacion-status">—</span>
           </div>
           <!-- Campos editables para corregir totales del OCR -->
-          <div style="padding:12px 14px 6px;font-size:13px;color:#FFCD24;font-weight:600;background:rgba(255,205,36,.08);">
+          <div style="padding:12px 14px 6px;font-size:13px;color:#093F89;font-weight:700;background:#E4ECF7;border-bottom:1px solid #B8CCE8;">
             ✏️ Verifica y corrige si el OCR cometió errores — todos los campos son editables
           </div>
           <table style="width:100%;border-collapse:collapse;" id="totales-ocr-table">
             <thead>
-              <tr style="background:rgba(255,255,255,.08);">
-                <th style="padding:10px 12px;text-align:left;font-size:12px;color:#FFCD24;text-transform:uppercase;font-weight:700;letter-spacing:.3px;">Material</th>
-                <th style="padding:10px 12px;text-align:right;font-size:12px;color:#FFCD24;text-transform:uppercase;font-weight:700;">Teórico</th>
-                <th style="padding:10px 12px;text-align:right;font-size:12px;color:#FFCD24;text-transform:uppercase;font-weight:700;">Real ✏️</th>
-                <th style="padding:10px 12px;text-align:right;font-size:12px;color:#FFCD24;text-transform:uppercase;font-weight:700;">Dif.</th>
+              <tr style="background:#093F89;">
+                <th style="padding:10px 14px;text-align:left;font-size:13px;color:#FFCD24;text-transform:uppercase;font-weight:700;letter-spacing:.3px;">Material</th>
+                <th style="padding:10px 14px;text-align:right;font-size:13px;color:#FFCD24;text-transform:uppercase;font-weight:700;">Teórico</th>
+                <th style="padding:10px 14px;text-align:right;font-size:13px;color:#FFCD24;text-transform:uppercase;font-weight:700;">Real ✏️</th>
+                <th style="padding:10px 14px;text-align:right;font-size:13px;color:#FFCD24;text-transform:uppercase;font-weight:700;">Dif.</th>
               </tr>
             </thead>
             <tbody id="totales-ocr-body"></tbody>
           </table>
           <!-- Peso húmedo + fórmula de piezas estimadas -->
-          <div style="margin:10px 12px;padding:16px;background:rgba(255,205,36,.1);border-radius:10px;border:2px solid rgba(255,205,36,.5);">
+          <div style="margin:0;padding:16px;background:#093F89;">
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:center;">
               <div>
                 <div style="font-size:13px;color:#FFCD24;font-weight:700;text-transform:uppercase;margin-bottom:6px;">⚖️ Peso húmedo/pieza (kg)</div>
                 <input type="number" id="t-peso-humedo" step="0.001" min="0" placeholder="11.660"
                   oninput="calcPiezasEstimadas()"
-                  style="width:100%;background:rgba(255,255,255,.15);border:2px solid #FFCD24;border-radius:8px;padding:10px;color:#FFCD24;font-family:'IBM Plex Mono',monospace;font-size:22px;text-align:center;font-weight:700;">
+                  style="width:100%;background:#FFFFFF;border:2px solid #FFCD24;border-radius:8px;padding:10px;color:#093F89;font-family:'IBM Plex Mono',monospace;font-size:22px;text-align:center;font-weight:700;">
               </div>
-              <div style="text-align:center;background:rgba(255,255,255,.08);border-radius:8px;padding:12px;">
+              <div style="text-align:center;background:rgba(255,255,255,.1);border-radius:8px;padding:12px;border:2px solid #FFCD24;">
                 <div style="font-size:13px;color:#FFCD24;font-weight:700;text-transform:uppercase;margin-bottom:6px;">= Piezas estimadas</div>
                 <div id="t-piezas-estimadas" style="font-size:34px;font-weight:700;font-family:'IBM Plex Mono',monospace;color:#FFCD24;line-height:1;">—</div>
-                <div id="t-formula-detail" style="font-size:11px;color:rgba(255,255,255,.6);margin-top:4px;">Total MP ÷ Peso húmedo</div>
+                <div id="t-formula-detail" style="font-size:11px;color:rgba(255,255,255,.7);margin-top:4px;">Total MP ÷ Peso húmedo</div>
               </div>
             </div>
           </div>
-          <div style="padding:4px 12px 10px;font-size:11px;color:rgba(255,255,255,.5);">
-            ℹ️ Teórico = kg/bachada × bachadas. Diferencia aceptable ±5%. Piezas = Total MP ÷ Peso húmedo.
+          <div style="padding:10px 14px;font-size:12px;color:#5A6E90;background:#F0F4FA;border-top:1px solid #C8D4E8;">
+            ℹ️ Teórico = kg/bachada × bachadas realizadas. Diferencia aceptable ±5%. Piezas = Total MP ÷ Peso húmedo.
           </div>
         </div>
       </div>
@@ -744,6 +744,9 @@ html,body{height:100%;background:var(--bg);color:var(--text);
       <div id="resumen-content"></div>
     </div>
    </div>
+  </div>
+  <div id="totales-rango-warn" style="display:none;background:#FDEAEA;border-top:2px solid #ef4444;padding:10px 16px;font-size:13px;color:#C0392B;font-weight:600;text-align:center;">
+    ⚠️ Corrige los valores marcados en rojo antes de continuar
   </div>
   <div class="bottom-bar">
     <button class="btn btn-secondary" id="btn-prev" onclick="prevStep()" style="display:none;">← Atrás</button>
@@ -1380,8 +1383,9 @@ Devuelve SOLO JSON sin markdown:
 CLAVE: Los kg/bachada están en la fila de cantidades del ENCABEZADO (debajo de los nombres de materiales), NO en las tablas.
 IMPORTANTE AGUA vs ADITIVO: El AGUA está en la columna AGUA y es en LITROS (típicamente 150-400 L/bachada). El ADITIVO está en columna ADITIVO y es en KGS (típicamente 0.5-2 kg/bachada). Son valores muy distintos - no los confundas.
 TOLVA 1: Es el primer agregado (Sello 3/8, Arena, Polvo). Si ves "Sello" en la columna Agregado 1, mapea como tolva1_material.
-ADITIVO DECIMALES: El aditivo usa decimales. Si ves ".66" o "0.66" es 0.66 kg/bachada. Si ves "24.42" en totales es 24.42 kg total (NO 2442). Siempre preserva los decimales del aditivo.
-AGUA: El agua está en LITROS. Valores típicos por bachada: 200-400 L. En totales del turno: 5,000-15,000 L. Si ves un número en la columna AGUA que sea menor que 100, probablemente tiene un decimal o está mal leído.
+ADITIVO — MUY IMPORTANTE: El aditivo se mide en KG con decimales. En la hoja puede aparecer como ".66" (sin cero inicial) que significa 0.66 kg/bachada. NUNCA interpretes ".66" como 66. Si el valor leído del aditivo por bachada es mayor a 5, probablemente perdiste el punto decimal (ej: 66 → 0.66, 132 → 1.32). Para totales del turno el aditivo típico es 15-50 kg (ej: 24.42 kg para 37 bachadas a 0.66 kg/bachada).
+AGUA: El agua está en LITROS. Valores típicos por bachada: 200-400 L. En totales del turno: 5,000-15,000 L. Si ves un número en columna AGUA menor que 100 es sospechoso.
+RANGOS ESPERADOS por bachada: Cemento 100-250 kg, Agregados 300-3000 kg cada tolva, Agua 150-450 L, Aditivo 0.3-3.0 kg.
 TOTALES: La fila TOTAL al final de cada bloque de 10 bachadas y la fila de TOTALES GENERALES al final de la hoja son los consumos acumulados reales del turno completo.`});
   try{
     const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',
@@ -1429,12 +1433,18 @@ TOTALES: La fila TOTAL al final de cada bloque de 10 bachadas y la fila de TOTAL
     setVal('mp-t2-mat',mapM(p.tolva2_material));    setVal('mp-t2-kg',p.tolva2_kg);
     setVal('mp-t3-mat',mapM(p.tolva3_material));    setVal('mp-t3-kg',p.tolva3_kg);
     setVal('mp-agua',p.agua_litros);
-    setVal('mp-aditivo-tipo',mapM(p.aditivo_tipo)); setVal('mp-aditivo-cc',p.aditivo_cc);
+    // Auto-corregir aditivo si OCR perdió el decimal (.66 leído como 66)
+    let aditivoVal = p.aditivo_cc;
+    if(aditivoVal > 5 && aditivoVal < 500){ aditivoVal = aditivoVal / 100; }
+    setVal('mp-aditivo-tipo',mapM(p.aditivo_tipo)); setVal('mp-aditivo-cc',aditivoVal);
     if(p.pigmento_tipo){setVal('mp-pigmento-tipo',mapM(p.pigmento_tipo));document.getElementById('row-pigmento').style.display='';}
     setVal('mp-pigmento-kg',p.pigmento_kg);
     setVal('f-bachadas',p.bachadas);
     if(p.produccion_reportada) setVal('f-prod-reportada',p.produccion_reportada);
-    S.totalesOCR={cemento:p.total_cemento_turno,tolva1:p.total_tolva1_turno,tolva2:p.total_tolva2_turno,tolva3:p.total_tolva3_turno,agua:p.total_agua_turno,aditivo:p.total_aditivo_turno};S.pesoHumedo=p.peso_humedo||null;if(p.peso_humedo){document.getElementById('t-peso-humedo').value=p.peso_humedo;}updateTotalesOCR();
+    // Auto-corregir total aditivo si tiene decimal perdido
+    let totalAditivo = p.total_aditivo_turno;
+    if(totalAditivo > 500 && totalAditivo < 50000){ totalAditivo = totalAditivo / 100; }
+    S.totalesOCR={cemento:p.total_cemento_turno,tolva1:p.total_tolva1_turno,tolva2:p.total_tolva2_turno,tolva3:p.total_tolva3_turno,agua:p.total_agua_turno,aditivo:totalAditivo};S.pesoHumedo=p.peso_humedo||null;if(p.peso_humedo){document.getElementById('t-peso-humedo').value=p.peso_humedo;}updateTotalesOCR();
     calcMetrics();
     const extras=hasDos?' + totales acumulados':'';
     document.getElementById('ocr-status').textContent=`✅ Datos extraídos${extras} — verifica y corrige si es necesario`;
@@ -1444,6 +1454,15 @@ TOTALES: La fila TOTAL al final de cada bloque de 10 bachadas y la fila de TOTAL
 }
 
 // ═══════ TOTALES ACUMULADOS OCR — editables ═══════
+// Rangos esperados para validación (min, max) del total del turno
+const RANGOS_TURNO = {
+  cemento: [3000,  15000],
+  tolva1:  [5000,  50000],
+  tolva2:  [5000,  150000],
+  tolva3:  [5000,  150000],
+  agua:    [3000,  20000],
+  aditivo: [5,     200],
+};
 const TOTALES_CAMPOS = [
   { key:'cemento', label:'Cemento',  inputId:'tot-cemento' },
   { key:'tolva1',  label:'Tolva 1',  inputId:'tot-tolva1'  },
@@ -1488,16 +1507,16 @@ function updateTotalesOCR(){
     const color= ok ? '#22c55e' : warn ? '#FFCD24' : '#ef4444';
     const icon = ok ? '✅' : warn ? '⚠️' : '❌';
 
-    return `<tr style="border-bottom:1px solid rgba(255,255,255,.15);">
-      <td style="padding:10px 12px;font-size:15px;font-weight:700;color:#FFFFFF;">${campo.label}</td>
-      <td style="padding:10px 12px;text-align:right;font-size:14px;font-family:'IBM Plex Mono',monospace;color:rgba(255,255,255,.8);">${teorico!=null?teorico.toFixed(0):'—'}</td>
+    return `<tr style="border-bottom:1px solid #C8D4E8;background:#FFFFFF;">
+      <td style="padding:12px 14px;font-size:16px;font-weight:700;color:#000000;">${campo.label}</td>
+      <td style="padding:12px 14px;text-align:right;font-size:15px;font-family:'IBM Plex Mono',monospace;color:#5A6E90;">${teorico!=null?teorico.toFixed(0):'—'}</td>
       <td style="padding:6px 10px;text-align:right;">
         <input type="number" id="${campo.inputId}" value="${real!=null?real:''}"
           step="0.01" min="0" placeholder="—"
           oninput="recalcDiff('${campo.inputId}',${teorico||0});calcPiezasEstimadas()"
-          style="width:100px;background:rgba(255,255,255,.15);border:2px solid rgba(255,205,36,.5);border-radius:8px;padding:7px 8px;color:#FFCD24;font-family:'IBM Plex Mono',monospace;font-size:15px;text-align:right;font-weight:700;">
+          style="width:100px;background:#FFFFFF;border:2px solid #FFCD24;border-radius:8px;padding:7px 8px;color:#093F89;font-family:'IBM Plex Mono',monospace;font-size:15px;text-align:right;font-weight:700;">
       </td>
-      <td id="diff-${campo.inputId}" style="padding:10px 12px;text-align:right;font-size:14px;font-family:'IBM Plex Mono',monospace;color:${color};font-weight:700;">${diff!=null?(diff>0?'+':'')+diff.toFixed(0)+' '+icon:'—'}</td>
+      <td id="diff-${campo.inputId}" style="padding:12px 14px;text-align:right;font-size:15px;font-family:'IBM Plex Mono',monospace;color:${color};font-weight:700;">${diff!=null?(diff>0?'+':'')+diff.toFixed(0)+' '+icon:'—'}</td>
     </tr>`;
   }).join('');
 
@@ -1514,18 +1533,59 @@ function updateTotalesOCR(){
 function recalcDiff(inputId, teorico){
   const val = parseFloat(document.getElementById(inputId).value)||0;
   const diffEl = document.getElementById('diff-'+inputId);
-  if(!diffEl || !teorico) return;
-  const diff = val - teorico;
-  const pct  = Math.abs(diff/teorico*100);
-  const ok   = pct <= 5;
-  const warn = pct > 5 && pct <= 10;
-  const color= ok ? '#22c55e' : warn ? '#FFCD24' : '#ef4444';
-  const icon = ok ? '✅' : warn ? '⚠️' : '❌';
-  diffEl.style.color = color;
-  diffEl.textContent = (diff>0?'+':'')+diff.toFixed(0)+' '+icon;
-  // Sync back to S.totalesOCR
+  const inputEl = document.getElementById(inputId);
   const campo = TOTALES_CAMPOS.find(c=>c.inputId===inputId);
+
+  // Validar rango esperado del total
+  let fueraDeRango = false;
+  if(campo && RANGOS_TURNO[campo.key] && val > 0){
+    const [min,max] = RANGOS_TURNO[campo.key];
+    fueraDeRango = val < min || val > max;
+  }
+
+  // Resaltar input en rojo si está fuera de rango
+  if(inputEl){
+    inputEl.style.borderColor = fueraDeRango ? '#ef4444' : '#FFCD24';
+    inputEl.style.color       = fueraDeRango ? '#ef4444' : '#093F89';
+  }
+
+  if(!diffEl) return;
+  if(!teorico){ diffEl.textContent = fueraDeRango ? '⚠️ Revisar' : '—'; diffEl.style.color = fueraDeRango?'#ef4444':'#5A6E90'; }
+  else {
+    const diff = val - teorico;
+    const pct  = teorico > 0 ? Math.abs(diff/teorico*100) : 0;
+    const ok   = pct <= 5 && !fueraDeRango;
+    const warn = (pct > 5 && pct <= 10) || fueraDeRango;
+    const bad  = pct > 10 || fueraDeRango;
+    const color= ok ? '#22c55e' : bad ? '#ef4444' : '#FFCD24';
+    const icon = ok ? '✅' : bad ? '❌' : '⚠️';
+    diffEl.style.color = color;
+    diffEl.textContent = (diff>0?'+':'')+diff.toFixed(0)+' '+icon+(fueraDeRango?' ⚠️Rng':'');
+  }
+  // Sync back to S.totalesOCR
   if(campo && S.totalesOCR) S.totalesOCR[campo.key] = val;
+  // Actualizar botón siguiente — no avanzar si hay valores fuera de rango
+  checkTotalesValidos();
+}
+
+function checkTotalesValidos(){
+  let hayErrores = false;
+  TOTALES_CAMPOS.forEach(c=>{
+    const el = document.getElementById(c.inputId);
+    if(!el) return;
+    const val = parseFloat(el.value)||0;
+    if(val > 0 && RANGOS_TURNO[c.key]){
+      const [min,max] = RANGOS_TURNO[c.key];
+      if(val < min || val > max) hayErrores = true;
+    }
+  });
+  const btn = document.getElementById('btn-next');
+  if(btn && document.getElementById('totales-ocr-section')?.style.display !== 'none'){
+    btn.disabled = hayErrores;
+    btn.title = hayErrores ? 'Corrige los valores marcados en rojo antes de continuar' : '';
+    const warn = document.getElementById('totales-rango-warn');
+    if(warn) warn.style.display = hayErrores ? '' : 'none';
+  }
 }
 
 function calcPiezasEstimadas(){
