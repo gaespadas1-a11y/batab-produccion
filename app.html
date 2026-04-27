@@ -641,7 +641,12 @@ html,body{height:100%;background:var(--bg);color:var(--text);
           <div class="photo-label">Fotografiar parte SUPERIOR de la hoja</div>
           <div class="photo-hint">Logo BATAB · Lote · Materiales · kg por bachada</div>
         </div>
+        <div style="display:flex;gap:8px;margin-top:6px;">
+          <button class="btn btn-secondary" style="flex:1;font-size:12px;padding:8px;" onclick="captureDosiPhoto()">📷 Cámara</button>
+          <button class="btn btn-secondary" style="flex:1;font-size:12px;padding:8px;" onclick="captureDosiPhotoGallery()">🖼️ Galería</button>
+        </div>
         <input type="file" id="dosi-photo-input" accept="image/*" capture="environment" style="display:none" onchange="onDosiPhotoSelected(event)">
+        <input type="file" id="dosi-photo-input-gallery" accept="image/*" style="display:none" onchange="onDosiPhotoSelected(event)">
       </div>
 
       <div class="form-group">
@@ -651,13 +656,22 @@ html,body{height:100%;background:var(--bg);color:var(--text);
           <div class="photo-label">Fotografiar TOTALES acumulados</div>
           <div class="photo-hint">Fila TOTAL del turno · Consumo real de cada material</div>
         </div>
+        <div style="display:flex;gap:8px;margin-top:6px;">
+          <button class="btn btn-secondary" style="flex:1;font-size:12px;padding:8px;" onclick="captureDosiPhoto2()">📷 Cámara</button>
+          <button class="btn btn-secondary" style="flex:1;font-size:12px;padding:8px;" onclick="captureDosiPhoto2Gallery()">🖼️ Galería</button>
+        </div>
         <input type="file" id="dosi-photo2-input" accept="image/*" capture="environment" style="display:none" onchange="onDosiPhoto2Selected(event)">
+        <input type="file" id="dosi-photo2-input-gallery" accept="image/*" style="display:none" onchange="onDosiPhoto2Selected(event)">
       </div>
 
       <!-- Fotos extra de dosificación -->
       <div id="dosi-extra-container" style="margin-bottom:4px;"></div>
-      <button class="btn btn-secondary" style="width:100%;margin-bottom:12px;font-size:13px;" onclick="addDosiPhotoExtra()">+ Agregar hoja de dosificación</button>
+      <div style="display:flex;gap:8px;margin-bottom:12px;">
+        <button class="btn btn-secondary" style="flex:1;font-size:12px;" onclick="addDosiPhotoExtra()">📷 + Hoja (cámara)</button>
+        <button class="btn btn-secondary" style="flex:1;font-size:12px;" onclick="addDosiPhotoExtraGallery()">🖼️ + Hoja (galería)</button>
+      </div>
       <input type="file" id="dosi-extra-input" accept="image/*" capture="environment" style="display:none" onchange="onDosiExtraSelected(event)">
+      <input type="file" id="dosi-extra-input-gallery" accept="image/*" style="display:none" onchange="onDosiExtraSelected(event)">
 
       <button class="ocr-btn" id="ocr-btn" onclick="runOCR()" disabled>🔍 Extraer datos con OCR (ambas fotos)</button>
       <div class="ocr-status" id="ocr-status"></div>
@@ -1000,7 +1014,12 @@ html,body{height:100%;background:var(--bg);color:var(--text);
         <div class="photo-label">Fotografiar placa vacía</div>
         <div class="photo-hint">Antes de colocar los blocks</div>
       </div>
+      <div style="display:flex;gap:8px;margin-top:6px;">
+        <button class="btn btn-secondary" style="flex:1;font-size:12px;padding:8px;" onclick="capturePesajeFoto(1)">📷 Cámara</button>
+        <button class="btn btn-secondary" style="flex:1;font-size:12px;padding:8px;" onclick="document.getElementById('pesaje-photo1-input-gallery').click()">🖼️ Galería</button>
+      </div>
       <input type="file" id="pesaje-photo1-input" accept="image/*" capture="environment" style="display:none" onchange="onPesajeFotoSelected(event,1)">
+      <input type="file" id="pesaje-photo1-input-gallery" accept="image/*" style="display:none" onchange="onPesajeFotoSelected(event,1)">
     </div>
 
     <!-- Peso placa vacía -->
@@ -1019,7 +1038,12 @@ html,body{height:100%;background:var(--bg);color:var(--text);
         <div class="photo-label">Fotografiar báscula con blocks</div>
         <div class="photo-hint">Con el producto ya colocado en la placa</div>
       </div>
+      <div style="display:flex;gap:8px;margin-top:6px;">
+        <button class="btn btn-secondary" style="flex:1;font-size:12px;padding:8px;" onclick="capturePesajeFoto(2)">📷 Cámara</button>
+        <button class="btn btn-secondary" style="flex:1;font-size:12px;padding:8px;" onclick="document.getElementById('pesaje-photo2-input-gallery').click()">🖼️ Galería</button>
+      </div>
       <input type="file" id="pesaje-photo2-input" accept="image/*" capture="environment" style="display:none" onchange="onPesajeFotoSelected(event,2)">
+      <input type="file" id="pesaje-photo2-input-gallery" accept="image/*" style="display:none" onchange="onPesajeFotoSelected(event,2)">
     </div>
 
     <!-- Peso bruto (placa + blocks) -->
@@ -1350,7 +1374,7 @@ async function onPesajeFotoSelected(e, num){
   const areaId = `pesaje-photo${num}-area`;
   const pa=document.getElementById(areaId);
   pa.className='photo-area has-photo';
-  pa.innerHTML=`<img src="${b64}" style="border-radius:10px;max-height:180px;"><div class="photo-overlay"><button class="photo-btn-sm" onclick="capturePesajeFoto(${num})">📷 Retomar</button></div>`;
+  pa.innerHTML=`<img src="${b64}" style="border-radius:10px;max-height:180px;"><div class="photo-overlay"><button class="photo-btn-sm" onclick="capturePesajeFoto(${num})">📷 Cámara</button><button class="photo-btn-sm" onclick="document.getElementById('pesaje-photo${num}-input-gallery').click()">🖼️ Galería</button></div>`;
   e.target.value='';
 }
 // Keep old function for compatibility
@@ -1381,12 +1405,15 @@ function savePesaje(){
 
 // ═══════ DOSIFICACIÓN + OCR ═══════
 function captureDosiPhoto(){document.getElementById('dosi-photo-input').click();}
+function captureDosiPhotoGallery(){document.getElementById('dosi-photo-input-gallery').click();}
 function captureDosiPhoto2(){document.getElementById('dosi-photo2-input').click();}
+function captureDosiPhoto2Gallery(){document.getElementById('dosi-photo2-input-gallery').click();}
 function addDosiPhotoExtra(){document.getElementById('dosi-extra-input').click();}
+function addDosiPhotoExtraGallery(){document.getElementById('dosi-extra-input-gallery').click();}
 async function onDosiExtraSelected(e){
   const f=e.target.files[0];if(!f)return;
   showLoading('Procesando foto extra...');
-  const b64=await compressImage(f,1200);
+  const b64=await compressImage(f,900);
   hideLoading();
   S.dosiPhotosExtra.push(b64);
   renderDosiExtras();
@@ -1418,10 +1445,10 @@ function renderDosiExtras(){
 async function onDosiPhotoSelected(e){
   const f=e.target.files[0];if(!f)return;
   showLoading('Procesando foto 1...');
-  S.dosiPhotoB64=await compressImage(f,1200);hideLoading();
+  S.dosiPhotoB64=await compressImage(f,900);hideLoading();
   const pa=document.getElementById('dosi-photo-area');
   pa.className='photo-area has-photo';
-  pa.innerHTML=`<img src="${S.dosiPhotoB64}" style="max-height:200px;" onclick="openLightbox('${S.dosiPhotoB64}','Encabezado dosificación')"><div class="photo-overlay"><button class="photo-btn-sm" onclick="captureDosiPhoto()">📷 Retomar</button><button class="photo-btn-sm" onclick="openLightbox('${S.dosiPhotoB64}','Encabezado')">🔍 Ver</button></div>`;
+  pa.innerHTML=`<img src="${S.dosiPhotoB64}" style="max-height:200px;" onclick="openLightbox('${S.dosiPhotoB64}','Encabezado dosificación')"><div class="photo-overlay"><button class="photo-btn-sm" onclick="captureDosiPhoto()">📷 Cámara</button><button class="photo-btn-sm" onclick="captureDosiPhotoGallery()">🖼️ Galería</button><button class="photo-btn-sm" onclick="openLightbox('${S.dosiPhotoB64}','Encabezado')">🔍 Ver</button></div>`;
   const hasKey=!!getOcrKey();
   const hasBoth=!!(S.dosiPhotoB64&&S.dosiPhotoB64_2);
   document.getElementById('ocr-btn').disabled=false;
@@ -1432,10 +1459,10 @@ async function onDosiPhotoSelected(e){
 async function onDosiPhoto2Selected(e){
   const f=e.target.files[0];if(!f)return;
   showLoading('Procesando foto 2...');
-  S.dosiPhotoB64_2=await compressImage(f,1200);hideLoading();
+  S.dosiPhotoB64_2=await compressImage(f,900);hideLoading();
   const pa=document.getElementById('dosi-photo2-area');
   pa.className='photo-area has-photo';
-  pa.innerHTML=`<img src="${S.dosiPhotoB64_2}" style="max-height:200px;" onclick="openLightbox('${S.dosiPhotoB64_2}','Resumen final turno')"><div class="photo-overlay"><button class="photo-btn-sm" onclick="captureDosiPhoto2()">📷 Retomar</button><button class="photo-btn-sm" onclick="openLightbox('${S.dosiPhotoB64_2}','Resumen final')">🔍 Ver</button></div>`;
+  pa.innerHTML=`<img src="${S.dosiPhotoB64_2}" style="max-height:200px;" onclick="openLightbox('${S.dosiPhotoB64_2}','Resumen final turno')"><div class="photo-overlay"><button class="photo-btn-sm" onclick="captureDosiPhoto2()">📷 Cámara</button><button class="photo-btn-sm" onclick="captureDosiPhoto2Gallery()">🖼️ Galería</button><button class="photo-btn-sm" onclick="openLightbox('${S.dosiPhotoB64_2}','Resumen final')">🔍 Ver</button></div>`;
   document.getElementById('ocr-btn').disabled=false;
   document.getElementById('ocr-status').textContent=S.dosiPhotoB64?'✅ Ambas fotos listas — toca OCR':'📋 Foto 2 lista — agrega Foto 1 también';
   e.target.value='';
@@ -1843,7 +1870,7 @@ function saveRecord(){
     const recsSinFotos=getRecords();recsSinFotos.push(recSinFotos);
     try{ saveRecords(recsSinFotos); }
     catch(e2){ showToast('Error al guardar: almacenamiento lleno','red'); return; }
-    showToast('Guardado sin fotos — almacenamiento limitado','red');
+    showToast('⚠️ Guardado SIN FOTOS — espacio lleno. Libera espacio en Ajustes','red');setTimeout(()=>showToast('Ve a Ajustes → Limpiar aprobados para liberar espacio','red'),3200);
   }
   document.getElementById('success-folio').textContent=d.folio;
   // Supervisor/director → ir directo a revisar el registro recién guardado
@@ -1929,30 +1956,31 @@ function renderReviewScreen(rec){
       ${rec.eficiencia?`<span class="rv-chip ${rec.eficiencia>=95?'ok':rec.eficiencia>=85?'warn':'bad'}">⚡ ${rec.eficiencia.toFixed(1)}% efic.</span>`:''}
     </div>`;
 
-  // Fotos dosificación — mostrar AMBAS (encabezado + totales acumulados)
+  // Fotos dosificación — registrar en _PR y usar data-pid (no base64 en onclick)
+  window._PR = {};
   const dosiBody=document.getElementById('rv-dosi-photo-body');
   let dosiHtml='';
   if(rec.dosiPhoto){
+    regPhoto('d1', rec.dosiPhoto, 'Encabezado · '+rec.folio);
     dosiHtml+=`<div style="margin-bottom:8px;">
       <div style="font-size:11px;font-weight:600;color:var(--text3);margin-bottom:4px;">📄 ENCABEZADO</div>
-      <img class="rv-photo-main" src="${rec.dosiPhoto}" alt="Encabezado dosificación"
-        onclick="openLightbox('${rec.dosiPhoto}','Encabezado dosificación · ${rec.folio}')">
+      <img class="rv-photo-main" src="${rec.dosiPhoto}" data-pid="d1" style="cursor:pointer;">
     </div>`;
   }
   if(rec.dosiPhoto2){
+    regPhoto('d2', rec.dosiPhoto2, 'Totales acumulados · '+rec.folio);
     dosiHtml+=`<div style="margin-bottom:8px;">
       <div style="font-size:11px;font-weight:600;color:var(--text3);margin-bottom:4px;">📊 TOTALES ACUMULADOS</div>
-      <img class="rv-photo-main" src="${rec.dosiPhoto2}" alt="Totales acumulados"
-        onclick="openLightbox('${rec.dosiPhoto2}','Totales acumulados · ${rec.folio}')">
+      <img class="rv-photo-main" src="${rec.dosiPhoto2}" data-pid="d2" style="cursor:pointer;">
     </div>`;
   }
-  // Fotos extra de dosificación
   if(rec.dosiPhotosExtra&&rec.dosiPhotosExtra.length){
     rec.dosiPhotosExtra.forEach((b64,i)=>{
+      const pid='dx'+i;
+      regPhoto(pid, b64, 'Hoja '+(i+3)+' · '+rec.folio);
       dosiHtml+=`<div style="margin-bottom:8px;">
         <div style="font-size:11px;font-weight:600;color:var(--text3);margin-bottom:4px;">📄 HOJA ${i+3}</div>
-        <img class="rv-photo-main" src="${b64}" alt="Hoja extra ${i+3}"
-          onclick="openLightbox('${b64}','Hoja ${i+3} de dosificación · ${rec.folio}')">
+        <img class="rv-photo-main" src="${b64}" data-pid="${pid}" style="cursor:pointer;">
       </div>`;
     });
   }
@@ -1971,6 +1999,9 @@ function renderReviewScreen(rec){
     pg.innerHTML=rec.pesajes.map((p,i)=>{
       const fVacia=p.photoVacia||null;
       const fLlena=p.photoLlena||p.photo||null;
+      const pidV='pv'+i, pidL='pl'+i;
+      if(fVacia) regPhoto(pidV, fVacia, 'Placa vacía · Pesaje '+(i+1));
+      if(fLlena) regPhoto(pidL, fLlena, 'Placa llena · Pesaje '+(i+1));
       return `<div class="rv-pesaje-item" style="cursor:default;">
         <div style="font-size:11px;font-weight:700;color:var(--text3);margin-bottom:6px;text-align:center;">
           PESAJE ${i+1} · Bachada ${p.bachada||'—'} · ${p.time}
@@ -1979,14 +2010,14 @@ function renderReviewScreen(rec){
           <div>
             <div style="font-size:10px;color:var(--text3);text-align:center;margin-bottom:2px;">PLACA VACÍA (tara)</div>
             ${fVacia
-              ?`<img src="${fVacia}" style="width:100%;border-radius:6px;cursor:pointer;" onclick="openLightbox('${fVacia}','Placa vacía · Pesaje ${i+1}')">`
+              ?`<img src="${fVacia}" data-pid="${pidV}" style="width:100%;border-radius:6px;cursor:pointer;">`
               :`<div style="background:var(--bg3);border-radius:6px;height:70px;display:flex;align-items:center;justify-content:center;font-size:18px;">📸</div>`}
             <div style="font-size:11px;text-align:center;color:var(--text2);margin-top:2px;">${p.vacia?.toFixed(1)||'—'} kg</div>
           </div>
           <div>
             <div style="font-size:10px;color:var(--text3);text-align:center;margin-bottom:2px;">PLACA LLENA (bruto)</div>
             ${fLlena
-              ?`<img src="${fLlena}" style="width:100%;border-radius:6px;cursor:pointer;" onclick="openLightbox('${fLlena}','Placa llena · Pesaje ${i+1}')">`
+              ?`<img src="${fLlena}" data-pid="${pidL}" style="width:100%;border-radius:6px;cursor:pointer;">`
               :`<div style="background:var(--bg3);border-radius:6px;height:70px;display:flex;align-items:center;justify-content:center;font-size:18px;">📸</div>`}
             <div style="font-size:11px;text-align:center;color:var(--text2);margin-top:2px;">${p.bruto?.toFixed(1)||'—'} kg</div>
           </div>
@@ -2271,13 +2302,50 @@ async function uploadToNetsuite(record){
 }
 
 // ═══════ IMAGE UTILS ═══════
-function compressImage(file,maxW=800){
+// Compresión recursiva — funciona con cualquier cámara:
+// iPhone 48MP, Samsung Galaxy 200MP, cualquier Android de gama alta
+// Reduce a la mitad en cada paso hasta llegar al objetivo → nunca satura memoria
+function compressImage(file,maxW=700){
   return new Promise(res=>{
-    const img=new Image(),reader=new FileReader();
-    reader.onload=e=>{img.onload=()=>{const sc=Math.min(maxW/img.width,1),c=document.createElement('canvas');c.width=img.width*sc;c.height=img.height*sc;c.getContext('2d').drawImage(img,0,0,c.width,c.height);res(c.toDataURL('image/jpeg',.78));};img.src=e.target.result;};
+    const reader=new FileReader();
+    reader.onload=e=>{
+      const img=new Image();
+      img.onload=()=>_shrink(img,maxW,res);
+      img.src=e.target.result;
+    };
     reader.readAsDataURL(file);
   });
 }
+function _shrink(source,maxW,done){
+  const w=source.naturalWidth||source.width;
+  const h=source.naturalHeight||source.height;
+  if(w > maxW*2){
+    // Todavía demasiado grande: reducir a la mitad y volver a intentar
+    const c=document.createElement('canvas');
+    const nw=Math.max(Math.round(w/2),maxW);
+    c.width=nw; c.height=Math.round(h*(nw/w));
+    c.getContext('2d').drawImage(source,0,0,c.width,c.height);
+    const img2=new Image();
+    img2.onload=()=>_shrink(img2,maxW,done); // siguiente paso
+    img2.src=c.toDataURL('image/jpeg',.85);  // intermedio alta calidad
+  } else {
+    // Último paso: tamaño final con calidad optimizada para almacenamiento
+    const sc=Math.min(maxW/w,1);
+    const c=document.createElement('canvas');
+    c.width=Math.round(w*sc); c.height=Math.round(h*sc);
+    c.getContext('2d').drawImage(source,0,0,c.width,c.height);
+    done(c.toDataURL('image/jpeg',.65));
+  }
+}
+// ── Registro global de fotos (evita base64 en atributos onclick) ──
+window._PR = {};
+function regPhoto(id, src, cap){ window._PR[id]={src,cap}; return id; }
+function openPhotoById(id){ const p=window._PR[id]; if(p&&p.src) openLightbox(p.src,p.cap); }
+// Delegación global: toca cualquier [data-pid] abre la foto
+document.addEventListener('click', e=>{
+  const pid=e.target.closest('[data-pid]')?.getAttribute('data-pid');
+  if(pid) openPhotoById(pid);
+});
 function openLightbox(src,cap){
   document.getElementById('lightbox-img').src=src;
   document.getElementById('lightbox-cap').textContent=cap||'';
