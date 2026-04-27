@@ -596,7 +596,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);
           <input type="text" class="form-input" id="f-lote" placeholder="Ej. 2026-04-001" style="padding-right:40px;font-family:'IBM Plex Mono',monospace;letter-spacing:.5px;">
           <span class="lote-lock-icon">🔒</span>
         </div>
-        <div class="form-hint">⚠️ Inmutable una vez enviado al supervisor.<br>📋 Formato: después de la letra del mes agrega M (matutino) o V (vespertino).<br>Ej: <strong>3C26DM26</strong> (Matutino) o <strong>3C26DV26</strong> (Vespertino)</div>
+        <div class="form-hint">⚠️ Inmutable una vez enviado al supervisor.<br>📋 Formato: después de la letra del mes agrega M (matutino) o V (vespertino).<br>Formato: [num][código][año][mes-letra][M/V][día] — Ej: <strong>3C26DM26</strong> (Abril, Matutino) · Si el OCR lo llenó mal, corrígelo aquí</div>
       </div>
       <div class="form-group">
         <label class="form-label">Operador</label>
@@ -1435,10 +1435,17 @@ TOTALES: La fila TOTAL al final de cada bloque de 10 bachadas y la fila de TOTAL
       const lo=String(p.lote).toUpperCase().trim();
       // Si ya tiene M o V después de una letra de mes, no duplicar
       const yaTiene = /[A-Z][MV]\d/.test(lo) || /[A-Z][MV]$/.test(lo);
-      // Insertar turno después de la última letra que precede dígitos finales
-      // Ej: "3C26D26" → "3C26DM26"
-      const conTurno = yaTiene ? lo : lo.replace(/([A-Z])(\d+)$/, '$1'+tl+'$2');
-      setVal('f-lote', conTurno);
+      if(!yaTiene){
+        // Insertar turno después de la SEGUNDA letra del lote
+        // Ej: "3C26D26" → segunda letra es D → "3C26DM26"
+        // Regex: todo hasta la segunda letra + segunda letra + resto
+        const conTurno = lo.replace(/^([^A-Z]*[A-Z][^A-Z]*)([A-Z])(\d+)$/, '$1$2'+tl+'$3');
+        // Si el regex no coincidió (solo 1 letra, como "3C26026" con D leída como 0)
+        // mostrar el lote tal cual para que el operador lo corrija manualmente
+        setVal('f-lote', conTurno !== lo ? conTurno : lo);
+      } else {
+        setVal('f-lote', lo);
+      }
     }
     setVal('f-mf',p.modulo_finura); setVal('f-humedad',p.humedad);
     setVal('mp-cemento-tipo',mapM(p.cemento_tipo)); setVal('mp-cemento-kg',p.cemento_kg);
