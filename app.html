@@ -1505,7 +1505,20 @@ TOTALES: La fila TOTAL al final de cada bloque de 10 bachadas y la fila de TOTAL
     if(!res.ok)throw new Error((await res.json()).error?.message||res.statusText);
     const d=await res.json();
     const text=d.content.find(c=>c.type==='text')?.text||'';
-    const p=JSON.parse(text.replace(/```json|```/g,'').trim());
+    // Extraer JSON robusto: buscar primer { y último } aunque haya texto extra
+    let jsonStr=text.replace(/```json|```/g,'').trim();
+    const j1=jsonStr.indexOf('{'), j2=jsonStr.lastIndexOf('}');
+    if(j1>=0&&j2>j1) jsonStr=jsonStr.substring(j1,j2+1);
+    let p;
+    try{ p=JSON.parse(jsonStr); }
+    catch(je){
+      // Mostrar qué devolvió el modelo para poder diagnosticar
+      document.getElementById('ocr-status').textContent='❌ OCR no pudo leer la hoja. Intenta con mejor iluminación o ángulo.';
+      btn.disabled=false;
+      console.error('OCR raw response:',text);
+      showToast('OCR: respuesta inesperada del modelo','red');
+      return;
+    }
     const setVal=(id,v)=>{
       if(v==null||v===''||v===0)return;
       const el=document.getElementById(id);if(!el)return;
