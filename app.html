@@ -678,19 +678,39 @@ html,body{height:100%;background:var(--bg);color:var(--text);
             <span style="color:#FFCD24;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;">📊 Consumos totales del turno</span>
             <span style="color:rgba(255,255,255,.6);font-size:11px;" id="totales-validacion-status">—</span>
           </div>
+          <!-- Campos editables para corregir totales del OCR -->
+          <div style="padding:10px 12px 4px;font-size:11px;color:#FFCD24;font-weight:600;">
+            ✏️ Verifica y corrige los totales reales de la hoja si el OCR cometió errores
+          </div>
           <table style="width:100%;border-collapse:collapse;" id="totales-ocr-table">
             <thead>
-              <tr style="background:rgba(9,63,137,.08);">
-                <th style="padding:8px 12px;text-align:left;font-size:11px;color:#5A6E90;text-transform:uppercase;font-weight:600;">Material</th>
-                <th style="padding:8px 12px;text-align:right;font-size:11px;color:#5A6E90;text-transform:uppercase;font-weight:600;">Teórico</th>
-                <th style="padding:8px 12px;text-align:right;font-size:11px;color:#5A6E90;text-transform:uppercase;font-weight:600;">Real (hoja)</th>
-                <th style="padding:8px 12px;text-align:right;font-size:11px;color:#5A6E90;text-transform:uppercase;font-weight:600;">Dif.</th>
+              <tr style="background:rgba(9,63,137,.12);">
+                <th style="padding:8px 10px;text-align:left;font-size:11px;color:rgba(255,255,255,.7);text-transform:uppercase;font-weight:600;">Material</th>
+                <th style="padding:8px 10px;text-align:right;font-size:11px;color:rgba(255,255,255,.7);text-transform:uppercase;font-weight:600;">Teórico</th>
+                <th style="padding:8px 10px;text-align:right;font-size:11px;color:#FFCD24;text-transform:uppercase;font-weight:600;">Real (editable)</th>
+                <th style="padding:8px 10px;text-align:right;font-size:11px;color:rgba(255,255,255,.7);text-transform:uppercase;font-weight:600;">Dif.</th>
               </tr>
             </thead>
             <tbody id="totales-ocr-body"></tbody>
           </table>
-          <div style="padding:8px 12px;font-size:11px;color:#5A6E90;">
-            ℹ️ Teórico = kg/bachada × bachadas capturadas. Diferencia aceptable ±5%.
+          <!-- Peso húmedo + fórmula de piezas estimadas -->
+          <div style="margin:10px 12px;padding:12px;background:rgba(255,255,255,.08);border-radius:8px;border:1px solid rgba(255,205,36,.3);">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:center;">
+              <div>
+                <div style="font-size:11px;color:#FFCD24;font-weight:700;text-transform:uppercase;margin-bottom:4px;">Peso húmedo/pieza (kg)</div>
+                <input type="number" id="t-peso-humedo" step="0.001" min="0" placeholder="11.660"
+                  oninput="calcPiezasEstimadas()"
+                  style="width:100%;background:rgba(255,255,255,.12);border:1px solid rgba(255,205,36,.4);border-radius:6px;padding:8px;color:white;font-family:'IBM Plex Mono',monospace;font-size:18px;text-align:center;">
+              </div>
+              <div style="text-align:center;">
+                <div style="font-size:11px;color:#FFCD24;font-weight:700;text-transform:uppercase;margin-bottom:4px;">= Piezas estimadas</div>
+                <div id="t-piezas-estimadas" style="font-size:28px;font-weight:700;font-family:'IBM Plex Mono',monospace;color:#FFCD24;">—</div>
+                <div id="t-formula-detail" style="font-size:10px;color:rgba(255,255,255,.5);margin-top:2px;">Total MP ÷ Peso húmedo</div>
+              </div>
+            </div>
+          </div>
+          <div style="padding:4px 12px 10px;font-size:11px;color:rgba(255,255,255,.5);">
+            ℹ️ Teórico = kg/bachada × bachadas. Diferencia aceptable ±5%. Piezas = Total MP ÷ Peso húmedo.
           </div>
         </div>
       </div>
@@ -1360,6 +1380,8 @@ Devuelve SOLO JSON sin markdown:
 CLAVE: Los kg/bachada están en la fila de cantidades del ENCABEZADO (debajo de los nombres de materiales), NO en las tablas.
 IMPORTANTE AGUA vs ADITIVO: El AGUA está en la columna AGUA y es en LITROS (típicamente 150-400 L/bachada). El ADITIVO está en columna ADITIVO y es en KGS (típicamente 0.5-2 kg/bachada). Son valores muy distintos - no los confundas.
 TOLVA 1: Es el primer agregado (Sello 3/8, Arena, Polvo). Si ves "Sello" en la columna Agregado 1, mapea como tolva1_material.
+ADITIVO DECIMALES: El aditivo usa decimales. Si ves ".66" o "0.66" es 0.66 kg/bachada. Si ves "24.42" en totales es 24.42 kg total (NO 2442). Siempre preserva los decimales del aditivo.
+AGUA: El agua está en LITROS. Valores típicos por bachada: 200-400 L. En totales del turno: 5,000-15,000 L. Si ves un número en la columna AGUA que sea menor que 100, probablemente tiene un decimal o está mal leído.
 TOTALES: La fila TOTAL al final de cada bloque de 10 bachadas y la fila de TOTALES GENERALES al final de la hoja son los consumos acumulados reales del turno completo.`});
   try{
     const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',
@@ -1412,7 +1434,7 @@ TOTALES: La fila TOTAL al final de cada bloque de 10 bachadas y la fila de TOTAL
     setVal('mp-pigmento-kg',p.pigmento_kg);
     setVal('f-bachadas',p.bachadas);
     if(p.produccion_reportada) setVal('f-prod-reportada',p.produccion_reportada);
-    S.totalesOCR={cemento:p.total_cemento_turno,tolva1:p.total_tolva1_turno,tolva2:p.total_tolva2_turno,tolva3:p.total_tolva3_turno,agua:p.total_agua_turno,aditivo:p.total_aditivo_turno}; updateTotalesOCR();
+    S.totalesOCR={cemento:p.total_cemento_turno,tolva1:p.total_tolva1_turno,tolva2:p.total_tolva2_turno,tolva3:p.total_tolva3_turno,agua:p.total_agua_turno,aditivo:p.total_aditivo_turno};S.pesoHumedo=p.peso_humedo||null;if(p.peso_humedo){document.getElementById('t-peso-humedo').value=p.peso_humedo;}updateTotalesOCR();
     calcMetrics();
     const extras=hasDos?' + totales acumulados':'';
     document.getElementById('ocr-status').textContent=`✅ Datos extraídos${extras} — verifica y corrige si es necesario`;
@@ -1421,50 +1443,116 @@ TOTALES: La fila TOTAL al final de cada bloque de 10 bachadas y la fila de TOTAL
   btn.disabled=false;
 }
 
-// ═══════ TOTALES ACUMULADOS OCR ═══════
+// ═══════ TOTALES ACUMULADOS OCR — editables ═══════
+const TOTALES_CAMPOS = [
+  { key:'cemento', label:'Cemento',  inputId:'tot-cemento' },
+  { key:'tolva1',  label:'Tolva 1',  inputId:'tot-tolva1'  },
+  { key:'tolva2',  label:'Tolva 2',  inputId:'tot-tolva2'  },
+  { key:'tolva3',  label:'Tolva 3',  inputId:'tot-tolva3'  },
+  { key:'agua',    label:'Agua (L)', inputId:'tot-agua'    },
+  { key:'aditivo', label:'Aditivo',  inputId:'tot-aditivo' },
+];
+
 function updateTotalesOCR(){
   if(!S.totalesOCR) return;
-  const t = S.totalesOCR;
+  const t   = S.totalesOCR;
   const bach = parseInt(document.getElementById('f-bachadas').value)||0;
 
-  // Datos de diseño por bachada
-  const diseno = {
-    'Cemento':   { kg: parseFloat(document.getElementById('mp-cemento-kg').value)||0, real: t.cemento },
-    'Tolva 1':   { kg: parseFloat(document.getElementById('mp-t1-kg').value)||0,      real: t.tolva1  },
-    'Tolva 2':   { kg: parseFloat(document.getElementById('mp-t2-kg').value)||0,      real: t.tolva2  },
-    'Tolva 3':   { kg: parseFloat(document.getElementById('mp-t3-kg').value)||0,      real: t.tolva3  },
-    'Agua (L)':  { kg: parseFloat(document.getElementById('mp-agua').value)||0,       real: t.agua    },
-    'Aditivo':   { kg: parseFloat(document.getElementById('mp-aditivo-cc').value)||0, real: t.aditivo },
+  // Cantidades de diseño por bachada
+  const kgBachada = {
+    cemento: parseFloat(document.getElementById('mp-cemento-kg').value)||0,
+    tolva1:  parseFloat(document.getElementById('mp-t1-kg').value)||0,
+    tolva2:  parseFloat(document.getElementById('mp-t2-kg').value)||0,
+    tolva3:  parseFloat(document.getElementById('mp-t3-kg').value)||0,
+    agua:    parseFloat(document.getElementById('mp-agua').value)||0,
+    aditivo: parseFloat(document.getElementById('mp-aditivo-cc').value)||0,
   };
 
   const section = document.getElementById('totales-ocr-section');
   const tbody   = document.getElementById('totales-ocr-body');
-  let hasData=false, allOk=true;
+  let hasData = false;
 
-  tbody.innerHTML = Object.entries(diseno).map(([nombre, d])=>{
-    if(!d.real && !d.kg) return '';
-    hasData=true;
-    const teorico = bach > 0 && d.kg > 0 ? d.kg * bach : null;
-    const real    = d.real || null;
-    const diff    = (teorico && real) ? real - teorico : null;
-    const pct     = (teorico && real) ? (diff/teorico*100) : null;
-    const ok      = pct === null || Math.abs(pct) <= 5;
-    if(!ok) allOk=false;
-    const color   = ok ? '#1A7A4A' : (Math.abs(pct)||0) <= 10 ? '#93700A' : '#C0392B';
-    const icon    = ok ? '✅' : '⚠️';
-    return `<tr style="border-bottom:1px solid #C8D4E8;">
-      <td style="padding:8px 12px;font-size:13px;font-weight:600;">${nombre}</td>
-      <td style="padding:8px 12px;text-align:right;font-size:13px;font-family:'IBM Plex Mono',monospace;color:#5A6E90;">${teorico!=null?teorico.toFixed(0):'—'}</td>
-      <td style="padding:8px 12px;text-align:right;font-size:13px;font-family:'IBM Plex Mono',monospace;font-weight:700;color:#093F89;">${real!=null?real.toFixed(0):'—'}</td>
-      <td style="padding:8px 12px;text-align:right;font-size:13px;font-family:'IBM Plex Mono',monospace;color:${color};">${diff!=null?(diff>0?'+':'')+diff.toFixed(0)+' ('+icon+')':'—'}</td>
+  tbody.innerHTML = TOTALES_CAMPOS.map(campo => {
+    const real    = t[campo.key];
+    const teorico = bach > 0 && kgBachada[campo.key] > 0 ? kgBachada[campo.key] * bach : null;
+    if(!real && !teorico) return '';
+    hasData = true;
+
+    // Calcular diferencia usando el valor editable si ya existe
+    const inputEl = document.getElementById(campo.inputId);
+    const valActual = inputEl ? parseFloat(inputEl.value)||real : real;
+    const diff = (teorico && valActual) ? valActual - teorico : null;
+    const pct  = (teorico && valActual && teorico > 0) ? Math.abs(diff/teorico*100) : null;
+    const ok   = pct === null || pct <= 5;
+    const warn = pct !== null && pct > 5 && pct <= 10;
+    const color= ok ? '#22c55e' : warn ? '#FFCD24' : '#ef4444';
+    const icon = ok ? '✅' : warn ? '⚠️' : '❌';
+
+    return `<tr style="border-bottom:1px solid rgba(255,255,255,.1);">
+      <td style="padding:8px 10px;font-size:13px;font-weight:600;color:white;">${campo.label}</td>
+      <td style="padding:8px 10px;text-align:right;font-size:12px;font-family:'IBM Plex Mono',monospace;color:rgba(255,255,255,.5);">${teorico!=null?teorico.toFixed(0):'—'}</td>
+      <td style="padding:6px 10px;text-align:right;">
+        <input type="number" id="${campo.inputId}" value="${real!=null?real:''}"
+          step="0.01" min="0" placeholder="—"
+          oninput="recalcDiff('${campo.inputId}',${teorico||0});calcPiezasEstimadas()"
+          style="width:90px;background:rgba(255,255,255,.12);border:1px solid rgba(255,205,36,.3);border-radius:6px;padding:5px 6px;color:#FFCD24;font-family:'IBM Plex Mono',monospace;font-size:13px;text-align:right;">
+      </td>
+      <td id="diff-${campo.inputId}" style="padding:8px 10px;text-align:right;font-size:12px;font-family:'IBM Plex Mono',monospace;color:${color};">${diff!=null?(diff>0?'+':'')+diff.toFixed(0)+' '+icon:'—'}</td>
     </tr>`;
   }).join('');
 
   if(hasData){
     section.style.display='';
-    document.getElementById('totales-validacion-status').textContent =
-      allOk ? '✅ Consumos dentro del rango' : '⚠️ Revisar diferencias';
+    // Rellenar peso húmedo desde OCR si está disponible
+    if(S.pesoHumedo && !document.getElementById('t-peso-humedo').value){
+      document.getElementById('t-peso-humedo').value = S.pesoHumedo;
+    }
+    calcPiezasEstimadas();
   }
+}
+
+function recalcDiff(inputId, teorico){
+  const val = parseFloat(document.getElementById(inputId).value)||0;
+  const diffEl = document.getElementById('diff-'+inputId);
+  if(!diffEl || !teorico) return;
+  const diff = val - teorico;
+  const pct  = Math.abs(diff/teorico*100);
+  const ok   = pct <= 5;
+  const warn = pct > 5 && pct <= 10;
+  const color= ok ? '#22c55e' : warn ? '#FFCD24' : '#ef4444';
+  const icon = ok ? '✅' : warn ? '⚠️' : '❌';
+  diffEl.style.color = color;
+  diffEl.textContent = (diff>0?'+':'')+diff.toFixed(0)+' '+icon;
+  // Sync back to S.totalesOCR
+  const campo = TOTALES_CAMPOS.find(c=>c.inputId===inputId);
+  if(campo && S.totalesOCR) S.totalesOCR[campo.key] = val;
+}
+
+function calcPiezasEstimadas(){
+  const pesoHumedo = parseFloat(document.getElementById('t-peso-humedo').value)||0;
+  if(!pesoHumedo || !S.totalesOCR) {
+    document.getElementById('t-piezas-estimadas').textContent='—';
+    return;
+  }
+  // Sumar todos los totales reales editados
+  let totalMP = 0;
+  TOTALES_CAMPOS.forEach(c => {
+    const el = document.getElementById(c.inputId);
+    const v = el ? parseFloat(el.value)||0 : (S.totalesOCR[c.key]||0);
+    totalMP += v;
+  });
+  const estimadas = Math.round(totalMP / pesoHumedo);
+  document.getElementById('t-piezas-estimadas').textContent = estimadas.toLocaleString();
+  document.getElementById('t-formula-detail').textContent =
+    `${totalMP.toFixed(0)} kg ÷ ${pesoHumedo} kg/pz`;
+  // Pre-llenar producción reportada si está vacío
+  const prodEl = document.getElementById('f-prod-reportada');
+  if((!prodEl.value || prodEl.value==='0') && estimadas > 0){
+    prodEl.value = estimadas;
+    calcMetrics();
+  }
+  // Guardar en estado
+  S.piezasEstimadas = estimadas;
 }
 
 // ═══════ METRICS ═══════
@@ -1537,7 +1625,7 @@ function saveRecord(){
   const num=incCounter(linea),year=new Date().getFullYear();
   d.folio=`${linea}-${year}-${String(num).padStart(4,'0')}`;
   const rec={...d,id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),
-    dosiPhoto:S.dosiPhotoB64,createdAt:new Date().toISOString(),
+    dosiPhoto:S.dosiPhotoB64,createdAt:new Date().toISOString(),piezasEstimadas:S.piezasEstimadas||null,pesoHumedo:S.pesoHumedo||null,
     status:'pending',netsuiteWO:null,approvedBy:null,approvedAt:null};
   const recs=getRecords();recs.push(rec);saveRecords(recs);
   document.getElementById('success-folio').textContent=d.folio;
