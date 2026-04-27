@@ -674,38 +674,38 @@ html,body{height:100%;background:var(--bg);color:var(--text);
       <!-- TOTALES ACUMULADOS DEL TURNO (de Foto 2 OCR) -->
       <div id="totales-ocr-section" style="display:none;margin-bottom:18px;">
         <div style="background:#E4ECF7;border:2px solid #093F89;border-radius:var(--radius);overflow:hidden;">
-          <div style="background:#093F89;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;">
-            <span style="color:#FFCD24;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;">📊 Consumos totales del turno</span>
-            <span style="color:rgba(255,255,255,.6);font-size:11px;" id="totales-validacion-status">—</span>
+          <div style="background:#093F89;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;">
+            <span style="color:#FFCD24;font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;">📊 Consumos totales del turno</span>
+            <span style="color:#FFCD24;font-size:12px;font-weight:600;" id="totales-validacion-status">—</span>
           </div>
           <!-- Campos editables para corregir totales del OCR -->
-          <div style="padding:10px 12px 4px;font-size:11px;color:#FFCD24;font-weight:600;">
-            ✏️ Verifica y corrige los totales reales de la hoja si el OCR cometió errores
+          <div style="padding:12px 14px 6px;font-size:13px;color:#FFCD24;font-weight:600;background:rgba(255,205,36,.08);">
+            ✏️ Verifica y corrige si el OCR cometió errores — todos los campos son editables
           </div>
           <table style="width:100%;border-collapse:collapse;" id="totales-ocr-table">
             <thead>
-              <tr style="background:rgba(9,63,137,.12);">
-                <th style="padding:8px 10px;text-align:left;font-size:11px;color:rgba(255,255,255,.7);text-transform:uppercase;font-weight:600;">Material</th>
-                <th style="padding:8px 10px;text-align:right;font-size:11px;color:rgba(255,255,255,.7);text-transform:uppercase;font-weight:600;">Teórico</th>
-                <th style="padding:8px 10px;text-align:right;font-size:11px;color:#FFCD24;text-transform:uppercase;font-weight:600;">Real (editable)</th>
-                <th style="padding:8px 10px;text-align:right;font-size:11px;color:rgba(255,255,255,.7);text-transform:uppercase;font-weight:600;">Dif.</th>
+              <tr style="background:rgba(255,255,255,.08);">
+                <th style="padding:10px 12px;text-align:left;font-size:12px;color:#FFCD24;text-transform:uppercase;font-weight:700;letter-spacing:.3px;">Material</th>
+                <th style="padding:10px 12px;text-align:right;font-size:12px;color:#FFCD24;text-transform:uppercase;font-weight:700;">Teórico</th>
+                <th style="padding:10px 12px;text-align:right;font-size:12px;color:#FFCD24;text-transform:uppercase;font-weight:700;">Real ✏️</th>
+                <th style="padding:10px 12px;text-align:right;font-size:12px;color:#FFCD24;text-transform:uppercase;font-weight:700;">Dif.</th>
               </tr>
             </thead>
             <tbody id="totales-ocr-body"></tbody>
           </table>
           <!-- Peso húmedo + fórmula de piezas estimadas -->
-          <div style="margin:10px 12px;padding:12px;background:rgba(255,255,255,.08);border-radius:8px;border:1px solid rgba(255,205,36,.3);">
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:center;">
+          <div style="margin:10px 12px;padding:16px;background:rgba(255,205,36,.1);border-radius:10px;border:2px solid rgba(255,205,36,.5);">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:center;">
               <div>
-                <div style="font-size:11px;color:#FFCD24;font-weight:700;text-transform:uppercase;margin-bottom:4px;">Peso húmedo/pieza (kg)</div>
+                <div style="font-size:13px;color:#FFCD24;font-weight:700;text-transform:uppercase;margin-bottom:6px;">⚖️ Peso húmedo/pieza (kg)</div>
                 <input type="number" id="t-peso-humedo" step="0.001" min="0" placeholder="11.660"
                   oninput="calcPiezasEstimadas()"
-                  style="width:100%;background:rgba(255,255,255,.12);border:1px solid rgba(255,205,36,.4);border-radius:6px;padding:8px;color:white;font-family:'IBM Plex Mono',monospace;font-size:18px;text-align:center;">
+                  style="width:100%;background:rgba(255,255,255,.15);border:2px solid #FFCD24;border-radius:8px;padding:10px;color:#FFCD24;font-family:'IBM Plex Mono',monospace;font-size:22px;text-align:center;font-weight:700;">
               </div>
-              <div style="text-align:center;">
-                <div style="font-size:11px;color:#FFCD24;font-weight:700;text-transform:uppercase;margin-bottom:4px;">= Piezas estimadas</div>
-                <div id="t-piezas-estimadas" style="font-size:28px;font-weight:700;font-family:'IBM Plex Mono',monospace;color:#FFCD24;">—</div>
-                <div id="t-formula-detail" style="font-size:10px;color:rgba(255,255,255,.5);margin-top:2px;">Total MP ÷ Peso húmedo</div>
+              <div style="text-align:center;background:rgba(255,255,255,.08);border-radius:8px;padding:12px;">
+                <div style="font-size:13px;color:#FFCD24;font-weight:700;text-transform:uppercase;margin-bottom:6px;">= Piezas estimadas</div>
+                <div id="t-piezas-estimadas" style="font-size:34px;font-weight:700;font-family:'IBM Plex Mono',monospace;color:#FFCD24;line-height:1;">—</div>
+                <div id="t-formula-detail" style="font-size:11px;color:rgba(255,255,255,.6);margin-top:4px;">Total MP ÷ Peso húmedo</div>
               </div>
             </div>
           </div>
@@ -720,7 +720,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);
         <input type="number" class="form-input" id="f-bachadas" min="0" step="1" placeholder="0" style="font-family:'IBM Plex Mono',monospace;font-size:24px;text-align:center;" oninput="calcMetrics();updateTotalesOCR()">
       </div>
       <div class="form-group">
-        <label class="form-label">Prod. reportada (pzas) <span class="req">*</span></label>
+        <label class="form-label">Producción estimada / reportada (pzas) <span class="req">*</span></label>
         <input type="number" class="form-input" id="f-prod-reportada" min="0" step="1" placeholder="0" style="font-family:'IBM Plex Mono',monospace;font-size:24px;text-align:center;" oninput="calcMetrics()">
       </div>
       <div class="form-group">
@@ -1488,16 +1488,16 @@ function updateTotalesOCR(){
     const color= ok ? '#22c55e' : warn ? '#FFCD24' : '#ef4444';
     const icon = ok ? '✅' : warn ? '⚠️' : '❌';
 
-    return `<tr style="border-bottom:1px solid rgba(255,255,255,.1);">
-      <td style="padding:8px 10px;font-size:13px;font-weight:600;color:white;">${campo.label}</td>
-      <td style="padding:8px 10px;text-align:right;font-size:12px;font-family:'IBM Plex Mono',monospace;color:rgba(255,255,255,.5);">${teorico!=null?teorico.toFixed(0):'—'}</td>
+    return `<tr style="border-bottom:1px solid rgba(255,255,255,.15);">
+      <td style="padding:10px 12px;font-size:15px;font-weight:700;color:#FFFFFF;">${campo.label}</td>
+      <td style="padding:10px 12px;text-align:right;font-size:14px;font-family:'IBM Plex Mono',monospace;color:rgba(255,255,255,.8);">${teorico!=null?teorico.toFixed(0):'—'}</td>
       <td style="padding:6px 10px;text-align:right;">
         <input type="number" id="${campo.inputId}" value="${real!=null?real:''}"
           step="0.01" min="0" placeholder="—"
           oninput="recalcDiff('${campo.inputId}',${teorico||0});calcPiezasEstimadas()"
-          style="width:90px;background:rgba(255,255,255,.12);border:1px solid rgba(255,205,36,.3);border-radius:6px;padding:5px 6px;color:#FFCD24;font-family:'IBM Plex Mono',monospace;font-size:13px;text-align:right;">
+          style="width:100px;background:rgba(255,255,255,.15);border:2px solid rgba(255,205,36,.5);border-radius:8px;padding:7px 8px;color:#FFCD24;font-family:'IBM Plex Mono',monospace;font-size:15px;text-align:right;font-weight:700;">
       </td>
-      <td id="diff-${campo.inputId}" style="padding:8px 10px;text-align:right;font-size:12px;font-family:'IBM Plex Mono',monospace;color:${color};">${diff!=null?(diff>0?'+':'')+diff.toFixed(0)+' '+icon:'—'}</td>
+      <td id="diff-${campo.inputId}" style="padding:10px 12px;text-align:right;font-size:14px;font-family:'IBM Plex Mono',monospace;color:${color};font-weight:700;">${diff!=null?(diff>0?'+':'')+diff.toFixed(0)+' '+icon:'—'}</td>
     </tr>`;
   }).join('');
 
@@ -1545,9 +1545,10 @@ function calcPiezasEstimadas(){
   document.getElementById('t-piezas-estimadas').textContent = estimadas.toLocaleString();
   document.getElementById('t-formula-detail').textContent =
     `${totalMP.toFixed(0)} kg ÷ ${pesoHumedo} kg/pz`;
-  // Pre-llenar producción reportada si está vacío
+  // Piezas estimadas SIEMPRE sobrescribe producción reportada
+  // (el campo correcto es piezas estimadas, no total placas físicas)
   const prodEl = document.getElementById('f-prod-reportada');
-  if((!prodEl.value || prodEl.value==='0') && estimadas > 0){
+  if(estimadas > 0){
     prodEl.value = estimadas;
     calcMetrics();
   }
