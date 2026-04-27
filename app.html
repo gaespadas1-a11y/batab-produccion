@@ -1190,8 +1190,14 @@ function updateStepUI(){
   document.getElementById('form-step-sub').textContent='Paso '+s+' de 5';
   const btnNext = document.getElementById('btn-next');
   btnNext.style.display='';
-  btnNext.disabled=false;  // SIEMPRE habilitar al cambiar de paso
-  btnNext.textContent=s===5?'✓ Guardar registro':'Siguiente →';
+  btnNext.disabled=false;
+  if(s===5){
+    btnNext.textContent='✓ Guardar registro';
+    btnNext.setAttribute('onclick','saveRecord()');  // directo, sin validaciones
+  }else{
+    btnNext.textContent='Siguiente →';
+    btnNext.setAttribute('onclick','nextStep()');
+  }
   document.getElementById('btn-prev').style.display=s>1?'':'none';
   document.getElementById('form-content').scrollTop=0;
   if(s===5)buildResumen();
