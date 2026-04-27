@@ -596,7 +596,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);
           <input type="text" class="form-input" id="f-lote" placeholder="Ej. 2026-04-001" style="padding-right:40px;font-family:'IBM Plex Mono',monospace;letter-spacing:.5px;">
           <span class="lote-lock-icon">🔒</span>
         </div>
-        <div class="form-hint">⚠️ Inmutable una vez enviado al supervisor.<br>📋 Formato: después de la letra del mes agrega M (matutino) o V (vespertino).<br>Ej: <strong>3C26D26M</strong> o <strong>3C26D26V</strong></div>
+        <div class="form-hint">⚠️ Inmutable una vez enviado al supervisor.<br>📋 Formato: después de la letra del mes agrega M (matutino) o V (vespertino).<br>Ej: <strong>3C26DM26</strong> (Matutino) o <strong>3C26DV26</strong> (Vespertino)</div>
       </div>
       <div class="form-group">
         <label class="form-label">Operador</label>
@@ -1079,6 +1079,10 @@ let S={currentUser:null,currentStep:1,form:{turno:'M'},pesajes:[],dosiPhotoB64:n
 let tempPesajePhoto=null;
 
 // ═══════ STORAGE ═══════
+const LINEA_NOMBRE = { B1:'BESSER 1', B2:'BESSER 2', CO:'COLUMBIA' };
+// Parámetro de producción por turno (kg) por línea
+const LINEA_PARAM_KG = { B1:220000, B2:220000, CO:250000 };
+const lineaNombre = (l) => LINEA_NOMBRE[l] || l || '—';
 const getRecords=()=>{try{return JSON.parse(localStorage.getItem('batab_records')||'[]');}catch{return[];}};
 const saveRecords=r=>localStorage.setItem('batab_records',JSON.stringify(r));
 const getOcrKey=()=>localStorage.getItem('batab_ocr_key')||'';
@@ -1426,7 +1430,16 @@ TOTALES: La fila TOTAL al final de cada bloque de 10 bachadas y la fila de TOTAL
       return v;
     };
     setVal('f-linea',p.linea); updateFolio();
-    if(p.lote){const tl=S.form.turno==='M'?'M':'V';const lo=String(p.lote).toUpperCase();setVal('f-lote',/[MV]$/.test(lo)?lo:lo+tl);}
+    if(p.lote){
+      const tl=S.form.turno==='M'?'M':'V';
+      const lo=String(p.lote).toUpperCase().trim();
+      // Si ya tiene M o V después de una letra de mes, no duplicar
+      const yaTiene = /[A-Z][MV]\d/.test(lo) || /[A-Z][MV]$/.test(lo);
+      // Insertar turno después de la última letra que precede dígitos finales
+      // Ej: "3C26D26" → "3C26DM26"
+      const conTurno = yaTiene ? lo : lo.replace(/([A-Z])(\d+)$/, '$1'+tl+'$2');
+      setVal('f-lote', conTurno);
+    }
     setVal('f-mf',p.modulo_finura); setVal('f-humedad',p.humedad);
     setVal('mp-cemento-tipo',mapM(p.cemento_tipo)); setVal('mp-cemento-kg',p.cemento_kg);
     setVal('mp-t1-mat',mapM(p.tolva1_material));    setVal('mp-t1-kg',p.tolva1_kg);
@@ -1689,29 +1702,48 @@ function collectFormData(){
 }
 function buildResumen(){
   const d=collectFormData();
+  // Calcular rendimiento de línea
+  const linea = document.getElementById('f-linea').value;
+  const paramKg = LINEA_PARAM_KG[linea] || null;
+  let rendimientoHTML = '—';
+  if(paramKg && S.totalesOCR){
+    const totalMP = (S.totalesOCR.cemento||0)+(S.totalesOCR.tolva1||0)+(S.totalesOCR.tolva2||0)+(S.totalesOCR.tolva3||0)+(S.totalesOCR.agua||0)+(S.totalesOCR.aditivo||0);
+    if(totalMP > 0){
+      const rend = (totalMP / paramKg * 100);
+      const color = rend >= 90?'var(--green)':rend>=70?'var(--yellow)':'var(--red)';
+      rendimientoHTML = `<span style="color:${color};font-weight:700;">${rend.toFixed(1)}%</span> <span style="font-size:11px;color:var(--text3);">(${Math.round(totalMP).toLocaleString()} ÷ ${paramKg.toLocaleString()} kg)</span>`;
+    }
+  } else if(!paramKg) {
+    rendimientoHTML = '<span style="color:var(--text3);font-size:12px;">Selecciona la línea en Paso 1</span>';
+  }
+
   document.getElementById('resumen-content').innerHTML=`
     <div class="summary-section"><div class="summary-header">📋 General</div><div class="summary-body">
       <div class="summary-row"><span class="sk">Folio</span><span class="sv">${d.folio}</span></div>
       <div class="summary-row"><span class="sk">Fecha</span><span class="sv">${d.fecha}</span></div>
       <div class="summary-row"><span class="sk">Turno</span><span class="sv">${d.turno==='M'?'Matutino':'Vespertino'}</span></div>
-      <div class="summary-row"><span class="sk">Línea</span><span class="sv">${d.linea}</span></div>
+      <div class="summary-row"><span class="sk">Línea</span><span class="sv">${lineaNombre(d.linea)}</span></div>
       <div class="summary-row"><span class="sk">Artículo</span><span class="sv" style="font-size:11px;max-width:55%;text-align:right;">${d.articulo}</span></div>
       <div class="summary-row"><span class="sk">Lote</span><span class="sv">${d.lote}</span></div>
     </div></div>
     <div class="summary-section"><div class="summary-header">🏭 Producción</div><div class="summary-body">
       <div class="summary-row"><span class="sk">Bachadas</span><span class="sv">${d.bachadas||'—'}</span></div>
-      <div class="summary-row"><span class="sk">Prod. reportada</span><span class="sv">${d.prodReportada||0} pzas</span></div>
-      <div class="summary-row"><span class="sk">Real empacada</span><span class="sv">${d.realEmpacada||0} pzas</span></div>
-      <div class="summary-row"><span class="sk">Eficiencia</span><span class="sv">${d.eficiencia?d.eficiencia.toFixed(1)+'%':'—'}</span></div>
+      <div class="summary-row"><span class="sk">Prod. estimada</span><span class="sv">${d.prodReportada||0} pzas</span></div>
+      <div class="summary-row"><span class="sk">Real empacada</span><span class="sv" style="color:var(--text3);">${d.realEmpacada?d.realEmpacada+' pzas':'Pendiente — supervisor'}</span></div>
+      <div class="summary-row"><span class="sk">Eficiencia</span><span class="sv">${d.eficiencia?d.eficiencia.toFixed(1)+'%':'Pendiente'}</span></div>
+      <div class="summary-row"><span class="sk">Rendimiento línea</span><span class="sv" id="resumen-rendimiento">—</span></div>
     </div></div>`;
+  // Insertar rendimiento calculado (usa innerHTML porque contiene spans)
+  const rendEl = document.getElementById('resumen-rendimiento');
+  if(rendEl) rendEl.innerHTML = rendimientoHTML;
 }
-function saveRecord(){
   const d=collectFormData();
   const linea=d.linea;
   const num=incCounter(linea),year=new Date().getFullYear();
   d.folio=`${linea}-${year}-${String(num).padStart(4,'0')}`;
   const rec={...d,id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),
     dosiPhoto:S.dosiPhotoB64,createdAt:new Date().toISOString(),piezasEstimadas:S.piezasEstimadas||null,pesoHumedo:S.pesoHumedo||null,
+    totalesConsumo:S.totalesOCR||null,
     status:'pending',netsuiteWO:null,approvedBy:null,approvedAt:null};
   const recs=getRecords();recs.push(rec);saveRecords(recs);
   document.getElementById('success-folio').textContent=d.folio;
@@ -1747,7 +1779,7 @@ function loadSupervisorScreen(){
     <div class="pending-card" onclick="openReview('${r.id}')">
       <div class="pending-card-header"><div class="pending-folio">${r.folio}</div><div class="pending-time">${new Date(r.createdAt).toLocaleString('es-MX',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})}</div></div>
       <div class="pending-article">${r.articulo}</div>
-      <div class="pending-meta"><span>🔄 Turno ${r.turno}</span><span>📦 ${r.prodReportada||0} pzas</span><span>🧱 Lote ${r.lote}</span><span>👤 ${r.operador}</span></div>
+      <div class="pending-meta"><span>🏭 ${lineaNombre(r.linea)}</span><span>🔄 Turno ${r.turno==="M"?"Mat.":"Vesp."}</span><span>📦 ${r.prodReportada||0} pzas</span><span>🧱 ${r.lote}</span></div>
     </div>`).join('')
     :'<div class="empty-state"><div class="empty-icon">🎉</div><div class="empty-text">Sin pendientes.</div></div>';
   const aList=document.getElementById('approved-list');
