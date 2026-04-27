@@ -1,0 +1,1094 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>BATAB Campo v8</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+:root{
+  --azul:#2A5298;--azul-claro:#EBF0F8;--azul-borde:#A0BCE0;
+  --amarillo:#7A4A00;--amarillo-claro:#FFF3DC;--amarillo-borde:#E8C070;
+  --rojo:#7A1A1A;--rojo-claro:#FDEAEA;--rojo-borde:#E89090;
+  --verde:#1A6B3A;--verde-claro:#E8F5ED;--verde-borde:#8CBFA8;
+  --gris:#4A4E5A;--gris-claro:#ECEEF2;--gris-borde:#C8CDD8;
+  --bg:#F4F6FA;--surface:#FFFFFF;--tx:#0F1A2E;--tx2:#3A4560;--tx3:#7A84A0;
+  --r:8px;--r2:12px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--tx);font-size:16px}
+.wrap{max-width:600px;margin:0 auto;padding:0 0 20px}
+.hdr{background:var(--azul);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.logo{font-size:18px;font-weight:800;color:#fff;letter-spacing:.06em}
+.hdr-right{display:flex;align-items:center;gap:8px}
+.version-tag{font-size:10px;color:#A0BCE0}
+.vendedor-chip{font-size:11px;background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:20px;padding:4px 10px;cursor:pointer;font-weight:500}
+.rol-badge{font-size:10px;padding:2px 8px;border-radius:10px;font-weight:700}
+.rol-director{background:#FFD700;color:#0F1A2E}
+.rol-gerente{background:#A0BCE0;color:#0F1A2E}
+.rol-vendedor{background:rgba(255,255,255,.2);color:#fff}
+.pad{padding:0 16px}
+.tabs{display:flex;border-bottom:2px solid var(--gris-borde);margin-bottom:14px;overflow-x:auto;padding:0 16px}
+.tab{padding:10px 14px;cursor:pointer;color:var(--tx3);font-size:13px;font-weight:500;border-bottom:2px solid transparent;white-space:nowrap;margin-bottom:-2px}
+.tab.on{color:var(--azul);border-bottom-color:var(--azul)}
+.tab.locked{color:var(--gris-borde);cursor:not-allowed}
+.tc{display:none}.tc.on{display:block}
+.btn-foto{display:block;width:100%;padding:22px 20px;background:var(--azul);color:#fff;border:none;border-radius:var(--r2);font-size:16px;font-weight:700;cursor:pointer;text-align:center;margin-bottom:8px}
+.btn-foto:active{opacity:.85}
+.btn-hint{text-align:center;font-size:12px;color:var(--tx3);margin-bottom:16px}
+#fi{display:none}
+#pa{display:none;text-align:center;padding:20px 0}
+#pa img{width:100%;max-height:200px;object-fit:cover;border-radius:var(--r);margin-bottom:12px}
+.spin{display:inline-block;width:18px;height:18px;border:3px solid #ddd;border-top-color:var(--azul);border-radius:50%;animation:spin .8s linear infinite;vertical-align:middle;margin-right:8px}
+@keyframes spin{to{transform:rotate(360deg)}}
+#pd{display:none}
+.err{background:var(--rojo-claro);border:1px solid var(--rojo-borde);border-radius:var(--r);padding:10px 14px;font-size:12px;color:var(--rojo);margin-bottom:10px;display:none}
+.offline-msg{background:var(--amarillo-claro);border:1px solid var(--amarillo-borde);border-radius:var(--r);padding:10px 14px;font-size:12px;color:var(--amarillo);margin-bottom:10px;display:none}
+.banner{padding:10px 14px;border-radius:var(--r);font-size:13px;font-weight:700;margin-bottom:10px;display:none}
+.ban-r{background:var(--rojo-claro);border:1px solid var(--rojo-borde);color:var(--rojo)}
+.ban-a{background:var(--amarillo-claro);border:1px solid var(--amarillo-borde);color:var(--amarillo)}
+.ban-v{background:var(--verde-claro);border:1px solid var(--verde-borde);color:var(--verde)}
+.res-img{width:100%;max-height:180px;object-fit:cover;border-radius:var(--r);margin-bottom:12px}
+.card{background:var(--surface);border:1px solid var(--gris-borde);border-radius:var(--r);padding:14px;margin-bottom:10px}
+.card-title{font-size:12px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px}
+.row{display:flex;justify-content:space-between;align-items:baseline;padding:8px 0;border-bottom:1px solid #F0EDE8;font-size:15px}
+.row:last-child{border-bottom:none}
+.rl{color:var(--tx3)}.rv{font-weight:600;text-align:right;color:var(--tx)}
+.big{font-size:34px;font-weight:700;line-height:1;margin-bottom:2px}
+.big-sub{font-size:13px;color:var(--tx3)}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.rbar{height:6px;background:#eee;border-radius:3px;overflow:hidden;margin-top:6px}
+.rbar-f{height:100%;border-radius:3px;transition:width .4s}
+.accion{padding:12px 14px;border-radius:var(--r);font-size:13px;line-height:1.6;margin-bottom:10px;border-left:4px solid}
+.ac-v{border-left-color:var(--verde);background:var(--verde-claro);color:#1A3A2A}
+.ac-a{border-left-color:#D4900A;background:var(--amarillo-claro);color:var(--amarillo)}
+.ac-r{border-left-color:#C43A3A;background:var(--rojo-claro);color:var(--rojo)}
+.ac-g{border-left-color:var(--gris-borde);background:var(--gris-claro);color:var(--gris)}
+.lbl{font-size:13px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}
+select,input[type=text],input[type=number],input[type=password],textarea{width:100%;padding:11px 13px;border:1px solid var(--gris-borde);border-radius:var(--r);font-size:15px;color:var(--tx);background:var(--surface);-webkit-appearance:none;font-family:inherit}
+select:focus,input:focus,textarea:focus{outline:none;border-color:var(--azul)}
+textarea{resize:vertical;min-height:70px}
+.field{margin-bottom:10px}
+.g2-fields{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.crit-list{display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
+.crit-opt{display:flex;align-items:center;gap:10px;padding:12px 14px;border:2px solid var(--gris-borde);border-radius:var(--r);background:var(--bg);font-size:15px;cursor:pointer}
+.crit-opt input{width:18px;height:18px;accent-color:var(--azul);flex-shrink:0}
+.crit-azul{border-color:var(--azul-borde);background:var(--azul-claro);color:var(--azul)}
+.crit-a{border-color:var(--amarillo-borde);background:var(--amarillo-claro);color:var(--amarillo)}
+.crit-r{border-color:var(--rojo-borde);background:var(--rojo-claro);color:var(--rojo)}
+.contacto-block{background:var(--bg);border:1px solid var(--gris-borde);border-radius:var(--r);padding:10px;margin-bottom:8px}
+.contacto-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.gps-box{background:var(--gris-claro);border:1px solid var(--gris-borde);border-radius:var(--r);padding:12px;margin-bottom:10px}
+.gps-ok{color:var(--verde);font-size:12px;font-weight:500}
+.gps-wt{color:var(--amarillo);font-size:12px}
+.gps-er{color:var(--rojo);font-size:12px}
+.cerca-alerta{background:var(--azul-claro);border:1px solid var(--azul-borde);border-radius:var(--r);padding:10px;font-size:12px;color:var(--azul);margin-bottom:10px;display:none;cursor:pointer}
+.offline-section{background:var(--amarillo-claro);border:1px solid var(--amarillo-borde);border-radius:var(--r);padding:14px;margin-bottom:10px;display:none}
+.btn-prim{display:block;width:100%;padding:16px;background:var(--azul);color:#fff;border:none;border-radius:var(--r);font-size:16px;font-weight:700;cursor:pointer;margin-bottom:8px}
+.btn-sec{display:block;width:100%;padding:14px;background:var(--surface);color:var(--gris);border:2px solid var(--gris-borde);border-radius:var(--r);font-size:15px;cursor:pointer;margin-bottom:8px}
+.btn-mini{padding:5px 10px;border:1px solid var(--gris-borde);border-radius:6px;font-size:11px;cursor:pointer;background:var(--surface);color:var(--tx3)}
+.save-ok{font-size:13px;color:var(--verde);font-weight:600;text-align:center;padding:8px;display:none}
+#map{height:360px;border-radius:var(--r);border:1px solid var(--gris-borde);margin-bottom:10px}
+.legend{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px;font-size:12px;padding:8px 12px;background:var(--surface);border:1px solid var(--gris-borde);border-radius:var(--r)}
+.leg{display:flex;align-items:center;gap:4px}
+.ldot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:12px}
+.stat{background:var(--surface);border:1px solid var(--gris-borde);border-radius:var(--r);padding:10px;text-align:center}
+.stat-n{font-size:22px;font-weight:700}.stat-l{font-size:12px;color:var(--tx3);margin-top:2px}
+.prosp{background:var(--surface);border:1px solid var(--gris-borde);border-radius:var(--r);padding:10px;margin-bottom:6px;display:flex;align-items:flex-start;gap:10px}
+.pthumb{width:52px;height:40px;object-fit:cover;border-radius:6px;border:1px solid var(--gris-borde);flex-shrink:0}
+.pempty{width:52px;height:40px;background:var(--gris-claro);border-radius:6px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:20px;color:var(--tx3)}
+.pinfo{flex:1;min-width:0}
+.pname{font-size:15px;font-weight:700;margin-bottom:2px}
+.pmeta{font-size:13px;color:var(--tx3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pill{display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;border-radius:3px;margin-top:3px}
+.kpi-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:12px}
+.kpi{background:var(--surface);border:1px solid var(--gris-borde);border-radius:var(--r);padding:12px}
+.kpi-n{font-size:24px;font-weight:700}.kpi-l{font-size:11px;color:var(--tx3);margin-top:2px}
+.vend-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #F0EDE8;font-size:13px}
+.vend-row:last-child{border-bottom:none}
+.guia-item{display:flex;gap:12px;padding:12px;border-radius:var(--r);margin-bottom:8px;align-items:flex-start}
+.guia-si{background:var(--verde-claro);border:1px solid var(--verde-borde)}
+.guia-no{background:var(--rojo-claro);border:1px solid var(--rojo-borde)}
+.guia-icon{font-size:20px;flex-shrink:0}
+.guia-title{font-size:13px;font-weight:700;margin-bottom:3px}
+.guia-desc{font-size:12px;color:var(--tx2);line-height:1.5}
+.modal-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.55);z-index:1000;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.show{display:flex}
+.modal{background:var(--surface);border-radius:var(--r2);padding:24px;width:100%;max-width:400px}
+.modal-title{font-size:16px;font-weight:700;margin-bottom:8px;color:var(--tx)}
+.modal-sub{font-size:13px;color:var(--tx2);margin-bottom:16px;line-height:1.5}
+.modal-btns{display:flex;gap:8px;margin-top:16px}
+.modal-btn{flex:1;padding:12px;border:none;border-radius:var(--r);font-size:13px;font-weight:600;cursor:pointer}
+.modal-prim{background:var(--azul);color:#fff}
+.modal-sec{background:var(--gris-claro);color:var(--gris)}
+.pin-dots{display:flex;gap:10px;justify-content:center;margin:16px 0}
+.pin-dot{width:14px;height:14px;border-radius:50%;background:var(--gris-borde)}
+.pin-dot.filled{background:var(--azul)}
+.pin-keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:8px}
+.pin-key{padding:14px;border:1px solid var(--gris-borde);border-radius:var(--r);font-size:18px;font-weight:600;cursor:pointer;background:var(--surface);text-align:center;color:var(--tx)}
+.pin-key:active{background:var(--azul-claro)}
+.lock-screen{text-align:center;padding:32px 16px;color:var(--tx3)}
+.lock-icon{font-size:48px;margin-bottom:12px}
+.context-card{background:var(--azul-claro);border:2px solid var(--azul-borde);border-radius:var(--r);padding:16px;margin-bottom:12px}
+.context-title{font-size:14px;font-weight:700;color:var(--azul);margin-bottom:12px}
+.context-opts{display:flex;flex-direction:column;gap:8px}
+.ctx-btn{padding:14px 16px;border:2px solid var(--gris-borde);border-radius:var(--r);background:var(--surface);font-size:15px;font-weight:600;cursor:pointer;color:var(--tx);text-align:left}
+.ctx-btn:active{opacity:.8}
+.ctx-btn.selected{border-color:var(--azul);background:var(--azul);color:#fff}
+@media(max-width:380px){.g2,.g2-fields,.kpi-grid{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="hdr">
+  <div>
+    <div class="logo">BATAB</div>
+    <div style="font-size:10px;color:#A0BCE0;margin-top:1px">Inteligencia Comercial · <span id='sync-st' style='color:#A0BCE0'>local</span></div>
+  </div>
+  <div class="hdr-right">
+    <span class="version-tag">v8</span>
+    <div id="rol-badge-wrap"></div>
+    <div class="vendedor-chip" id="chip-vendedor" onclick="abrirRegistro()">
+      <span id="chip-nombre">Registrarse</span>
+    </div>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <div class="tab on" onclick="sT('analisis',this)">Análisis</div>
+  <div class="tab" onclick="sT('mapa',this)">Mapa</div>
+  <div class="tab" id="tab-gerente" onclick="clickGerente(this)">Gerente</div>
+  <div class="tab" onclick="sT('guia',this)">Guía</div>
+  <div class="tab" onclick="sT('competencia',this)">Competencia</div>
+</div>
+
+<!-- ═══ TAB ANÁLISIS ═══ -->
+<div id="ta" class="tc on pad">
+
+  <div id="pu">
+    <div class="cerca-alerta" id="cerca-alerta" onclick="verObraCercana()">
+      <b>Obra registrada cerca</b> — <span id="cerca-dist"></span> · <span id="cerca-tipo"></span><br>
+      <span style="font-size:11px">Toca para ver el registro anterior y agregar seguimiento</span>
+    </div>
+    <button class="btn-foto" onclick="document.getElementById('fi').click()">+ Tomar foto de la obra</button>
+    <input type="file" id="fi" accept="image/*" capture="environment">
+    <div class="btn-hint">Toca el botón para abrir la cámara</div>
+    <div class="offline-section" id="offline-section">
+      <div style="font-size:13px;font-weight:700;color:var(--amarillo);margin-bottom:10px">Sin señal — Registro manual</div>
+      <div class="field"><div class="lbl">Tipo de obra</div>
+        <select id="of-tipo"><option value="">— Selecciona</option>
+          <option>Barda perimetral</option><option>Casa habitación</option><option>Local comercial</option>
+          <option>Nave industrial</option><option>Edificio 3-5 niveles</option>
+          <option>Terreno pre-construcción</option><option>Fraccionamiento / Desarrollo múltiple</option>
+          <option>Remodelación / Ampliación</option>
+        </select>
+      </div>
+      <div class="field"><div class="lbl">Etapa visible</div>
+        <select id="of-etapa"><option value="">— Selecciona</option>
+          <option>Terreno sin obra</option><option>Excavación y trazo</option><option>Cimentación</option>
+          <option>Desplante</option><option>Levantamiento de muros</option><option>Estructura / Castillos</option>
+          <option>Losa / Techo</option><option>Acabados</option><option>Obra terminada</option>
+        </select>
+      </div>
+      <div class="field"><div class="lbl">¿Reconoces al cliente?</div>
+        <select id="of-cliente"><option value="no">No conocido</option><option value="si-batab">Sí — cliente BATAB</option><option value="si-ref">Sí — referido</option></select>
+      </div>
+      <div class="field"><div class="lbl">Notas</div><textarea id="of-notas" placeholder="Observaciones, contacto visto, referencias..."></textarea></div>
+      <button class="btn-prim" style="background:var(--amarillo)" onclick="guardarOffline()">Guardar sin análisis IA</button>
+    </div>
+  </div>
+
+  <div id="pa">
+    <img id="ia" src="" alt="">
+    <div><span class="spin"></span><b>Analizando con IA...</b></div>
+    <div style="font-size:12px;color:var(--tx3);margin-top:6px">Identificando tipo de obra y etapa constructiva</div>
+  </div>
+
+  <div id="pd">
+    <!-- CONFIRMACIÓN DE CONTEXTO -->
+    <div class="context-card" id="context-card" style="display:none">
+      <div class="context-title">¿Qué fotografiaste exactamente?</div>
+      <div class="context-opts">
+        <button class="ctx-btn" id="ctx-construccion" onclick="selCtx('construccion')">Una obra en construcción activa</button>
+        <button class="ctx-btn" id="ctx-terreno" onclick="selCtx('terreno')">Un terreno que va a construirse (pre-construcción)</button>
+        <button class="ctx-btn" id="ctx-terminada" onclick="selCtx('terminada')">Una construcción ya terminada</button>
+        <button class="ctx-btn" id="ctx-fraccionamiento" onclick="selCtx('fraccionamiento')">Un fraccionamiento o desarrollo múltiple</button>
+        <button class="ctx-btn" id="ctx-remodelacion" onclick="selCtx('remodelacion')">Una remodelación o ampliación de obra existente</button>
+      </div>
+      <button class="btn-prim" style="margin-top:12px;margin-bottom:0" onclick="aplicarContexto()">Confirmar y ver análisis</button>
+    </div>
+
+    <div id="resultado-content" style="display:none">
+      <div class="err" id="err-box"></div>
+      <div class="offline-msg" id="offline-msg"></div>
+      <div class="banner" id="banner"></div>
+      <img id="id2" class="res-img" src="" alt="">
+      <div class="card">
+        <div class="card-title">Resultado del análisis — editable</div>
+        <div class="field"><div class="lbl">Tipo de obra</div>
+          <select id="r-tipo-sel" onchange="recalcular()">
+            <option value="barda perimetral">Barda perimetral</option>
+            <option value="casa habitación">Casa habitación</option>
+            <option value="local comercial">Local comercial</option>
+            <option value="nave industrial">Nave industrial</option>
+            <option value="edificio 3-5 niveles">Edificio 3-5 niveles</option>
+            <option value="terreno pre-construcción">Terreno pre-construcción</option>
+            <option value="fraccionamiento">Fraccionamiento / Desarrollo múltiple</option>
+            <option value="remodelacion">Remodelación / Ampliación</option>
+            <option value="otro">Otro</option>
+          </select>
+        </div>
+        <div class="field"><div class="lbl">Etapa actual</div><select id="r-etapa-sel" onchange="recalcular()"></select></div>
+        <div class="row"><span class="rl">Confianza IA</span><span class="rv" id="r-conf">—</span></div>
+      </div>
+      <div class="card">
+        <div class="card-title">¿Cómo clasificas esta obra?</div>
+        <div class="crit-list">
+          <label class="crit-opt crit-azul" id="crit-0"><input type="radio" name="crit" value="0" checked onchange="uCrit(0)">Terreno pre-construcción — oportunidad máxima</label>
+          <label class="crit-opt" id="crit-1"><input type="radio" name="crit" value="1" onchange="uCrit(1)">Obra activa — cliente desconocido</label>
+          <label class="crit-opt" id="crit-2"><input type="radio" name="crit" value="2" onchange="uCrit(2)">Cliente BATAB — obra nueva no registrada</label>
+          <label class="crit-opt" id="crit-3"><input type="radio" name="crit" value="3" onchange="uCrit(3)">Ya hay cotización activa — no duplicar</label>
+          <label class="crit-opt" id="crit-4"><input type="radio" name="crit" value="4" onchange="uCrit(4)">Obra terminada — seguimiento futuro</label>
+          <label class="crit-opt" id="crit-5"><input type="radio" name="crit" value="5" onchange="uCrit(5)">Fraccionamiento — múltiples clientes</label>
+        </div>
+        <div id="frac-lotes" style="display:none">
+          <div class="lbl">Número aproximado de lotes</div>
+          <input type="number" id="num-lotes" placeholder="Ej: 10" min="2" max="500">
+        </div>
+      </div>
+      <div class="g2">
+        <div class="card">
+          <div class="card-title">Días disponibles</div>
+          <div class="big" id="r-dias">—</div>
+          <div class="big-sub" id="r-dias-sub"></div>
+          <div style="margin-top:10px;font-size:12px;color:var(--tx3)">Cotizar antes del</div>
+          <div style="font-weight:700;font-size:13px;margin-top:2px" id="r-fecha">—</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Score de riesgo</div>
+          <div class="big" id="r-score">—</div>
+          <div class="big-sub" id="r-nivel">—</div>
+          <div class="rbar"><div class="rbar-f" id="r-bar" style="width:0%"></div></div>
+          <div style="margin-top:10px;font-size:12px;color:var(--tx3)">Volumen estimado</div>
+          <div style="font-weight:700;font-size:12px;margin-top:2px" id="r-vol">—</div>
+        </div>
+      </div>
+      <div class="accion" id="r-accion"></div>
+      <div class="card">
+        <div class="card-title">Competencia en la zona</div>
+        <div class="crit-list" style="gap:5px">
+          <label class="crit-opt crit-azul" id="co-none"><input type="radio" name="cp" value="none" checked onchange="uC('none')">Sin competencia identificada</label>
+          <label class="crit-opt" id="co-far"><input type="radio" name="cp" value="far" onchange="uC('far')">Lejana — más de 15 km</label>
+          <label class="crit-opt" id="co-close"><input type="radio" name="cp" value="close" onchange="uC('close')">En la zona — 5 a 15 km</label>
+          <label class="crit-opt" id="co-very"><input type="radio" name="cp" value="very_close" onchange="uC('very_close')">Muy cercana — menos de 5 km</label>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Contactos de la obra</div>
+        <div id="contactos-list"></div>
+        <button class="btn-mini" onclick="agregarContacto()" style="width:100%;padding:9px;margin-top:6px">+ Agregar contacto</button>
+      </div>
+      <div class="gps-box">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <div class="card-title" style="margin-bottom:0">Ubicación GPS</div>
+          <button class="btn-mini" onclick="rGPS()">Capturar GPS</button>
+        </div>
+        <div id="gps-st" class="gps-wt">Sin GPS — toca "Capturar GPS"</div>
+        <div class="g2-fields" style="margin-top:8px">
+          <div><div class="lbl">Latitud</div><input type="number" step="0.0001" id="ilat" placeholder="18.0220"></div>
+          <div><div class="lbl">Longitud</div><input type="number" step="0.0001" id="ilng" placeholder="-92.9376"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Notas del vendedor</div>
+        <textarea id="r-notas" placeholder="Observaciones, nombre de quién atendió, referencias visuales..."></textarea>
+      </div>
+      <div class="card" id="r-obs" style="display:none">
+        <div class="card-title">Observaciones IA</div>
+        <div id="r-obs-text" style="font-size:13px;color:var(--tx2);line-height:1.6"></div>
+      </div>
+
+      <div class="card" id="r-producto">
+        <div class="card-title">Producto sugerido — toca para ajustar</div>
+        <div id="producto-sugerido" style="background:var(--azul-claro);border:1px solid var(--azul-borde);border-radius:var(--r);padding:10px;margin-bottom:12px;font-size:13px;color:var(--azul);line-height:1.5"></div>
+        <div class="lbl" style="margin-bottom:8px">MEDIDA</div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px" id="btns-medida">
+          <button onclick="selMedida('10',this)" class="btn-prod-sel" style="padding:14px 6px;border:2px solid var(--gris-borde);border-radius:var(--r);background:var(--surface);font-size:15px;font-weight:600;cursor:pointer;color:var(--tx)">10</button>
+          <button onclick="selMedida('12',this)" class="btn-prod-sel" style="padding:14px 6px;border:2px solid var(--gris-borde);border-radius:var(--r);background:var(--surface);font-size:15px;font-weight:600;cursor:pointer;color:var(--tx)">12</button>
+          <button onclick="selMedida('15',this)" class="btn-prod-sel" style="padding:14px 6px;border:2px solid var(--gris-borde);border-radius:var(--r);background:var(--surface);font-size:15px;font-weight:600;cursor:pointer;color:var(--tx)">15</button>
+          <button onclick="selMedida('20',this)" class="btn-prod-sel" style="padding:14px 6px;border:2px solid var(--gris-borde);border-radius:var(--r);background:var(--surface);font-size:15px;font-weight:600;cursor:pointer;color:var(--tx)">20</button>
+        </div>
+        <div class="lbl" style="margin-bottom:8px">TIPO</div>
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:14px" id="btns-tipo">
+          <button onclick="selTipo('BH',this)" class="btn-prod-sel" style="padding:14px;border:2px solid var(--gris-borde);border-radius:var(--r);background:var(--surface);font-size:14px;font-weight:600;cursor:pointer;color:var(--tx)">Hueco (BH)</button>
+          <button onclick="selTipo('BS',this)" class="btn-prod-sel" style="padding:14px;border:2px solid var(--gris-borde);border-radius:var(--r);background:var(--surface);font-size:14px;font-weight:600;cursor:pointer;color:var(--tx)">Sólido (BS)</button>
+          <button onclick="selTipo('BL',this)" class="btn-prod-sel" style="padding:14px;border:2px solid var(--gris-borde);border-radius:var(--r);background:var(--surface);font-size:14px;font-weight:600;cursor:pointer;color:var(--tx)">Ligero (BL)</button>
+          <button onclick="selTipo('BM',this)" class="btn-prod-sel" style="padding:14px;border:2px solid var(--gris-borde);border-radius:var(--r);background:var(--surface);font-size:14px;font-weight:600;cursor:pointer;color:var(--tx)">Mitad (BM)</button>
+        </div>
+        <div class="lbl" style="margin-bottom:8px">LÍNEA BATAB</div>
+        <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:10px" id="btns-linea">
+          <button onclick="selLinea('EMBLEMA',this)" class="btn-prod-sel" style="padding:12px 14px;border:2px solid var(--gris-borde);border-radius:var(--r);background:var(--surface);font-size:14px;font-weight:600;cursor:pointer;color:var(--tx);text-align:left">EMBLEMA <span style="font-weight:400;font-size:12px;color:var(--tx3)">— Esencia de la construcción</span></button>
+          <button onclick="selLinea('FORTALEZA',this)" class="btn-prod-sel" style="padding:12px 14px;border:2px solid var(--gris-borde);border-radius:var(--r);background:var(--surface);font-size:14px;font-weight:600;cursor:pointer;color:var(--tx);text-align:left">FORTALEZA <span style="font-weight:400;font-size:12px;color:var(--tx3)">— Alta resistencia</span></button>
+          <button onclick="selLinea('AVANCE',this)" class="btn-prod-sel" style="padding:12px 14px;border:2px solid var(--gris-borde);border-radius:var(--r);background:var(--surface);font-size:14px;font-weight:600;cursor:pointer;color:var(--tx);text-align:left">AVANCE <span style="font-weight:400;font-size:12px;color:var(--tx3)">— Más ligero, tipo europeo</span></button>
+          <button onclick="selLinea('PRISMA',this)" class="btn-prod-sel" style="padding:12px 14px;border:2px solid var(--gris-borde);border-radius:var(--r);background:var(--surface);font-size:14px;font-weight:600;cursor:pointer;color:var(--tx);text-align:left">PRISMA <span style="font-weight:400;font-size:12px;color:var(--tx3)">— Decorativo con colores</span></button>
+          <button onclick="selLinea('VITTA',this)" class="btn-prod-sel" style="padding:12px 14px;border:2px solid var(--gris-borde);border-radius:var(--r);background:var(--surface);font-size:14px;font-weight:600;cursor:pointer;color:var(--tx);text-align:left">VITTA <span style="font-weight:400;font-size:12px;color:var(--tx3)">— Cara partida, arquitectónico</span></button>
+        </div>
+        <input type="hidden" id="prod-medida" value="">
+        <input type="hidden" id="prod-tipo" value="">
+        <input type="hidden" id="prod-linea" value="">
+        <div id="prod-resultado" style="display:none;background:var(--azul-claro);border:2px solid var(--azul-borde);border-radius:var(--r);padding:12px;font-size:14px;color:var(--azul);margin-top:6px;line-height:1.6;font-weight:600"></div>
+      </div>
+      <button class="btn-prim" onclick="sP()">Agregar al mapa y guardar</button>
+      <button class="btn-sec" onclick="rst()">Nueva foto</button>
+      <div class="save-ok" id="save-ok"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ TAB MAPA ═══ -->
+<div id="tmapa" class="tc pad">
+  <div class="stats" id="stats"></div>
+  <div class="legend">
+    <div class="leg"><div class="ldot" style="background:#C43A3A"></div>Crítico</div>
+    <div class="leg"><div class="ldot" style="background:#D4900A"></div>Urgente</div>
+    <div class="leg"><div class="ldot" style="background:#2A5298"></div>Activo</div>
+    <div class="leg"><div class="ldot" style="background:#1A1916;border-radius:2px"></div>Competencia</div>
+  </div>
+  <div id="map"></div>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px">
+    <b style="font-size:13px">Mis registros</b>
+  </div>
+  <div id="pl"></div>
+</div>
+
+<!-- ═══ TAB GERENTE ═══ -->
+<div id="tgerente" class="tc pad">
+  <div id="gerente-lock" class="lock-screen">
+    <div class="lock-icon">🔒</div>
+    <div style="font-size:15px;font-weight:700;color:var(--tx);margin-bottom:6px">Área restringida</div>
+    <div style="font-size:13px;color:var(--tx3);margin-bottom:20px">Solo para gerentes y dirección</div>
+    <button class="btn-prim" style="max-width:200px;margin:0 auto" onclick="abrirPIN()">Ingresar PIN</button>
+  </div>
+  <div id="gerente-content" style="display:none">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+      <b style="font-size:14px">Vista ejecutiva — todos los vendedores</b>
+      <div style="display:flex;gap:6px">
+        <button class="btn-mini" onclick="enviarReporte()">Enviar reporte por correo</button>
+        <button class="btn-mini" onclick="expCSV()">Exportar CSV</button>
+      </div>
+    </div>
+    <div class="kpi-grid" id="kpi-grid"></div>
+    <div class="card" style="margin-bottom:12px">
+      <div class="card-title">Actividad por vendedor</div>
+      <div id="vendedor-tabla"></div>
+    </div>
+    <div class="card" style="margin-bottom:12px">
+      <div class="card-title">Alertas críticas</div>
+      <div id="alertas-criticas"></div>
+    </div>
+    <button class="btn-sec" onclick="cerrarGerente()">Cerrar sesión de gerente</button>
+  </div>
+</div>
+
+<!-- ═══ TAB GUÍA ═══ -->
+<div id="tguia" class="tc pad">
+  <div class="card" style="margin-bottom:12px">
+    <div class="card-title">Qué foto tomar — y qué NO tomar</div>
+    <div class="guia-item guia-si"><div class="guia-icon">✓</div><div><div class="guia-title" style="color:var(--verde)">Terreno con movimiento reciente</div><div class="guia-desc">Lote limpio, cercado, maquinaria. La obra no inicia — oportunidad máxima. Fotografía el terreno, no lo que está detrás.</div></div></div>
+    <div class="guia-item guia-si"><div class="guia-icon">✓</div><div><div class="guia-title" style="color:var(--verde)">Cimientos y cimentación activa</div><div class="guia-desc">Excavación, varillas, mezcla de concreto. Tienes 2-3 semanas para cerrar.</div></div></div>
+    <div class="guia-item guia-si"><div class="guia-icon">✓</div><div><div class="guia-title" style="color:var(--verde)">Muros levantándose</div><div class="guia-desc">Castillos armados, block comenzando. Venta inmediata — llama hoy.</div></div></div>
+    <div class="guia-item guia-si"><div class="guia-icon">✓</div><div><div class="guia-title" style="color:var(--verde)">Fraccionamiento en desarrollo</div><div class="guia-desc">Varios lotes con construcciones similares. Fotografía el conjunto completo, no solo una casa.</div></div></div>
+    <div class="guia-item guia-no"><div class="guia-icon">✗</div><div><div class="guia-title" style="color:var(--rojo)">Terreno con obra terminada al fondo</div><div class="guia-desc">Si el terreno baldío tiene una construcción terminada detrás, fotografía el terreno al frente. La IA puede confundirse con lo que hay detrás.</div></div></div>
+    <div class="guia-item guia-no"><div class="guia-icon">✗</div><div><div class="guia-title" style="color:var(--rojo)">Foto desde demasiado lejos</div><div class="guia-desc">Si no se distingue el tipo ni la etapa, acércate o cambia el ángulo.</div></div></div>
+    <div class="guia-item guia-no"><div class="guia-icon">✗</div><div><div class="guia-title" style="color:var(--rojo)">Instalaciones de BATAB</div><div class="guia-desc">La fábrica, patio de bloques o bodegas de BATAB no son obras de clientes.</div></div></div>
+  </div>
+</div>
+
+<!-- ═══ TAB COMPETENCIA ═══ -->
+<div id="tcompetencia" class="tc pad">
+  <div class="card" style="margin-bottom:12px"><p style="font-size:13px;color:var(--tx2);line-height:1.6">Registra la ubicación de los competidores. La app calcula automáticamente la distancia real desde cada obra y ajusta el score de riesgo.</p></div>
+  <div class="field"><div class="lbl">Nombre del competidor</div><input type="text" id="cna" placeholder="Nombre del competidor"></div>
+  <div class="g2-fields">
+    <div class="field"><div class="lbl">Latitud</div><input type="number" step="0.0001" id="cla" placeholder="18.00"></div>
+    <div class="field"><div class="lbl">Longitud</div><input type="number" step="0.0001" id="clo" placeholder="-92.94"></div>
+  </div>
+  <button class="btn-prim" onclick="aC()">Agregar competidor</button>
+  <div style="font-size:11px;color:var(--tx3);margin:8px 0 14px">Google Maps → mantén presionado → copias las coordenadas</div>
+  <div id="comp-lista"></div>
+  <div id="comp-empty" style="text-align:center;padding:20px;color:var(--tx3);font-size:12px">Sin competidores registrados.</div>
+</div>
+
+<!-- MODAL REGISTRO VENDEDOR -->
+<div class="modal-overlay" id="modal-vendedor">
+  <div class="modal">
+    <div class="modal-title">¿Cómo te llamas?</div>
+    <div class="modal-sub">Se registra una sola vez. Todos tus registros quedarán identificados con tu nombre.</div>
+    <div class="field"><div class="lbl">Tu nombre completo</div><input type="text" id="inp-nombre-v" placeholder="Ej: Janet Hernández"></div>
+    <div class="modal-btns">
+      <button class="modal-btn modal-sec" onclick="cerrarModalV()">Cancelar</button>
+      <button class="modal-btn modal-prim" onclick="guardarVendedor()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL PIN GERENTE -->
+<div class="modal-overlay" id="modal-pin">
+  <div class="modal">
+    <div class="modal-title" style="text-align:center">Ingresa el PIN de gerente</div>
+    <div class="pin-dots" id="pin-dots">
+      <div class="pin-dot" id="pd0"></div>
+      <div class="pin-dot" id="pd1"></div>
+      <div class="pin-dot" id="pd2"></div>
+      <div class="pin-dot" id="pd3"></div>
+    </div>
+    <div id="pin-error" style="text-align:center;font-size:12px;color:var(--rojo);min-height:18px;margin-bottom:8px"></div>
+    <div class="pin-keypad">
+      <div class="pin-key" onclick="pinKey('1')">1</div>
+      <div class="pin-key" onclick="pinKey('2')">2</div>
+      <div class="pin-key" onclick="pinKey('3')">3</div>
+      <div class="pin-key" onclick="pinKey('4')">4</div>
+      <div class="pin-key" onclick="pinKey('5')">5</div>
+      <div class="pin-key" onclick="pinKey('6')">6</div>
+      <div class="pin-key" onclick="pinKey('7')">7</div>
+      <div class="pin-key" onclick="pinKey('8')">8</div>
+      <div class="pin-key" onclick="pinKey('9')">9</div>
+      <div class="pin-key" onclick="pinBorrar()" style="font-size:14px;color:var(--rojo)">⌫</div>
+      <div class="pin-key" onclick="pinKey('0')">0</div>
+      <div class="pin-key" onclick="cerrarPIN()" style="font-size:12px;color:var(--tx3)">✕</div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL SEGUIMIENTO -->
+<div class="modal-overlay" id="modal-seg">
+  <div class="modal">
+    <div class="modal-title" id="modal-seg-title">Obra registrada cercana</div>
+    <div id="modal-seg-content" style="font-size:13px;color:var(--tx2);line-height:1.7;margin-bottom:8px"></div>
+    <div class="modal-btns">
+      <button class="modal-btn modal-sec" onclick="document.getElementById('modal-seg').classList.remove('show')">Es obra diferente</button>
+      <button class="modal-btn modal-prim" onclick="agregarSeguimiento()">Agregar seguimiento</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+const AK="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";
+const PIN_GERENTE="PON_PIN_AQUI";
+const CORREO_DIRECTOR="CEO3Batab@outlook.com";
+const CORREOS_GERENTES=["Manager1Batab@outlook.com","manager2batab@outlook.com","manager3batab@outlook.com","Manager4Batab@outlook.com"];
+
+const DIRECTORIO={
+  "GERARDO ALEJANDRO ESPADAS HERNANDEZ":{rol:"director",email:"CEO3Batab@outlook.com",tel:"+529321138053"},
+  "ELIAS HERNANDEZ CHAVEZ":{rol:"gerente",email:"Manager1Batab@outlook.com",tel:"+529932591124"},
+  "JUAN MANUEL PAREDES ALVARADO":{rol:"gerente",email:"manager2batab@outlook.com",tel:"+529321053591"},
+  "JANET NEREYDA HERNANDEZ MARTINEZ":{rol:"gerente",email:"manager3batab@outlook.com",tel:"+529321052239"},
+  "MARIO ALBERTO CUEVAS SOSA":{rol:"gerente",email:"Manager4Batab@outlook.com",tel:"+529321051855"},
+  "ERNESTO CACERES ESPINOSA":{rol:"vendedor",email:"Sales1Batab@outlook.com",tel:"+529933939795"},
+  "EDGAR ADOLFO MARTINEZ GARCIA":{rol:"vendedor",email:"Sales2Batab@outlook.com",tel:"+529932996853"},
+  "ADYZ REBECA RAMOS RAMOS":{rol:"vendedor",email:"Sales3Batab@outlook.com",tel:"+529933470840"},
+  "ERICK RAFAEL PEREZ VALENCIA":{rol:"vendedor",email:"Sales4Batab@outlook.com",tel:"+529321058165"},
+  "ANA GABRIELA ALVAREZ DE LA CRUZ":{rol:"vendedor",email:"QA1Batab@outlook.com",tel:""},
+  "MARIA ISABEL GARCIA PEREZ":{rol:"vendedor",email:"Br1Batab@outlook.com",tel:"+529321050698"},
+  "DINA VILLALOBOS GONZALEZ":{rol:"vendedor",email:"Payroll1Batab@outlook.com",tel:"+529321053800"},
+  "ARTURO PEREZ PEREZ":{rol:"vendedor",email:"counterbatab1@outlook.com",tel:"+529321012700"},
+  "JORGE PEREZ HERNANDEZ":{rol:"vendedor",email:"counterbatab2@outlook.com",tel:""}
+};
+
+const PR=`Eres un sistema de análisis de imágenes para BATAB, fabricante de bloques de concreto en Tabasco, México. Analiza esta fotografía de una obra de construcción. Responde ÚNICAMENTE con JSON válido sin texto extra ni backticks: {"tipo_obra":"VALOR","etapa_id":"VALOR","etapa_nombre":"VALOR","tamano_estimado":"VALOR o null","observaciones":"VALOR","confianza":"VALOR"} tipo_obra: barda perimetral|casa habitación|local comercial|nave industrial|edificio 3-5 niveles|terreno pre-construcción|fraccionamiento|remodelacion|otro etapas barda perimetral: excavacion_trazo|firme_concreto|cimentacion_desplante|pegando_block|castillos_trabe. casa habitación: limpieza_trazo|excavacion_cimientos|cimentacion_zapatas|desplante_dala|levantamiento_muros|castillos_dalas|losa_techo. local comercial: excavacion_trazo|cimentacion|desplante|levantamiento_muros|cubierta_acabados. nave industrial: estudio_trazo|excavacion_pilotes|cimentacion|estructura|levantamiento_muros|cubierta. edificio 3-5 niveles: excavacion_pilotes|cimentacion_profunda|estructura_concreto|muros_nivel|losas_entrepiso|acabados. terreno pre-construcción: terreno_baldio|desmonte_activo|cerco_nuevo|señalizacion_proyecto. fraccionamiento: lotes_delimitados|construcciones_multiples|en_proceso. si otro: etapa_id=desconocido. confianza: alta|media|baja`;
+
+const D={
+  "barda perimetral":{b:"500–3,000 piezas",e:{excavacion_trazo:{d:16,u:"v",n:"Excavación y trazo"},firme_concreto:{d:10,u:"v",n:"Firme de concreto"},cimentacion_desplante:{d:5,u:"a",n:"Cimentación"},pegando_block:{d:0,u:"r",n:"Pegando block"},castillos_trabe:{d:-1,u:"g",n:"Castillos y trabe"}}},
+  "casa habitación":{b:"2,000–8,000 piezas",e:{limpieza_trazo:{d:38,u:"v",n:"Limpieza y trazo"},excavacion_cimientos:{d:28,u:"v",n:"Excavación"},cimentacion_zapatas:{d:18,u:"v",n:"Cimentación"},desplante_dala:{d:8,u:"a",n:"Desplante"},levantamiento_muros:{d:0,u:"r",n:"Muros"},castillos_dalas:{d:-1,u:"g",n:"Castillos"},losa_techo:{d:-2,u:"g",n:"Losa"}}},
+  "local comercial":{b:"3,000–10,000 piezas",e:{excavacion_trazo:{d:22,u:"v",n:"Excavación"},cimentacion:{d:14,u:"v",n:"Cimentación"},desplante:{d:6,u:"a",n:"Desplante"},levantamiento_muros:{d:0,u:"r",n:"Muros"},cubierta_acabados:{d:-1,u:"g",n:"Cubierta"}}},
+  "nave industrial":{b:"20,000–80,000 piezas",e:{estudio_trazo:{d:85,u:"v",n:"Trazo"},excavacion_pilotes:{d:60,u:"v",n:"Excavación"},cimentacion:{d:38,u:"v",n:"Cimentación"},estructura:{d:18,u:"v",n:"Estructura"},levantamiento_muros:{d:0,u:"r",n:"Muros"},cubierta:{d:-1,u:"g",n:"Cubierta"}}},
+  "edificio 3-5 niveles":{b:"15,000–40,000 piezas",e:{excavacion_pilotes:{d:55,u:"v",n:"Excavación"},cimentacion_profunda:{d:40,u:"v",n:"Cimentación"},estructura_concreto:{d:22,u:"v",n:"Estructura"},muros_nivel:{d:0,u:"r",n:"Muros"},losas_entrepiso:{d:-1,u:"g",n:"Losas"},acabados:{d:-2,u:"g",n:"Acabados"}}},
+  "terreno pre-construcción":{b:"Por determinar",e:{terreno_baldio:{d:45,u:"v",n:"Terreno baldío"},desmonte_activo:{d:35,u:"v",n:"Desmonte activo"},cerco_nuevo:{d:30,u:"v",n:"Cerco nuevo"},señalizacion_proyecto:{d:25,u:"v",n:"Señalización de proyecto"}}},
+  "fraccionamiento":{b:"Múltiples — por lote",e:{lotes_delimitados:{d:40,u:"v",n:"Lotes delimitados"},construcciones_multiples:{d:10,u:"a",n:"Construcciones múltiples en proceso"},en_proceso:{d:0,u:"r",n:"Construcción activa múltiple"}}},
+  "remodelacion":{b:"1,000–15,000 piezas",e:{demolicion_parcial:{d:14,u:"v",n:"Demolición parcial"},preparacion_ampliacion:{d:8,u:"a",n:"Preparación de ampliación"},levantamiento_nuevo:{d:0,u:"r",n:"Levantamiento nuevo en proceso"},acabados_finales:{d:-1,u:"g",n:"Acabados finales"}}},"otro":{b:"Por determinar",e:{desconocido:{d:-1,u:"g",n:"No determinado"}}}
+};
+
+const URG={
+  v:{l:"SEGUIMIENTO ACTIVO",bc:"ac-v",pr:"20%",a:"Mantén visitas periódicas y registra avances. Tienes tiempo para preparar la cotización."},
+  a:{l:"COTIZAR AHORA",bc:"ac-a",pr:"50%",a:"Momento de hacer contacto formal. Presenta la cotización y confirma volumen."},
+  r:{l:"VENTA INMEDIATA",bc:"ac-r",pr:"90%",a:"Están colocando block ahora. Llama de inmediato. Entrega en 24–48 hrs."},
+  g:{l:"FUERA DE VENTANA",bc:"ac-g",pr:"0%",a:"La ventana ya cerró. Registra al constructor para seguimiento de próximos proyectos."}
+};
+const CS={none:0,far:20,close:55,very_close:90};
+const CRIT_LABEL=["Terreno pre-construcción","Obra activa — cliente nuevo","Cliente BATAB — obra nueva","Cotización activa","Obra terminada","Fraccionamiento"];
+
+let iB="",iT="",iS="",aD=null,tO="",eI="",cD="none",critSel=0,ctxSel="";
+let contactos=[],mp=null,mk=[],obraCercana=null,pinIngresado="";
+
+let pr=[];try{pr=JSON.parse(localStorage.getItem("batab_pr")||"[]");}catch(e){}
+let cp=[];try{cp=JSON.parse(localStorage.getItem("batab_cp")||"[]");}catch(e){}
+let vendedor=localStorage.getItem("batab_vend")||"";
+let rolActual=localStorage.getItem("batab_rol")||"vendedor";
+let gerenteAuth=false;
+
+function init(){
+  if(!vendedor){document.getElementById("modal-vendedor").classList.add("show");}
+  else{actualizarChip();}
+  verificarOffline();
+  rCL();
+}
+
+function buscarRol(nombre){
+  const key=nombre.toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+  for(const [k,v] of Object.entries(DIRECTORIO)){
+    const kn=k.normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+    if(kn.includes(key)||key.includes(kn.split(" ")[0]))return v.rol;
+  }
+  return"vendedor";
+}
+
+function actualizarChip(){
+  document.getElementById("chip-nombre").textContent=vendedor;
+  const badge=document.getElementById("rol-badge-wrap");
+  const cls=rolActual==="director"?"rol-director":rolActual==="gerente"?"rol-gerente":"rol-vendedor";
+  const label=rolActual==="director"?"DIRECTOR":rolActual==="gerente"?"GERENTE":"VENDEDOR";
+  badge.innerHTML=`<span class="rol-badge ${cls}">${label}</span>`;
+}
+
+function abrirRegistro(){document.getElementById("modal-vendedor").classList.add("show");}
+function cerrarModalV(){if(vendedor)document.getElementById("modal-vendedor").classList.remove("show");}
+
+function guardarVendedor(){
+  const n=document.getElementById("inp-nombre-v").value.trim();
+  if(!n){alert("Escribe tu nombre");return;}
+  vendedor=n;rolActual=buscarRol(n);
+  localStorage.setItem("batab_vend",n);localStorage.setItem("batab_rol",rolActual);
+  actualizarChip();
+  document.getElementById("modal-vendedor").classList.remove("show");
+  regUsuario(n,rolActual);
+}
+
+function verificarOffline(){
+  if(!navigator.onLine)document.getElementById("offline-section").style.display="block";
+  window.addEventListener("online",()=>document.getElementById("offline-section").style.display="none");
+  window.addEventListener("offline",()=>document.getElementById("offline-section").style.display="block");
+}
+
+function hav(a,b,c,d){const R=6371,x=(c-a)*Math.PI/180,y=(d-b)*Math.PI/180,e=Math.sin(x/2)**2+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(y/2)**2;return R*2*Math.atan2(Math.sqrt(e),Math.sqrt(1-e));}
+function nC(la,ln){if(!cp.length||!la||!ln)return null;let m=Infinity,n=null;cp.forEach(c=>{if(!c.la||!c.ln)return;const d=hav(la,ln,c.la,c.ln);if(d<m){m=d;n={c,d:Math.round(d*10)/10};}});return n;}
+function cFD(k){return k<5?"very_close":k<15?"close":k<30?"far":"none";}
+function buscarCercana(la,ln){if(!la||!ln)return null;for(const p of pr){if(!p.la||!p.ln)continue;const d=hav(la,ln,p.la,p.ln);if(d<0.15)return{p,d:Math.round(d*1000)};}return null;}
+
+function rK(d,c){
+  const ds=d<0?0:d===0?100:d<=7?85:d<=21?60:d<=45?30:12;
+  const cs=CS[c]||0,hC=c!=="none",tot=hC?Math.round(ds*0.5+cs*0.5):ds;
+  const col=tot>=75?"#C43A3A":tot>=50?"#D4900A":tot>=25?"#2A5298":"#9A9890";
+  const lv=tot>=75?"CRÍTICO":tot>=50?"URGENTE":tot>=25?"ACTIVO":"SEGUIMIENTO";
+  return{lv,col,tot};
+}
+function aD2(d){if(d<=0)return"—";const t=new Date();t.setDate(t.getDate()+d);return t.toLocaleDateString("es-MX",{day:"2-digit",month:"short",year:"numeric"});}
+function cap(s){return s?s.charAt(0).toUpperCase()+s.slice(1):"—"}
+
+function sT(t,el){
+  document.querySelectorAll(".tc").forEach(x=>x.classList.remove("on"));
+  document.querySelectorAll(".tab").forEach(x=>x.classList.remove("on"));
+  document.getElementById("t"+t).classList.add("on");el.classList.add("on");
+  if(t==="mapa"&&!mp)iM();
+  if(t==="mapa")rM();
+  if(t==="competencia")rCL();
+}
+
+function clickGerente(el){
+  if(rolActual==="director"||rolActual==="gerente"||gerenteAuth){
+    sT("gerente",el);rGerente();
+  }else{
+    document.querySelectorAll(".tc").forEach(x=>x.classList.remove("on"));
+    document.querySelectorAll(".tab").forEach(x=>x.classList.remove("on"));
+    document.getElementById("tgerente").classList.add("on");el.classList.add("on");
+  }
+}
+
+function shP(p){
+  ["pu","pa","pd"].forEach(x=>document.getElementById(x).style.display=x===("p"+p.charAt(0))?"block":"none");
+}
+
+function rGPS(){
+  const el=document.getElementById("gps-st");
+  el.className="gps-wt";el.textContent="Capturando GPS...";
+  if(!navigator.geolocation){el.className="gps-er";el.textContent="GPS no disponible";return;}
+  navigator.geolocation.getCurrentPosition(pos=>{
+    const la=pos.coords.latitude,ln=pos.coords.longitude;
+    document.getElementById("ilat").value=la.toFixed(5);
+    document.getElementById("ilng").value=ln.toFixed(5);
+    el.className="gps-ok";el.textContent="GPS: "+la.toFixed(4)+", "+ln.toFixed(4);
+    const n=nC(la,ln);if(n){const cd=cFD(n.d);document.querySelector('input[name="cp"][value="'+cd+'"]').checked=true;uC(cd);}
+    const cerca=buscarCercana(la,ln);
+    if(cerca){obraCercana=cerca;document.getElementById("cerca-dist").textContent=cerca.d+"m";document.getElementById("cerca-tipo").textContent=cap(cerca.p.tO);document.getElementById("cerca-alerta").style.display="block";}
+    else document.getElementById("cerca-alerta").style.display="none";
+  },()=>{el.className="gps-er";el.textContent="GPS no disponible — ingresa coordenadas manualmente";});
+}
+
+document.getElementById("fi").addEventListener("change",e=>{
+  const f=e.target.files[0];if(!f)return;
+  if(!vendedor){document.getElementById("modal-vendedor").classList.add("show");return;}
+  rGPS();
+  const r=new FileReader();
+  r.onload=ev=>{
+    const orig=ev.target.result;
+    document.getElementById("ia").src=orig;document.getElementById("id2").src=orig;
+    shP("a");
+    const img=new Image();
+    img.onload=function(){
+      const canvas=document.createElement("canvas");
+      let w=img.width,h=img.height;const ms=1920;
+      if(w>ms||h>ms){const ratio=Math.min(ms/w,ms/h);w=Math.round(w*ratio);h=Math.round(h*ratio);}
+      canvas.width=w;canvas.height=h;canvas.getContext("2d").drawImage(img,0,0,w,h);
+      let q=0.85,comp=canvas.toDataURL("image/jpeg",q);
+      while(comp.length*0.75>4.5*1024*1024&&q>0.4){q-=0.1;comp=canvas.toDataURL("image/jpeg",q);}
+      iS=comp;iT="image/jpeg";iB=comp.split(",")[1];
+      cAI();
+    };
+    img.src=orig;
+  };
+  r.readAsDataURL(f);
+});
+
+async function cAI(){
+  document.getElementById("err-box").style.display="none";
+  document.getElementById("offline-msg").style.display="none";
+  if(!navigator.onLine){
+    aD={tipo_obra:"otro",etapa_id:"desconocido",etapa_nombre:"Sin análisis",observaciones:"",confianza:"baja"};
+    tO="otro";eI="desconocido";
+    document.getElementById("offline-msg").style.display="block";
+    document.getElementById("offline-msg").textContent="Sin señal. Datos guardados localmente.";
+    shP("d");mostrarContexto();return;
+  }
+  try{
+    const res=await fetch("https://api.anthropic.com/v1/messages",{
+      method:"POST",
+      headers:{"Content-Type":"application/json","x-api-key":AK,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
+      body:JSON.stringify({model:"claude-sonnet-4-6",max_tokens:1000,messages:[{role:"user",content:[{type:"image",source:{type:"base64",media_type:iT,data:iB}},{type:"text",text:PR}]}]})
+    });
+    const dt=await res.json();
+    if(dt.error)throw new Error(dt.error.type+": "+dt.error.message);
+    const tx=(dt.content||[]).find(c=>c.type==="text")?.text||"{}";
+    aD=JSON.parse(tx.replace(/```json|```/g,"").trim());
+    tO=aD.tipo_obra||"otro";eI=aD.etapa_id||"desconocido";
+  }catch(e){
+    document.getElementById("err-box").style.display="block";document.getElementById("err-box").textContent="Error: "+e.message;
+    aD={tipo_obra:"otro",etapa_id:"desconocido",etapa_nombre:"Error",observaciones:"",confianza:"baja"};
+    tO="otro";eI="desconocido";
+  }
+  shP("d");mostrarContexto();
+}
+
+function mostrarContexto(){
+  document.getElementById("context-card").style.display="block";
+  document.getElementById("resultado-content").style.display="none";
+  ctxSel="";
+  ["ctx-construccion","ctx-terreno","ctx-terminada","ctx-fraccionamiento"].forEach(id=>{
+    document.getElementById(id).classList.remove("selected");
+  });
+}
+
+function selCtx(ctx){
+  ctxSel=ctx;
+  ["ctx-construccion","ctx-terreno","ctx-terminada","ctx-fraccionamiento"].forEach(id=>{
+    document.getElementById(id).classList.remove("selected");
+  });
+  document.getElementById("ctx-"+ctx).classList.add("selected");
+}
+
+function aplicarContexto(){
+  if(!ctxSel){alert("Selecciona una opción");return;}
+  if(ctxSel==="terreno"){tO="terreno pre-construcción";eI="terreno_baldio";}
+  else if(ctxSel==="terminada"){tO=tO==="otro"?"casa habitación":tO;eI=Object.keys(D[tO]?.e||{}).pop()||"desconocido";}
+  else if(ctxSel==="fraccionamiento"){tO="fraccionamiento";eI="construcciones_multiples";}
+  else if(ctxSel==="remodelacion"){tO="remodelacion";eI="preparacion_ampliacion";}
+  document.getElementById("context-card").style.display="none";
+  document.getElementById("resultado-content").style.display="block";
+  rD();
+  setTimeout(sugerirProductoAuto,300);
+}
+
+function rD(){
+  const ob=D[tO]||D["otro"],et=ob.e[eI];
+  const u=et?et.u:"g",d=et?et.d:-99;
+  const ug=URG[u],rk=rK(d,cD);
+  contactos=[];actualizarContactos();
+  const ts=document.getElementById("r-tipo-sel");ts.value=tO;actualizarEtapas(tO);
+  setTimeout(()=>{if(document.getElementById("r-etapa-sel"))document.getElementById("r-etapa-sel").value=eI;},10);
+  document.getElementById("r-conf").textContent=(aD.confianza||"?").toUpperCase();
+  renderResultado(d,u,rk,ug,ob);
+  auto_crit();
+  const obs=document.getElementById("r-obs");
+  if(aD.observaciones&&tO!=="otro"){obs.style.display="block";document.getElementById("r-obs-text").textContent=aD.observaciones;}
+  else obs.style.display="none";
+  document.getElementById("save-ok").style.display="none";
+  document.getElementById("r-notas").value="";
+}
+
+function auto_crit(){
+  let c=1;
+  if(tO==="terreno pre-construcción"||ctxSel==="terreno")c=0;
+  else if(tO==="fraccionamiento"||ctxSel==="fraccionamiento")c=5;
+  else if(ctxSel==="terminada")c=4;
+  else if(ctxSel==="remodelacion")c=1;
+  uCrit(c);
+  const radio=document.querySelector('input[name="crit"][value="'+c+'"]');
+  if(radio)radio.checked=true;
+}
+
+function actualizarEtapas(tipo){
+  const ob=D[tipo]||D["otro"];
+  const sel=document.getElementById("r-etapa-sel");
+  sel.innerHTML=Object.entries(ob.e).map(([k,v])=>`<option value="${k}">${v.n}</option>`).join("");
+}
+
+function recalcular(){
+  tO=document.getElementById("r-tipo-sel").value;
+  actualizarEtapas(tO);
+  const ob=D[tO]||D["otro"];
+  const sel=document.getElementById("r-etapa-sel");
+  eI=sel.value||Object.keys(ob.e)[0];
+  const et=ob.e[eI];const u=et?et.u:"g",d=et?et.d:-99;
+  renderResultado(d,u,rK(d,cD),URG[u],ob);
+}
+
+function renderResultado(d,u,rk,ug,ob){
+  if(d>0){document.getElementById("r-dias").textContent=d;document.getElementById("r-dias").style.color=d<=7?"var(--rojo)":d<=21?"var(--amarillo)":"var(--azul)";document.getElementById("r-dias-sub").textContent="días hasta colocación";}
+  else if(d===0){document.getElementById("r-dias").textContent="HOY";document.getElementById("r-dias").style.color="var(--rojo)";document.getElementById("r-dias-sub").textContent="bloques necesarios ahora";}
+  else{document.getElementById("r-dias").textContent="—";document.getElementById("r-dias").style.color="var(--tx3)";document.getElementById("r-dias-sub").textContent="ventana cerrada";}
+  const fl=d>2?aD2(Math.max(1,d-2)):d>0?"Mañana":d===0?"Hoy":"—";
+  document.getElementById("r-fecha").textContent=fl;
+  document.getElementById("r-score").textContent=rk.tot;document.getElementById("r-score").style.color=rk.col;
+  document.getElementById("r-nivel").textContent=rk.lv;document.getElementById("r-nivel").style.color=rk.col;
+  document.getElementById("r-bar").style.cssText="width:"+rk.tot+"%;background:"+rk.col;
+  document.getElementById("r-vol").textContent=ob?ob.b:"—";
+  const ac=document.getElementById("r-accion");ac.className="accion "+ug.bc;ac.textContent=ug.a;
+  const bn=document.getElementById("banner");
+  if(rk.tot>=75){bn.style.display="block";bn.className="banner ban-r";bn.textContent="ALERTA CRÍTICA — ACCIÓN HOY";}
+  else if(rk.tot>=50){bn.style.display="block";bn.className="banner ban-a";bn.textContent="URGENTE — Cotizar esta semana";}
+  else if(rk.tot>=25){bn.style.display="block";bn.className="banner ban-v";bn.textContent="Prospecto activo — mantener seguimiento";}
+  else bn.style.display="none";
+  ["co-none","co-far","co-close","co-very"].forEach(k=>{
+    const el=document.getElementById(k);if(!el)return;
+    const v=k==="co-very"?"very_close":k==="co-close"?"close":k==="co-far"?"far":"none";
+    el.className="crit-opt"+(v===cD?v==="very_close"?" crit-r":v==="close"?" crit-a":" crit-azul":"");
+  });
+}
+
+function uC(v){cD=v;if(aD)recalcular();}
+function uCrit(n){
+  critSel=n;
+  const cls=["crit-azul","crit-a","crit-azul","crit-r","crit-r","crit-azul"];
+  [0,1,2,3,4,5].forEach(i=>{const el=document.getElementById("crit-"+i);if(!el)return;el.className="crit-opt"+(i===n?" "+cls[i]:"");});
+  document.getElementById("frac-lotes").style.display=n===5?"block":"none";
+}
+
+function agregarContacto(){
+  if(contactos.length>=3){alert("Máximo 3 contactos");return;}
+  contactos.push({rol:"",nombre:"",tel:""});actualizarContactos();
+}
+function actualizarContactos(){
+  const el=document.getElementById("contactos-list");
+  if(!contactos.length){el.innerHTML='<p style="font-size:12px;color:var(--tx3)">Sin contactos. Toca "+ Agregar contacto".</p>';return;}
+  el.innerHTML=contactos.map((c,i)=>`<div class="contacto-block">
+    <div class="contacto-head"><span style="font-size:11px;font-weight:700;color:var(--tx3)">Contacto ${i+1}</span><button class="btn-mini" style="color:var(--rojo)" onclick="contactos.splice(${i},1);actualizarContactos()">Eliminar</button></div>
+    <div class="g2-fields" style="gap:8px">
+      <div><div class="lbl">Rol</div><select onchange="contactos[${i}].rol=this.value">
+        <option value="">— Rol</option><option${c.rol==="dueño"?" selected":""}>Dueño</option><option${c.rol==="constructor"?" selected":""}>Constructor</option><option${c.rol==="maestro de obra"?" selected":""}>Maestro de obra</option><option${c.rol==="desarrollador"?" selected":""}>Desarrollador</option>
+      </select></div>
+      <div><div class="lbl">Nombre</div><input type="text" value="${c.nombre}" placeholder="Nombre" oninput="contactos[${i}].nombre=this.value"></div>
+    </div>
+    <div style="margin-top:8px"><div class="lbl">Teléfono</div><input type="text" value="${c.tel}" placeholder="+52 993..." oninput="contactos[${i}].tel=this.value"></div>
+  </div>`).join("");
+}
+
+function sP(){
+  if(!aD)return;
+  const la=parseFloat(document.getElementById("ilat").value)||null;
+  const ln=parseFloat(document.getElementById("ilng").value)||null;
+  const ob=D[tO]||D["otro"];
+  const eISel=document.getElementById("r-etapa-sel")?.value||eI;
+  const et=ob.e[eISel];const d=et?et.d:-99,u=et?et.u:"g";
+  let eC=cD;if(la&&ln){const n=nC(la,ln);if(n)eC=cFD(n.d);}
+  const rk=rK(d,eC);
+  const tipoSel=document.getElementById("r-tipo-sel")?.value||tO;
+  const lotes=parseInt(document.getElementById("num-lotes")?.value)||null;
+  const prodCodigo=(document.getElementById("prod-resultado")?.innerText||"").split("Código NetSuite:")[1]?.split("\n")[0]?.trim()||"";
+  const p={id:Date.now(),la,ln,tO:tipoSel,eI:eISel,d,rs:rk.tot,lv:rk.lv,col:rk.col,criterio:critSel,critLabel:CRIT_LABEL[critSel],compD:eC,bl:ob.b,contactos:[...contactos],lotes,notas:document.getElementById("r-notas").value,obs:aD.observaciones||"",conf:aD.confianza||"?",fe:new Date().toLocaleDateString("es-MX",{day:"2-digit",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"}),en:et?et.n:"No determinado",vendedor,rol:rolActual,th:iS,visitas:[],productoCodigo:prodCodigo};
+  pr.unshift(p);
+  try{localStorage.setItem("batab_pr",JSON.stringify(pr));}catch(e){}
+  document.getElementById("save-ok").style.display="block";
+  document.getElementById("save-ok").textContent="Guardando...";
+  guardarEnSupabase(p);
+  if(rk.tot>=75)notificarCritico(p);
+}
+
+function notificarCritico(p){
+  const msg=`BATAB ALERTA CRÍTICA\n\nVendedor: ${p.vendedor}\nObra: ${cap(p.tO)} — ${p.en}\nScore: ${p.rs}/100 — ${p.lv}\nCotizar antes del: ${aD2(p.d>2?Math.max(1,p.d-2):1)}\nVolumen: ${p.bl}\nGPS: ${p.la||"—"}, ${p.ln||"—"}\nFecha: ${p.fe}`;
+  const link=`https://wa.me/${DIRECTORIO["JANET NEREYDA HERNANDEZ MARTINEZ"]?.tel?.replace(/\D/g,"")}?text=${encodeURIComponent(msg)}`;
+  const so=document.getElementById("save-ok");
+  so.innerHTML+='<br><a href="'+link+'" target="_blank" style="color:var(--azul);font-size:12px">Enviar alerta WhatsApp al gerente comercial</a>';
+}
+
+function guardarOffline(){
+  const tipo=document.getElementById("of-tipo").value,etapa=document.getElementById("of-etapa").value;
+  if(!tipo||!etapa){alert("Selecciona tipo y etapa");return;}
+  const la=parseFloat(document.getElementById("ilat").value)||null,ln=parseFloat(document.getElementById("ilng").value)||null;
+  pr.unshift({id:Date.now(),la,ln,tO:tipo,eI:"manual",d:-1,rs:0,lv:"PENDIENTE",col:"#888",criterio:1,critLabel:"Sin análisis IA",compD:"none",bl:"Por determinar",contactos:[],notas:document.getElementById("of-notas").value,obs:"Registro manual sin señal",conf:"sin IA",fe:new Date().toLocaleDateString("es-MX",{day:"2-digit",month:"short",year:"numeric"}),en:etapa,vendedor,rol:rolActual,th:"",visitas:[]});
+  try{localStorage.setItem("batab_pr",JSON.stringify(pr));}catch(e){}
+  alert("Guardado localmente.");
+}
+
+function rst(){
+  iB="";iT="";iS="";aD=null;tO="";eI="";cD="none";critSel=0;contactos=[];ctxSel="";obraCercana=null;
+  document.getElementById("fi").value="";document.getElementById("ilat").value="";document.getElementById("ilng").value="";
+  document.getElementById("gps-st").className="gps-wt";document.getElementById("gps-st").textContent='Sin GPS — toca "Capturar GPS"';
+  document.querySelector('input[name="cp"][value="none"]').checked=true;
+  document.querySelector('input[name="crit"][value="0"]').checked=true;
+  document.getElementById("cerca-alerta").style.display="none";
+  document.getElementById("save-ok").style.display="none";
+  document.getElementById("err-box").style.display="none";
+  document.getElementById("offline-msg").style.display="none";
+  document.getElementById("context-card").style.display="none";
+  document.getElementById("resultado-content").style.display="none";
+  shP("u");
+}
+
+function verObraCercana(){
+  if(!obraCercana)return;
+  const p=obraCercana.p;
+  document.getElementById("modal-seg-title").textContent="Obra a "+obraCercana.d+"m — "+cap(p.tO);
+  document.getElementById("modal-seg-content").innerHTML=`<b>Etapa anterior:</b> ${p.en}<br><b>Registrada el:</b> ${p.fe}<br><b>Vendedor:</b> ${p.vendedor||"—"}<br><b>Score:</b> ${p.rs}/100 — ${p.lv}<br>${p.notas?"<b>Notas:</b> "+p.notas:""}`;
+  document.getElementById("modal-seg").classList.add("show");
+}
+
+function agregarSeguimiento(){
+  if(!obraCercana||!iS)return;
+  const p=pr.find(x=>x.id===obraCercana.p.id);
+  if(!p){document.getElementById("modal-seg").classList.remove("show");return;}
+  if(!p.visitas)p.visitas=[];
+  p.visitas.push({fecha:new Date().toLocaleDateString("es-MX",{day:"2-digit",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"}),foto:iS,vendedor,notas:document.getElementById("r-notas").value});
+  try{localStorage.setItem("batab_pr",JSON.stringify(pr));}catch(e){}
+  document.getElementById("modal-seg").classList.remove("show");
+  document.getElementById("save-ok").style.display="block";
+  document.getElementById("save-ok").textContent="Seguimiento agregado a obra existente.";
+}
+
+/* PIN */
+function abrirPIN(){pinIngresado="";actualizarDots();document.getElementById("pin-error").textContent="";document.getElementById("modal-pin").classList.add("show");}
+function cerrarPIN(){document.getElementById("modal-pin").classList.remove("show");}
+function pinKey(n){if(pinIngresado.length>=4)return;pinIngresado+=n;actualizarDots();if(pinIngresado.length===4)verificarPIN();}
+function pinBorrar(){pinIngresado=pinIngresado.slice(0,-1);actualizarDots();}
+function actualizarDots(){for(let i=0;i<4;i++){const d=document.getElementById("pd"+i);d.className="pin-dot"+(i<pinIngresado.length?" filled":"");}}
+function verificarPIN(){
+  if(pinIngresado===PIN_GERENTE){
+    gerenteAuth=true;cerrarPIN();
+    document.getElementById("gerente-lock").style.display="none";
+    document.getElementById("gerente-content").style.display="block";
+    rGerente();
+  }else{
+    document.getElementById("pin-error").textContent="PIN incorrecto";
+    pinIngresado="";actualizarDots();
+  }
+}
+function cerrarGerente(){gerenteAuth=false;document.getElementById("gerente-lock").style.display="block";document.getElementById("gerente-content").style.display="none";}
+
+/* GERENTE */
+function rGerente(){
+  const total=pr.length,criticos=pr.filter(p=>p.lv==="CRÍTICO").length;
+  const vendedores=[...new Set(pr.map(p=>p.vendedor).filter(Boolean))];
+  document.getElementById("kpi-grid").innerHTML=
+    `<div class="kpi"><div class="kpi-n">${total}</div><div class="kpi-l">Total obras</div></div>`+
+    `<div class="kpi"><div class="kpi-n" style="color:var(--rojo)">${criticos}</div><div class="kpi-l">Críticas</div></div>`+
+    `<div class="kpi"><div class="kpi-n" style="color:var(--amarillo)">${pr.filter(p=>p.rs>=75&&(!p.visitas||!p.visitas.length)).length}</div><div class="kpi-l">Sin seguimiento</div></div>`+
+    `<div class="kpi"><div class="kpi-n" style="color:var(--azul)">${vendedores.length}</div><div class="kpi-l">Vendedores</div></div>`;
+  const tabla=document.getElementById("vendedor-tabla");
+  if(!vendedores.length){tabla.innerHTML='<p style="font-size:12px;color:var(--tx3)">Sin registros aún.</p>';return;}
+  tabla.innerHTML=vendedores.map(v=>{
+    const regs=pr.filter(p=>p.vendedor===v);
+    return`<div class="vend-row"><div><b>${v}</b><br><span style="font-size:11px;color:var(--tx3)">${regs.length} registros · ${regs.filter(p=>p.lv==="CRÍTICO").length} críticos</span></div><div style="font-size:12px;color:var(--tx3)">${regs[0]?.fe||"—"}</div></div>`;
+  }).join("");
+  const alertas=document.getElementById("alertas-criticas");
+  const criticas=pr.filter(p=>p.rs>=75);
+  if(!criticas.length){alertas.innerHTML='<p style="font-size:12px;color:var(--verde)">Sin alertas críticas.</p>';return;}
+  alertas.innerHTML=criticas.map(p=>`<div style="display:flex;gap:10px;padding:10px 0;border-bottom:1px solid #F0EDE8;align-items:flex-start">${p.th?`<img style="width:44px;height:33px;object-fit:cover;border-radius:6px;flex-shrink:0" src="${p.th}">`:""}<div style="flex:1;font-size:12px"><b>${cap(p.tO)}</b> — ${p.en}<br><span style="color:var(--rojo)">Score ${p.rs}/100 — ${p.lv}</span><br><span style="color:var(--tx3)">${p.vendedor||"—"} · ${p.fe}</span></div></div>`).join("");
+}
+
+function enviarReporte(){
+  const csv=generarCSV();
+  const asunto=encodeURIComponent("BATAB Campo — Reporte de prospectos "+new Date().toLocaleDateString("es-MX"));
+  const cuerpo=encodeURIComponent("Adjunto el reporte de prospectos capturados en campo.\n\nRegistros totales: "+pr.length+"\nCríticos: "+pr.filter(p=>p.lv==="CRÍTICO").length+"\n\nGenerado el "+new Date().toLocaleDateString("es-MX",{weekday:"long",day:"2-digit",month:"long",year:"numeric"}));
+  const destinatarios=CORREOS_GERENTES.concat(CORREO_DIRECTOR).join(",");
+  window.location.href=`mailto:${destinatarios}?subject=${asunto}&body=${cuerpo}`;
+  setTimeout(()=>{expCSV();},500);
+}
+
+function generarCSV(){
+  const h="ID,Tipo,Etapa,Criterio,Días,Score,Nivel,Lat,Lng,Bloques,Vendedor,Contactos,Notas,Visitas,Fecha\n";
+  return h+pr.map(p=>[p.id,'"'+p.tO+'"','"'+p.en+'"','"'+p.critLabel+'"',p.d,p.rs,p.lv,p.la||"",p.ln||"",'"'+p.bl+'"','"'+(p.vendedor||"")+'"','"'+(p.contactos?.map(c=>c.rol+" "+c.nombre+" "+c.tel).join("|")||"")+'"','"'+(p.notas||"")+'"',p.visitas?.length||0,'"'+p.fe+'"'].join(",")).join("\n");
+}
+
+function expCSV(){
+  const b=new Blob([generarCSV()],{type:"text/csv;charset=utf-8"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="batab_prospectos_"+new Date().toISOString().slice(0,10)+".csv";a.click();
+}
+
+function iM(){mp=L.map("map").setView([17.9895,-92.9475],12);L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{attribution:"© OSM",maxZoom:19}).addTo(mp);}
+function rM(){
+  if(!mp)return;mk.forEach(m=>m.remove());mk=[];
+  cp.forEach(c=>{if(!c.la||!c.ln)return;const m=L.circleMarker([c.la,c.ln],{radius:8,color:"#1A1916",fillColor:"#3D3A34",fillOpacity:.9,weight:2}).addTo(mp);m.bindPopup("<b>"+c.nm+"</b><br>Competidor");mk.push(m);});
+  const misPr=pr.filter(p=>p.la&&p.ln&&(rolActual==="director"||rolActual==="gerente"||p.vendedor===vendedor));
+  misPr.forEach(p=>{
+    const r=p.rs>=75?10:p.rs>=50?8:6;
+    const m=L.circleMarker([p.la,p.ln],{radius:r,color:p.col,fillColor:p.col,fillOpacity:.75,weight:2}).addTo(mp);
+    const n=nC(p.la,p.ln);
+    m.bindPopup(`<b>${cap(p.tO)}</b><br>${p.en}<br>Score:${p.rs}/100 — ${p.lv}${n?`<br>Comp: ${n.c.nm} ${n.d}km`:""}<br>${p.vendedor||"—"} · ${p.fe}`);
+    mk.push(m);
+  });
+  if(misPr.length>0){const g=L.latLngBounds(misPr.map(p=>[p.la,p.ln]));cp.forEach(c=>{if(c.la&&c.ln)g.extend([c.la,c.ln]);});mp.fitBounds(g,{padding:[30,30]});}
+  rPL();rST();
+}
+function rST(){
+  const misPr=pr.filter(p=>rolActual==="director"||rolActual==="gerente"||p.vendedor===vendedor);
+  const c=misPr.filter(p=>p.lv==="CRÍTICO").length,u=misPr.filter(p=>p.lv==="URGENTE").length;
+  document.getElementById("stats").innerHTML=`<div class="stat"><div class="stat-n">${misPr.length}</div><div class="stat-l">Total</div></div><div class="stat"><div class="stat-n" style="color:#C43A3A">${c}</div><div class="stat-l">Críticos</div></div><div class="stat"><div class="stat-n" style="color:#D4900A">${u}</div><div class="stat-l">Urgentes</div></div><div class="stat"><div class="stat-n" style="color:#2A5298">${misPr.filter(p=>p.rs>0&&p.lv!=="CRÍTICO"&&p.lv!=="URGENTE").length}</div><div class="stat-l">Activos</div></div>`;
+}
+function rPL(){
+  const el=document.getElementById("pl");
+  const misPr=pr.filter(p=>rolActual==="director"||rolActual==="gerente"||p.vendedor===vendedor);
+  if(!misPr.length){el.innerHTML='<div style="text-align:center;padding:30px;color:var(--tx3);font-size:13px">Sin registros. Analiza fotos y toca "Agregar al mapa".</div>';return;}
+  el.innerHTML=misPr.map(p=>`<div class="prosp">${p.th?`<img class="pthumb" src="${p.th}">`:`<div class="pempty">+</div>`}<div class="pinfo"><div class="pname">${cap(p.tO)}</div><div class="pmeta">${p.en} · ${p.vendedor||"—"}</div><div><span class="pill" style="background:${p.rs>=75?"var(--rojo-claro)":p.rs>=50?"var(--amarillo-claro)":p.rs>=25?"var(--azul-claro)":"var(--gris-claro)"};color:${p.col}">${p.lv}</span>${p.visitas?.length?`<span style="font-size:10px;color:var(--verde);font-weight:600;margin-left:6px">${p.visitas.length} seguimiento(s)</span>`:""}</div><div class="pmeta">${p.fe}</div></div></div>`).join("");
+}
+
+function aC(){
+  const nm=document.getElementById("cna").value.trim();const la=parseFloat(document.getElementById("cla").value);const ln=parseFloat(document.getElementById("clo").value);
+  if(!nm){alert("Ingresa el nombre");return;}
+  cp.push({id:Date.now(),nm,la:isNaN(la)?null:la,ln:isNaN(ln)?null:ln});
+  try{localStorage.setItem("batab_cp",JSON.stringify(cp));}catch(e){}
+  document.getElementById("cna").value="";document.getElementById("cla").value="";document.getElementById("clo").value="";
+  rCL();if(mp)rM();
+}
+function dC(id){cp=cp.filter(c=>c.id!==id);try{localStorage.setItem("batab_cp",JSON.stringify(cp));}catch(e){}rCL();if(mp)rM();}
+function rCL(){
+  const el=document.getElementById("comp-lista"),em=document.getElementById("comp-empty");
+  if(!cp.length){el.innerHTML="";em.style.display="block";return;}
+  em.style.display="none";
+  el.innerHTML=cp.map(c=>`<div class="prosp"><div class="pempty" style="font-size:14px;font-weight:700">C</div><div class="pinfo"><div class="pname">${c.nm}</div><div class="pmeta">${c.la&&c.ln?c.la.toFixed(4)+", "+c.ln.toFixed(4):"Sin coords"}</div></div><button style="padding:5px 10px;border:1px solid var(--rojo-borde);border-radius:6px;color:var(--rojo);font-size:11px;cursor:pointer;background:var(--surface);flex-shrink:0" onclick="dC(${c.id})">×</button></div>`).join("");
+}
+
+
+const CATALOGO={
+  EMBLEMA:{desc:"Block Americano tipo pera — calidad y resistencia estándar",tipos:{BH:{10:"BLOCK EMBLEMA - BH10",12:"BLOCK EMBLEMA - BH12",15:"BLOCK EMBLEMA - BH15",20:"BLOCK EMBLEMA - BH20"},BT:{10:"BLOCK EMBLEMA - BT10",12:"BLOCK EMBLEMA - BT12"}}},
+  FORTALEZA:{desc:"Block estructural alta resistencia (R-90, R-120, R-150)",tipos:{BH:{10:"BLOCK FORTALEZA - BH10 R-90",12:"BLOCK FORTALEZA - BH12 R-90",15:"BLOCK FORTALEZA - BH15 R-90",20:"BLOCK FORTALEZA - BH20 R-90"},BS:{10:"BLOCK FORTALEZA - BS10",12:"BLOCK FORTALEZA - BS12",15:"BLOCK FORTALEZA - BS15",20:"BLOCK FORTALEZA - BS20"}}},
+  AVANCE:{desc:"Block tipo europeo — más ligero, resistencia superior a normativa",tipos:{BH:{10:"BLOCK AVANCE - BH10",12:"BLOCK AVANCE - BH12",15:"BLOCK AVANCE - BH15",20:"BLOCK AVANCE - BH20"}}},
+  PRISMA:{desc:"Block decorativo — variedad de colores y acabados arquitectónicos",tipos:{BH:{10:"BLOCK PRISMA - BH10",12:"BLOCK PRISMA - BH12",15:"BLOCK PRISMA - BH15",20:"BLOCK PRISMA - BH20"}}},
+  VITTA:{desc:"Block cara partida tipo roca — estilo y textura",tipos:{BP:{12:"BLOCK VITTA - BP12 NATURAL",15:"BLOCK VITTA - BP15 NATURAL",20:"BLOCK VITTA - BP20 NATURAL"},BL:{10:"BLOCK VITTA - BL10 NATURAL",12:"BLOCK VITTA - BL12 NATURAL",15:"BLOCK VITTA - BL15 NATURAL"},BM:{10:"BLOCK VITTA - BM10 NATURAL",12:"BLOCK VITTA - BM12 NATURAL",15:"BLOCK VITTA - BM15 NATURAL",20:"BLOCK VITTA - BM20 NATURAL"}}}
+};
+const SUGERENCIA_AUTO={
+  "barda perimetral":{linea:"EMBLEMA",tipo:"BH",medida:"10",razon:"Barda perimetral estándar — BH10 Emblema es la elección más común y rentable."},
+  "casa habitación":{linea:"EMBLEMA",tipo:"BH",medida:"12",razon:"Casa habitación — BH12 Emblema es el más utilizado en vivienda en Tabasco."},
+  "local comercial":{linea:"FORTALEZA",tipo:"BH",medida:"15",razon:"Local comercial — BH15 Fortaleza ofrece mayor resistencia para cargas comerciales."},
+  "nave industrial":{linea:"FORTALEZA",tipo:"BS",medida:"20",razon:"Nave industrial — BS20 Fortaleza sólido para muros portantes de alta exigencia."},
+  "edificio 3-5 niveles":{linea:"FORTALEZA",tipo:"BH",medida:"20",razon:"Edificio multinivel — BH20 Fortaleza R-90 o superior para estructura de varios niveles."},
+  "terreno pre-construcción":{linea:"EMBLEMA",tipo:"BH",medida:"12",razon:"Pre-construcción — sugerir BH12 Emblema como opción estándar para iniciar cotización."},
+  "fraccionamiento":{linea:"EMBLEMA",tipo:"BH",medida:"12",razon:"Fraccionamiento — BH12 Emblema para vivienda. Evaluar volumen por número de lotes."},
+  "remodelacion":{linea:"AVANCE",tipo:"BH",medida:"12",razon:"Remodelación — BH12 Avance, más ligero para ampliaciones sin sobrecargar estructura existente."},
+  "otro":{linea:"EMBLEMA",tipo:"BH",medida:"12",razon:"Verificar con el cliente el tipo de obra para hacer la recomendación correcta."}
+};
+function sugerirProductoAuto(){
+  const sug=SUGERENCIA_AUTO[tO]||SUGERENCIA_AUTO["otro"];
+  document.getElementById("producto-sugerido").innerHTML="<b>Sugerencia:</b> "+sug.razon;
+  // Activar botones visualmente
+  document.querySelectorAll("#btns-medida .btn-prod-sel").forEach(b=>{if(b.textContent.trim()===sug.medida){b.style.background="var(--azul)";b.style.borderColor="var(--azul)";b.style.color="#fff";}else{b.style.background="var(--surface)";b.style.borderColor="var(--gris-borde)";b.style.color="var(--tx)";}});
+  document.querySelectorAll("#btns-tipo .btn-prod-sel").forEach(b=>{const v=b.textContent.includes("("+sug.tipo+")");if(v){b.style.background="var(--azul)";b.style.borderColor="var(--azul)";b.style.color="#fff";}else{b.style.background="var(--surface)";b.style.borderColor="var(--gris-borde)";b.style.color="var(--tx)";}});
+  document.querySelectorAll("#btns-linea .btn-prod-sel").forEach(b=>{const v=b.textContent.trim().startsWith(sug.linea);if(v){b.style.background="var(--azul-claro)";b.style.borderColor="var(--azul)";b.style.color="var(--azul)";}else{b.style.background="var(--surface)";b.style.borderColor="var(--gris-borde)";b.style.color="var(--tx)";}});
+  document.getElementById("prod-medida").value=sug.medida;
+  document.getElementById("prod-tipo").value=sug.tipo;
+  document.getElementById("prod-linea").value=sug.linea;
+  actualizarProducto();
+}
+function actualizarProducto(){
+  const medida=document.getElementById("prod-medida").value;
+  const tipo=document.getElementById("prod-tipo").value;
+  const linea=document.getElementById("prod-linea").value;
+  const el=document.getElementById("prod-resultado");
+  if(!medida||!tipo||!linea){el.style.display="none";return;}
+  const lin=CATALOGO[linea];if(!lin){el.style.display="none";return;}
+  const prod=(lin.tipos[tipo]||{})[medida];
+  if(prod){el.style.display="block";el.innerHTML="<b>Código NetSuite:</b> "+prod+"<br><small style='color:var(--tx3)'>"+lin.desc+"</small>";}
+  else{el.style.display="block";el.innerHTML="<span style='color:var(--rojo)'>Esta combinación no está disponible. Verifica con almacén o elige otra opción.</span>";}
+}
+
+function selMedida(val, btn){
+  document.getElementById("prod-medida").value=val;
+  document.querySelectorAll("#btns-medida .btn-prod-sel").forEach(b=>{b.style.background="var(--surface)";b.style.borderColor="var(--gris-borde)";b.style.color="var(--tx)";});
+  btn.style.background="var(--azul)";btn.style.borderColor="var(--azul)";btn.style.color="#fff";
+  actualizarProducto();
+}
+function selTipo(val, btn){
+  document.getElementById("prod-tipo").value=val;
+  document.querySelectorAll("#btns-tipo .btn-prod-sel").forEach(b=>{b.style.background="var(--surface)";b.style.borderColor="var(--gris-borde)";b.style.color="var(--tx)";});
+  btn.style.background="var(--azul)";btn.style.borderColor="var(--azul)";btn.style.color="#fff";
+  actualizarProducto();
+}
+function selLinea(val, btn){
+  document.getElementById("prod-linea").value=val;
+  document.querySelectorAll("#btns-linea .btn-prod-sel").forEach(b=>{b.style.background="var(--surface)";b.style.borderColor="var(--gris-borde)";b.style.color="var(--tx)";});
+  btn.style.background="var(--azul-claro)";btn.style.borderColor="var(--azul)";btn.style.color="var(--azul)";
+  actualizarProducto();
+}
+
+const SB_URL='https://szrcmvlgxxpmvgrfmxak.supabase.co';
+const SB_KEY='sb_publishable_VOhn9Z2Ev8gYK3nFKr44Sw_VngbAX4N';
+async function sbFetch(path,opts){
+  return fetch(SB_URL+'/rest/v1/'+path,Object.assign({headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}},opts));
+}
+async function sbGet(t,q){const r=await sbFetch(t+(q?'?'+q:''));return r.json();}
+async function sbPost(t,d){
+  const r=await sbFetch(t,{method:'POST',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'return=representation'},body:JSON.stringify(d)});
+  return r.json();
+}
+async function sbDel(t,id){
+  return sbFetch(t+'?id=eq.'+id,{method:'DELETE',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}});
+}
+async function guardarEnSupabase(p){
+  const el=document.getElementById('save-ok');
+  if(!navigator.onLine){el.textContent='Guardado local — sin conexión';return;}
+  try{
+    await sbPost('prospectos',{id:p.id,vendedor:p.vendedor,rol_vendedor:p.rol,tipo_obra:p.tO,etapa:p.eI,etapa_nombre:p.en,criterio:p.criterio,criterio_label:p.critLabel,score:p.rs,nivel:p.lv,dias:p.d,volumen:p.bl,competencia:p.compD,lat:p.la,lng:p.ln,notas:p.notas,observaciones_ia:p.obs,confianza:p.conf,producto_codigo:p.productoCodigo||'',lotes:p.lotes||null,fecha_str:p.fe,contactos:p.contactos||[],visitas:p.visitas||[],foto_thumb:p.th?p.th.substring(0,800):''});
+    el.textContent='Guardado en la nube — '+vendedor+' · '+new Date().toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'});
+    el.style.color='var(--verde)';
+    const si=document.getElementById('sync-st');if(si)si.textContent='en la nube';
+  }catch(e){el.textContent='Guardado local — error de red';el.style.color='var(--amarillo)';}
+}
+async function cargarDeSupabase(){
+  if(!navigator.onLine)return;
+  try{
+    const data=await sbGet('prospectos','order=fecha.desc&limit=200');
+    if(!Array.isArray(data)||!data.length)return;
+    const localIds=new Set(pr.map(p=>p.id));
+    data.forEach(r=>{
+      if(!localIds.has(r.id)){
+        pr.push({id:r.id,tO:r.tipo_obra,eI:r.etapa,en:r.etapa_nombre,criterio:r.criterio,critLabel:r.criterio_label,rs:r.score,lv:r.nivel,d:r.dias,bl:r.volumen,compD:r.competencia,la:r.lat,ln:r.lng,notas:r.notas,obs:r.observaciones_ia,conf:r.confianza,productoCodigo:r.producto_codigo,lotes:r.lotes,fe:r.fecha_str,contactos:r.contactos||[],visitas:r.visitas||[],vendedor:r.vendedor,rol:r.rol_vendedor,col:r.score>=75?'#C43A3A':r.score>=50?'#D4900A':r.score>=25?'#2A5298':'#9A9890',th:r.foto_thumb||''});
+        localIds.add(r.id);
+      }
+    });
+    try{localStorage.setItem('batab_pr',JSON.stringify(pr));}catch(e){}
+    const si=document.getElementById('sync-st');if(si)si.textContent='en la nube';
+  }catch(e){console.log('Supabase no disponible',e);}
+}
+async function regUsuario(nombre,rol){
+  if(!navigator.onLine)return;
+  try{
+    const ex=await sbGet('usuarios','nombre=eq.'+encodeURIComponent(nombre));
+    if(Array.isArray(ex)&&ex.length)return;
+    await sbPost('usuarios',{nombre,rol,estado:'activo',origen:'app'});
+  }catch(e){}
+}
+
+setTimeout(cargarDeSupabase,1500);
+init();
+</script>
+</body>
+</html>
