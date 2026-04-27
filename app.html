@@ -1737,7 +1737,7 @@ function buildResumen(){
   const rendEl = document.getElementById('resumen-rendimiento');
   if(rendEl) rendEl.innerHTML = rendimientoHTML;
 }
-  const d=collectFormData();
+function saveRecord(){
   const linea=d.linea;
   const num=incCounter(linea),year=new Date().getFullYear();
   d.folio=`${linea}-${year}-${String(num).padStart(4,'0')}`;
