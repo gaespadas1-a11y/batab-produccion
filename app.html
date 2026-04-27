@@ -252,7 +252,7 @@ textarea.fn{resize:none;font-size:14px;min-height:70px}
 <!-- INPUTS DE FOTO FIJOS — compatibles con iOS y Android -->
 <input type="file" accept="image/*" capture="environment" id="cam-pesaje" style="display:none" onchange="routeCamPesaje(event)">
 <input type="file" accept="image/*" capture="environment" id="cam-dos" style="display:none" onchange="routeCamDos(event)">
-<div class="screen" id="sl">
+<div class="screen active" id="sl">
   <div class="lg"></div>
   <div class="li">🏭</div>
   <div class="lt">BATAB · Producción</div>
@@ -270,7 +270,7 @@ textarea.fn{resize:none;font-size:14px;min-height:70px}
 </div>
 
 <!-- HOME -->
-<div class="screen active" id="sh">
+<div class="screen" id="sh">
   <div class="topbar"><div class="tl">B</div><div class="tt">Control de Producción</div><div class="tr" id="tbu">—</div></div>
   <div class="scroll enter">
     <div class="hh"><div class="hg" id="hgr">Bienvenido</div><div class="hd" id="hdt"></div></div>
@@ -662,9 +662,9 @@ const CFG={
   sk:'sb_publishable_VOhn9Z2Ev8gYK3nFKr44Sw_VngbAX4N',
   ns:'https://7905968.suitetalk.api.netsuite.com/services/mcp/v1/suiteapp/com.netsuite.mcpstandardtools',
   // PINES OPERADORES — agregar/cambiar según personal real
-  ops:{'1111':{n:'Operador Dosif. Matutino',r:'op'},'2222':{n:'Operador Dosif. Vespertino',r:'op'},'3333':{n:'Operador Dosif. Aux',r:'op'}},
+  ops:{'1001':{n:'Felipe de Jesús Cruz',r:'op'},'1002':{n:'Jose de Jesús García',r:'op'},'1003':{n:'Eduardo López Jiménez',r:'op'},'1004':{n:'Yamil Ramos Vicente',r:'op'}},
   // PINES AUTORIZADOS (supervisor) — los únicos que pueden aprobar y subir a NetSuite
-  sups:{'9999':{n:'Supervisor General',r:'sup'},'8888':{n:'Jefe de Producción',r:'sup'},'0314':{n:'Gerardo Espadas',r:'sup'}},
+  sups:{'5001':{n:'Jesús Miguel Reyes',r:'sup'},'0314':{n:'Gerardo Espadas',r:'sup'}},
 };
 
 // ══ STATE ══
@@ -776,13 +776,6 @@ function startForm(){
   pesajes=[]; pjCount=0;
   step=0;
   document.getElementById('f-fe').value=new Date().toISOString().slice(0,10);
-// AUTO-LOGIN temporal — quitar PIN para prueba
-U={n:'Gerardo Espadas',r:'sup'};
-document.getElementById('tbu').textContent=U.n;
-document.getElementById('hgr').textContent='Gerardo';
-document.getElementById('hdt').textContent=new Date().toLocaleDateString('es-MX',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
-refreshHome();
-show('sh');
   const li=document.getElementById('f-li').value;
   const tu=document.getElementById('f-tu').value;
   fd.lote=genLote(li,tu);
@@ -1229,13 +1222,6 @@ const gv=id=>document.getElementById(id)?.value||'';
 const sv=(id,v)=>{const e=document.getElementById(id);if(e&&v!=null&&v!==0)e.value=v;};
 function selV(id,val){const s=document.getElementById(id);if(!s)return;for(const o of s.options)if(o.value.toLowerCase()===String(val||'').toLowerCase()||o.text.toLowerCase()===String(val||'').toLowerCase()){s.value=o.value;return;}}
 document.getElementById('f-fe').value=new Date().toISOString().slice(0,10);
-// AUTO-LOGIN temporal — quitar PIN para prueba
-U={n:'Gerardo Espadas',r:'sup'};
-document.getElementById('tbu').textContent=U.n;
-document.getElementById('hgr').textContent='Gerardo';
-document.getElementById('hdt').textContent=new Date().toLocaleDateString('es-MX',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
-refreshHome();
-show('sh');
 
 // ══ CAMARA FIJA — compatible iOS y Android ══
 let currentPesajeId = null;
