@@ -692,16 +692,16 @@ async function saveCredential(key, value) {
 
 async function loadRecentLogs() {
   try {
-    const r = await sbFetch('produccion_logs?select=id,created_at,data,netsuite_id,status&order=created_at.desc&limit=10');
+    const r = await sbFetch('produccion_logs?select=id,created_at,payload,record_id,http_status,error&order=created_at.desc&limit=10');
     if (!r.ok) return [];
     return await r.json();
   } catch(e) { return []; }
 }
 
-async function insertLog(logData) {
+async function insertLog(payload) {
   const r = await sbFetch('produccion_logs', {
     method: 'POST',
-    body: JSON.stringify(logData)
+    body: JSON.stringify({ payload, http_status: 0 })
   });
   if (!r.ok) throw new Error('Supabase insert failed: ' + await r.text());
   const rows = await r.json();
@@ -709,10 +709,15 @@ async function insertLog(logData) {
 }
 
 async function updateLog(id, fields) {
+  // Map internal names to real column names
+  const mapped = {};
+  if (fields.status !== undefined) mapped.http_status = fields.status === 'ok' ? 200 : fields.status === 'error' ? 500 : 0;
+  if (fields.netsuite_id !== undefined) mapped.record_id = fields.netsuite_id;
+  if (fields.error !== undefined) mapped.error = fields.error;
   await sbFetch('produccion_logs?id=eq.' + id, {
     method: 'PATCH',
     headers: { 'Prefer': 'return=minimal' },
-    body: JSON.stringify(fields)
+    body: JSON.stringify(mapped)
   });
 }
 
@@ -887,8 +892,8 @@ async function loadHomeData() {
   if (!logs.length) { list.innerHTML = '<div class="empty-state">Sin registros aún</div>'; return; }
   list.innerHTML = '';
   for (const log of logs) {
-    const data = typeof log.data === 'string' ? JSON.parse(log.data) : (log.data || {});
-    const statusClass = log.status === 'ok' ? 'ok' : log.status === 'error' ? 'err' : 'pending';
+    const data = typeof log.payload === 'string' ? JSON.parse(log.payload) : (log.payload || {});
+    const statusClass = log.http_status === 200 ? 'ok' : log.http_status === 500 ? 'err' : 'pending';
     const date = new Date(log.created_at).toLocaleDateString('es-MX', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' });
     list.innerHTML += `
       <div class="log-item">
@@ -896,7 +901,7 @@ async function loadHomeData() {
         <div class="log-info">
           <div class="log-name">${data.operador || '—'} · ${data.maquina || '—'}</div>
           <div class="log-meta">${data.producto || ''} · ${date}</div>
-          ${log.netsuite_id ? `<div class="log-id">NS #${log.netsuite_id}</div>` : ''}
+          ${log.record_id ? `<div class="log-id">NS #${log.record_id}</div>` : ''}
         </div>
       </div>`;
   }
@@ -1087,7 +1092,7 @@ async function submitRecord() {
   // Check NS credentials
   if (!creds.ns_consumer_key || !creds.ns_consumer_secret || !creds.ns_token_id || !creds.ns_token_secret) {
     // Save to Supabase only
-    if (logId) await updateLog(logId, { status: 'pending_ns', netsuite_id: null });
+    if (logId) await updateLog(logId, { status: 'pending_ns', netsuite_id: null, error: 'Sin credenciales NS' });
     hideLoading();
     setSubmitStatus('ok', '✓ Guardado en Supabase (sin credenciales NS)\nConfigura NetSuite en Ajustes para sincronizar.', null);
     btn.disabled = false;
