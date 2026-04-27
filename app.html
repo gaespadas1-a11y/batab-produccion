@@ -451,35 +451,49 @@ textarea.fn{resize:none;font-size:14px;min-height:70px}
           <tr>
             <td><select class="fn" id="mp-ce-sel" style="font-size:14px;padding:6px 8px" onchange="recalc()">
               <option value="">— Cemento —</option>
-              <option value="MATERIAS PRIMA - CEMENTO PORTLAND - CPC-30">CPC-30</option>
-              <option value="MATERIAS PRIMA - CEMENTO PORTLAND - CPC-30R-RS">CPC-30R-RS</option>
-              <option value="MATERIAS PRIMA - CEMENTO PORTLAND - CPC-40">CPC-40</option>
-              <option value="MATERIAS PRIMA - CEMENTO PORTLAND - CPC-40R">CPC-40R</option>
-              <option value="MATERIAS PRIMA - CEMENTO PORTLAND - CPC-40-RS">CPC-40-RS</option>
-              <option value="CEMENTO CPC 40 RS GRANEL">CPC 40 RS Granel</option>
+              <option value="CPC-30">CPC-30</option>
+              <option value="CPC-30R-RS">CPC-30R-RS</option>
+              <option value="CPC-40">CPC-40</option>
+              <option value="CPC-40R">CPC-40R</option>
+              <option value="CPC-40R-RS">CPC-40R-RS</option>
             </select></td>
             <td class="ti"><input class="fn" type="number" id="m-ce" placeholder="0" oninput="recalc()"></td>
             <td class="tu">kg</td>
           </tr>
-          <tr>
-            <td><select class="fn" id="mp-ar-sel" style="font-size:14px;padding:6px 8px" onchange="recalc()">
-              <option value="">— Agregado fino —</option>
-              <option value="MATERIAS PRIMAS - AGREGADOS - ARENA 3/16 AFI">Arena 3/16 AFI</option>
-              <option value="MATERIAS PRIMAS - AGREGADOS - POLVO 3/16 AFI">Polvo 3/16 AFI</option>
-              <option value="MATERIAS PRIMAS - AGREGADOS - SELLO1/4">Sello 1/4</option>
-              <option value="MATERIAS PRIMAS - AGREGADOS - SELLO3/8">Sello 3/8</option>
+          <!-- TOLVA 1 -->
+          <tr style="background:rgba(56,142,210,.06)">
+            <td><select class="fn" id="t1-mat" style="font-size:14px;padding:6px 8px;border-left:3px solid #378ADD" onchange="recalc()">
+              <option value="">⚙️ Tolva 1 — material</option>
+              <option value="Arena 3/16 AFI">Arena 3/16 AFI</option>
+              <option value="Polvo 3/16 AFI">Polvo 3/16 AFI</option>
+              <option value="Sello 1/4">Sello 1/4</option>
+              <option value="Sello 3/8">Sello 3/8</option>
             </select></td>
-            <td class="ti"><input class="fn" type="number" id="m-ar" placeholder="0" oninput="recalc()"></td>
+            <td class="ti"><input class="fn" type="number" id="t1-kg" placeholder="0" oninput="recalc()"></td>
             <td class="tu">kg</td>
           </tr>
-          <tr>
-            <td><select class="fn" id="mp-gr-sel" style="font-size:14px;padding:6px 8px" onchange="recalc()">
-              <option value="">— Grava —</option>
-              <option value="GRAVA 3/8">Grava 3/8</option>
-              <option value="GRAVA 3/4">Grava 3/4</option>
-              <option value="BATAB INTEGRAL AGREGADOS-GRAVA DE 1/2 PARA CONCRETO">Grava 1/2</option>
+          <!-- TOLVA 2 -->
+          <tr style="background:rgba(56,142,210,.06)">
+            <td><select class="fn" id="t2-mat" style="font-size:14px;padding:6px 8px;border-left:3px solid #378ADD" onchange="recalc()">
+              <option value="">⚙️ Tolva 2 — material (opcional)</option>
+              <option value="Arena 3/16 AFI">Arena 3/16 AFI</option>
+              <option value="Polvo 3/16 AFI">Polvo 3/16 AFI</option>
+              <option value="Sello 1/4">Sello 1/4</option>
+              <option value="Sello 3/8">Sello 3/8</option>
             </select></td>
-            <td class="ti"><input class="fn" type="number" id="m-gr" placeholder="0" oninput="recalc()"></td>
+            <td class="ti"><input class="fn" type="number" id="t2-kg" placeholder="0" oninput="recalc()"></td>
+            <td class="tu">kg</td>
+          </tr>
+          <!-- TOLVA 3 -->
+          <tr style="background:rgba(56,142,210,.06)">
+            <td><select class="fn" id="t3-mat" style="font-size:14px;padding:6px 8px;border-left:3px solid #378ADD" onchange="recalc()">
+              <option value="">⚙️ Tolva 3 — material (opcional)</option>
+              <option value="Arena 3/16 AFI">Arena 3/16 AFI</option>
+              <option value="Polvo 3/16 AFI">Polvo 3/16 AFI</option>
+              <option value="Sello 1/4">Sello 1/4</option>
+              <option value="Sello 3/8">Sello 3/8</option>
+            </select></td>
+            <td class="ti"><input class="fn" type="number" id="t3-kg" placeholder="0" oninput="recalc()"></td>
             <td class="tu">kg</td>
           </tr>
           <tr>
@@ -490,12 +504,11 @@ textarea.fn{resize:none;font-size:14px;min-height:70px}
           <tr>
             <td><select class="fn" id="mp-ad-sel" style="font-size:14px;padding:6px 8px" onchange="recalc()">
               <option value="">— Aditivo —</option>
-              <option value="MATERIAS PRIMAS - ADITIVOS - EUCOLITH DC">Eucolith DC</option>
-              <option value="MATERIAS PRIMAS - ADITIVOS - EUCOLITH R">Eucolith R</option>
-              <option value="EUCOLITHR GRANEL">Eucolithr Granel</option>
+              <option value="Eucolith DC">Eucolith DC</option>
+              <option value="Eucolith R">Eucolith R</option>
             </select></td>
             <td class="ti"><input class="fn" type="number" id="m-ad" placeholder="0" step="1" oninput="recalc()"></td>
-            <td class="tu">kg</td>
+            <td class="tu">cc</td>
           </tr>
           <!-- PIGMENTOS (solo para blocks de color) -->
           <tr id="row-pig" style="display:none">
