@@ -252,7 +252,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);
 /* ── BOTTOM BAR ── */
 .bottom-bar{padding:12px 16px;background:var(--bg2);border-top:2px solid var(--border);box-shadow:0 -2px 12px rgba(27,58,107,.08);
   display:flex;gap:10px;position:sticky;bottom:0;}
-.btn{flex:1;padding:14px;border-radius:var(--radius);font-size:15px;font-weight:600;
+.btn{flex:1;padding:14px;border-radius:var(--radius);font-size:15px;font-weight:600;touch-action:manipulation;-webkit-tap-highlight-color:transparent;
   cursor:pointer;transition:all .15s;border:none;font-family:'IBM Plex Sans',sans-serif;
   display:flex;align-items:center;justify-content:center;gap:6px;}
 .btn-primary{background:#FFCD24;color:#000000;border:2px solid #093F89;font-weight:700;}
@@ -750,7 +750,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);
   </div>
   <div class="bottom-bar">
     <button class="btn btn-secondary" id="btn-prev" onclick="prevStep()" style="display:none;">← Atrás</button>
-    <button class="btn btn-primary" id="btn-next" onclick="nextStep()">Siguiente →</button>
+    <button class="btn btn-primary" id="btn-next">Siguiente →</button>
   </div>
 </div>
 
@@ -1193,10 +1193,12 @@ function updateStepUI(){
   btnNext.disabled=false;
   if(s===5){
     btnNext.textContent='✓ Guardar registro';
-    btnNext.setAttribute('onclick','saveRecord()');  // directo, sin validaciones
+    btnNext.onclick = null;
+    btnNext.onclick = function(){ saveRecord(); };  // .onclick directo — funciona en iOS Safari
   }else{
     btnNext.textContent='Siguiente →';
-    btnNext.setAttribute('onclick','nextStep()');
+    btnNext.onclick = null;
+    btnNext.onclick = function(){ nextStep(); };
   }
   document.getElementById('btn-prev').style.display=s>1?'':'none';
   document.getElementById('form-content').scrollTop=0;
