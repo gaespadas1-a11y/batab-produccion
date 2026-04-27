@@ -253,39 +253,31 @@ textarea.fn{resize:none;font-size:14px;min-height:70px}
 <input type="file" accept="image/*" capture="environment" id="cam-pesaje" style="display:none" onchange="routeCamPesaje(event)">
 <input type="file" accept="image/*" capture="environment" id="cam-dos" style="display:none" onchange="routeCamDos(event)">
 <div class="screen active" id="sl">
-  <div class="lg"></div>
-  <div class="li">🏭</div>
-  <div class="lt">BATAB · Producción</div>
-  <div class="ls">Solo personal autorizado</div>
-  <div class="pd-row"><div class="pd" id="p0"></div><div class="pd" id="p1"></div><div class="pd" id="p2"></div><div class="pd" id="p3"></div></div>
-  <div class="pp">
-    <button class="pk" ontouchstart="pp('1')">1</button><button class="pk" ontouchstart="pp('2')">2</button><button class="pk" ontouchstart="pp('3')">3</button>
-    <button class="pk" ontouchstart="pp('4')">4</button><button class="pk" ontouchstart="pp('5')">5</button><button class="pk" ontouchstart="pp('6')">6</button>
-    <button class="pk" ontouchstart="pp('7')">7</button><button class="pk" ontouchstart="pp('8')">8</button><button class="pk" ontouchstart="pp('9')">9</button>
-    <button class="pk" ontouchstart="pp('0')" style="font-size:22px;font-weight:600;color:var(--tx)">0</button>
-    <button class="pk sm" ontouchstart="showSup()">SUP</button>
-    <button class="pk sm" style="font-size:20px;color:var(--tx2)" ontouchstart="pp('⌫')">⌫</button>
+  <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:32px;gap:20px">
+    <div style="width:80px;height:80px;background:#F5A623;border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:36px">🏭</div>
+    <div style="text-align:center">
+      <div style="font-size:24px;font-weight:700;color:var(--tx)">BATAB · Producción</div>
+      <div style="font-size:14px;color:var(--tx2);margin-top:4px">Solo personal autorizado</div>
+    </div>
+    <div style="width:100%;max-width:300px;display:flex;flex-direction:column;gap:12px">
+      <div style="font-size:14px;color:var(--tx2);font-weight:600;text-align:center">Ingresa tu PIN de 4 dígitos</div>
+      <input type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" id="pin-text"
+        style="width:100%;height:56px;border-radius:14px;border:1.5px solid var(--bdr2);
+        background:var(--bg2);color:var(--tx);font-size:28px;font-weight:700;
+        text-align:center;letter-spacing:8px;outline:none;padding:0 16px;
+        -webkit-appearance:none;"
+        placeholder="••••"
+        oninput="if(this.value.length===4)checkPinText()">
+      <button onclick="checkPinText()"
+        style="width:100%;height:52px;border-radius:14px;background:#F5A623;
+        border:none;color:#000;font-size:16px;font-weight:700;cursor:pointer;
+        -webkit-appearance:none;">
+        Entrar
+      </button>
+      <div id="pin-error" style="color:#F04E4E;font-size:13px;text-align:center;min-height:18px"></div>
+    </div>
   </div>
-  <div class="pm" id="perr">PIN incorrecto — intenta de nuevo</div>
-</div>
 
-<!-- HOME -->
-<div class="screen" id="sh">
-  <div class="topbar"><div class="tl">B</div><div class="tt">Control de Producción</div><div class="tr" id="tbu">—</div></div>
-  <div class="scroll enter">
-    <div class="hh"><div class="hg" id="hgr">Bienvenido</div><div class="hd" id="hdt"></div></div>
-    <div class="kpi-row">
-      <div class="kc"><div class="kv" id="kp">—</div><div class="kl">Pzas hoy</div></div>
-      <div class="kc"><div class="kv" id="kpd" style="color:var(--red)">—</div><div class="kl">Pendientes aprobación</div></div>
-    </div>
-    <div class="stl">Acciones</div>
-    <div class="ag">
-      <div class="ac h" onclick="startForm()"><div class="ai">📸</div><div class="al2">Nueva captura</div><div class="as">Foto · Calcular · Guardar</div></div>
-      <div class="ac s" onclick="openSup()"><div class="ai">✅</div><div class="al2">Supervisor</div><div class="as">Revisar · Aprobar · ERP</div></div>
-    </div>
-    <div class="stl">Registros recientes</div>
-    <div id="hlist"></div>
-  </div>
 </div>
 
 <!-- FORM -->
@@ -823,6 +815,37 @@ function nextStep(){
   if(step<4)renderStep(step+1);
 }
 function prevStep(){if(step>0)renderStep(step-1);}
+
+
+// ══ LOGIN CON INPUT NATIVO — compatible iOS y Android ══
+function checkPinText(){
+  const val = document.getElementById('pin-text').value.trim();
+  const err = document.getElementById('pin-error');
+  // Check operadores
+  if(CFG.ops[val]){
+    U=CFG.ops[val];
+    document.getElementById('tbu').textContent=U.n;
+    document.getElementById('hgr').textContent=U.n.split(' ')[0];
+    document.getElementById('hdt').textContent=new Date().toLocaleDateString('es-MX',
+      {weekday:'long',year:'numeric',month:'long',day:'numeric'});
+    refreshHome();show('sh');
+    return;
+  }
+  // Check supervisores
+  if(CFG.sups[val]){
+    U=CFG.sups[val];
+    document.getElementById('tbu').textContent=U.n;
+    document.getElementById('hgr').textContent=U.n.split(' ')[0];
+    document.getElementById('hdt').textContent=new Date().toLocaleDateString('es-MX',
+      {weekday:'long',year:'numeric',month:'long',day:'numeric'});
+    refreshHome();show('sh');
+    return;
+  }
+  // Wrong PIN
+  err.textContent='PIN incorrecto. Intenta de nuevo.';
+  document.getElementById('pin-text').value='';
+  setTimeout(()=>err.textContent='', 2000);
+}
 
 // ══ MULTI-PESAJE ══
 // Array of pesajes: [{id, ppz, to, pl, pzs, img}]
