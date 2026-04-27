@@ -264,6 +264,9 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
       <button class="pin-btn" onclick="pinPress('0')">0</button>
       <button class="pin-btn del" onclick="pinDel()">⌫</button>
     </div>
+    <button onclick="resetPin()" style="background:none;border:none;color:var(--text3);font-size:12px;cursor:pointer;padding:8px 12px;margin-top:8px;font-family:'Nunito',sans-serif;text-decoration:underline">
+      Olvidé mi PIN — restablecer a 1234
+    </button>
   </div>
 </div>
 
@@ -834,6 +837,21 @@ async function verifyPin() {
 }
 
 function logout() { showScreen('pin'); pinInput = ''; updatePinDots(); }
+
+async function resetPin() {
+  if (!confirm('¿Restablecer PIN a 1234?')) return;
+  creds.pin_hash = await hashPin('1234');
+  try {
+    await saveCredential('pin_hash', creds.pin_hash);
+    toast('PIN restablecido a 1234', 'ok');
+  } catch(e) {
+    // Even if Supabase fails, local creds are updated
+    toast('PIN restablecido (local)', 'ok');
+  }
+  pinInput = '';
+  updatePinDots();
+  document.getElementById('pinError').textContent = '';
+}
 
 /* ══════════════════════════════════════════════
    SCREEN NAV
