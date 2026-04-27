@@ -658,20 +658,35 @@ async function sbFetch(path, options = {}) {
 
 async function loadCredentials() {
   try {
-    const r = await sbFetch('app_credentials?select=key,value');
+    const r = await sbFetch('app_credentials?id=eq.batab_main&select=ns_ck,ns_cs,ns_ti,ns_ts,pin_hash,operators');
     if (!r.ok) return;
     const rows = await r.json();
-    for (const row of rows) {
-      if (row.key in creds) creds[row.key] = row.value;
-    }
+    if (!rows.length) return;
+    const row = rows[0];
+    if (row.ns_ck)     creds.ns_consumer_key    = row.ns_ck;
+    if (row.ns_cs)     creds.ns_consumer_secret  = row.ns_cs;
+    if (row.ns_ti)     creds.ns_token_id         = row.ns_ti;
+    if (row.ns_ts)     creds.ns_token_secret     = row.ns_ts;
+    if (row.pin_hash)  creds.pin_hash            = row.pin_hash;
+    if (row.operators) creds.operators           = row.operators;
   } catch(e) { console.warn('Could not load credentials from Supabase:', e); }
 }
 
 async function saveCredential(key, value) {
-  await sbFetch('app_credentials', {
-    method: 'POST',
-    headers: { 'Prefer': 'resolution=merge-duplicates,return=minimal' },
-    body: JSON.stringify({ key, value })
+  const colMap = {
+    ns_consumer_key:    'ns_ck',
+    ns_consumer_secret: 'ns_cs',
+    ns_token_id:        'ns_ti',
+    ns_token_secret:    'ns_ts',
+    pin_hash:           'pin_hash',
+    operators:          'operators'
+  };
+  const col = colMap[key];
+  if (!col) return;
+  await sbFetch('app_credentials?id=eq.batab_main', {
+    method: 'PATCH',
+    headers: { 'Prefer': 'return=minimal' },
+    body: JSON.stringify({ [col]: value })
   });
 }
 
@@ -1290,10 +1305,19 @@ async function saveSettings() {
   }
 
   try {
-    const keys = ['supabase_url','supabase_key','ns_consumer_key','ns_consumer_secret','ns_token_id','ns_token_secret','operators','pin_hash'];
-    for (const k of keys) {
-      if (creds[k] !== undefined) await saveCredential(k, creds[k]);
-    }
+    const r = await sbFetch('app_credentials?id=eq.batab_main', {
+      method: 'PATCH',
+      headers: { 'Prefer': 'return=minimal' },
+      body: JSON.stringify({
+        ns_ck:     creds.ns_consumer_key,
+        ns_cs:     creds.ns_consumer_secret,
+        ns_ti:     creds.ns_token_id,
+        ns_ts:     creds.ns_token_secret,
+        operators: creds.operators,
+        ...(creds.pin_hash ? { pin_hash: creds.pin_hash } : {})
+      })
+    });
+    if (!r.ok) throw new Error(await r.text());
     hideLoading();
     toast('✓ Ajustes guardados en Supabase', 'ok');
   } catch(e) {
