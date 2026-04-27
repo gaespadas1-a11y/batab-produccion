@@ -1188,8 +1188,11 @@ function updateStepUI(){
   }
   document.getElementById('form-step-title').textContent=STEP_TITLES[s-1];
   document.getElementById('form-step-sub').textContent='Paso '+s+' de 5';
+  const btnNext = document.getElementById('btn-next');
+  btnNext.style.display='';
+  btnNext.disabled=false;  // SIEMPRE habilitar al cambiar de paso
+  btnNext.textContent=s===5?'✓ Guardar registro':'Siguiente →';
   document.getElementById('btn-prev').style.display=s>1?'':'none';
-  document.getElementById('btn-next').textContent=s===5?'✓ Guardar registro':'Siguiente →';
   document.getElementById('form-content').scrollTop=0;
   if(s===5)buildResumen();
 }
@@ -1612,6 +1615,8 @@ function recalcDiff(inputId, teorico){
 }
 
 function checkTotalesValidos(){
+  // Solo bloquear en el Paso 4 — no afectar otros pasos
+  if(S.currentStep !== 4) return;
   let hayErrores = false;
   TOTALES_CAMPOS.forEach(c=>{
     const el = document.getElementById(c.inputId);
@@ -1623,7 +1628,8 @@ function checkTotalesValidos(){
     }
   });
   const btn = document.getElementById('btn-next');
-  if(btn && document.getElementById('totales-ocr-section')?.style.display !== 'none'){
+  const seccionVisible = document.getElementById('totales-ocr-section')?.style.display !== 'none';
+  if(btn && seccionVisible){
     btn.disabled = hayErrores;
     btn.title = hayErrores ? 'Corrige los valores marcados en rojo antes de continuar' : '';
     const warn = document.getElementById('totales-rango-warn');
@@ -1751,7 +1757,17 @@ function saveRecord(){
     dosiPhoto:S.dosiPhotoB64,createdAt:new Date().toISOString(),piezasEstimadas:S.piezasEstimadas||null,pesoHumedo:S.pesoHumedo||null,
     totalesConsumo:S.totalesOCR||null,
     status:'pending',netsuiteWO:null,approvedBy:null,approvedAt:null};
-  const recs=getRecords();recs.push(rec);saveRecords(recs);
+  const recs=getRecords();recs.push(rec);
+  try{
+    saveRecords(recs);
+  }catch(e){
+    // localStorage lleno — guardar sin fotos para no perder el registro
+    const recSinFotos={...rec,dosiPhoto:null,pesajes:rec.pesajes?.map(p=>({...p,photo:null,photoVacia:null,photoLlena:null}))||[]};
+    const recsSinFotos=getRecords();recsSinFotos.push(recSinFotos);
+    try{ saveRecords(recsSinFotos); }
+    catch(e2){ showToast('Error al guardar: almacenamiento lleno','red'); return; }
+    showToast('Guardado sin fotos — almacenamiento limitado','red');
+  }
   document.getElementById('success-folio').textContent=d.folio;
   showScreen('screen-success');
 }
