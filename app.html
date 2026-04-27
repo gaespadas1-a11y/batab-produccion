@@ -821,30 +821,26 @@ function prevStep(){if(step>0)renderStep(step-1);}
 function checkPinText(){
   const val = document.getElementById('pin-text').value.trim();
   const err = document.getElementById('pin-error');
-  // Check operadores
-  if(CFG.ops[val]){
-    U=CFG.ops[val];
-    document.getElementById('tbu').textContent=U.n;
-    document.getElementById('hgr').textContent=U.n.split(' ')[0];
-    document.getElementById('hdt').textContent=new Date().toLocaleDateString('es-MX',
+  let found = null;
+  if(CFG.ops[val]) found = CFG.ops[val];
+  else if(CFG.sups[val]) found = CFG.sups[val];
+  if(found){
+    U = found;
+    // Update UI elements safely
+    const tbu = document.getElementById('tbu');
+    const hgr = document.getElementById('hgr');
+    const hdt = document.getElementById('hdt');
+    if(tbu) tbu.textContent = U.n;
+    if(hgr) hgr.textContent = U.n.split(' ')[0];
+    if(hdt) hdt.textContent = new Date().toLocaleDateString('es-MX',
       {weekday:'long',year:'numeric',month:'long',day:'numeric'});
-    refreshHome();show('sh');
+    try{refreshHome();}catch(e){}
+    show('sh');
     return;
   }
-  // Check supervisores
-  if(CFG.sups[val]){
-    U=CFG.sups[val];
-    document.getElementById('tbu').textContent=U.n;
-    document.getElementById('hgr').textContent=U.n.split(' ')[0];
-    document.getElementById('hdt').textContent=new Date().toLocaleDateString('es-MX',
-      {weekday:'long',year:'numeric',month:'long',day:'numeric'});
-    refreshHome();show('sh');
-    return;
-  }
-  // Wrong PIN
-  err.textContent='PIN incorrecto. Intenta de nuevo.';
-  document.getElementById('pin-text').value='';
-  setTimeout(()=>err.textContent='', 2000);
+  if(err) err.textContent = 'PIN incorrecto. Intenta de nuevo.';
+  document.getElementById('pin-text').value = '';
+  setTimeout(()=>{ if(err) err.textContent=''; }, 2000);
 }
 
 // ══ MULTI-PESAJE ══
