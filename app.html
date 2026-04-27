@@ -908,6 +908,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);
         <div class="form-hint">Si no tienes el WO ahora, puedes aprobar sin él. Se puede agregar después.</div>
         <div class="rv-actions">
           <button class="btn btn-primary" onclick="doApprove(true)" id="rv-btn-approve">✓ Aprobar y subir a NetSuite</button>
+          <button class="btn btn-ghost" onclick="doApprove(false)">✓ Solo aprobar (sin subir)</button>
           <button class="btn btn-danger" onclick="doReject()">✗ Rechazar — solicitar corrección</button>
         </div>
       </div>
@@ -940,6 +941,10 @@ html,body{height:100%;background:var(--bg);color:var(--text);
       <div class="section-title" style="margin-bottom:12px;">NetSuite · Integración</div>
       <div class="settings-section">
         <div class="settings-row" style="flex-direction:column;align-items:flex-start;gap:10px;">
+          <div><div class="settings-label">URL del RESTlet</div><div class="settings-desc">Copia la URL exacta del deployment en NetSuite › Customization › Scripts › Deployments</div></div>
+          <input type="url" class="form-input" id="ns-url-input" placeholder="https://7905968.restlets.api.netsuite.com/app/site/hosting/restlet.nl?script=XXX&amp;deploy=1" autocomplete="off">
+        </div>
+        <div class="settings-row" style="flex-direction:column;align-items:flex-start;gap:10px;margin-top:10px;">
           <div class="settings-label">Consumer Key</div>
           <input type="password" class="form-input" id="ns-ck-input" placeholder="Consumer Key (TBA)" autocomplete="off">
         </div>
@@ -1750,7 +1755,7 @@ function checkTotalesValidos(){
 
 function calcPiezasEstimadas(){
   const pesoHumedo = parseFloat(document.getElementById('t-peso-humedo').value)||0;
-  if(!pesoHumedo) {
+  if(!pesoHumedo || !S.totalesOCR) {
     document.getElementById('t-piezas-estimadas').textContent='—';
     return;
   }
@@ -2103,9 +2108,8 @@ function renderReviewScreen(rec){
 
   // Btn state si ya fue aprobado
   const approved=rec.status==='approved';
-  const uploaded=rec.netsuiteStatus==='uploaded';
-  document.getElementById('rv-btn-approve').disabled=uploaded;
-  document.getElementById('rv-btn-approve').textContent=uploaded?'✓ Ya subido a NetSuite':approved?'↑ Reintentar subida a NetSuite':'✓ Aprobar y subir a NetSuite';
+  document.getElementById('rv-btn-approve').disabled=approved;
+  document.getElementById('rv-btn-approve').textContent=approved?'✓ Ya aprobado':'✓ Aprobar y subir a NetSuite';
   const chip=document.getElementById('rv-status-chip');
   if(approved){chip.style.background='rgba(34,197,94,.15)';chip.style.color='var(--green)';chip.textContent='APROBADO';}
   else{chip.style.background='rgba(234,179,8,.15)';chip.style.color='var(--yellow)';chip.textContent='PENDIENTE';}
@@ -2152,15 +2156,14 @@ async function doApprove(withNetsuite){
   recs[idx].approvedAt=new Date().toISOString();
   recs[idx].netsuiteWO=woId||null;
   recs[idx].checksCompleted=Object.values(S.checks).filter(Boolean).length;
-  if(withNetsuite){
+  if(withNetsuite&&woId){
     showLoading('Subiendo a NetSuite...');
     try{
         const nsResult = await uploadToNetsuite(recs[idx]);
       recs[idx].netsuiteStatus='uploaded';
       recs[idx].netsuiteRecordId=nsResult.recordId||null;
-      recs[idx].netsuiteWO=nsResult.recordId||null;
       saveRecords(recs);hideLoading();
-      showToast('✅ Subido a NetSuite · ID: '+(nsResult.recordId||'—'),'green');
+      showToast('✅ Aprobado y subido a NetSuite · ID: '+(nsResult.recordId||'—'),'green');
     }catch(e){recs[idx].netsuiteStatus='error';saveRecords(recs);hideLoading();showToast('Aprobado · Error NetSuite: '+e.message,'red');}
   }else{saveRecords(recs);showToast('✓ Registro aprobado','green');}
   // Refresh review screen
@@ -2186,6 +2189,7 @@ function goSettings(){
   document.getElementById('settings-records-count').textContent=getRecords().length;
   // Cargar estado NS
   const cfg=getNsConfig();
+  document.getElementById('ns-url-input').value=cfg.url||'';
   if(cfg.ck){['ns-ck-input','ns-cs-input','ns-ti-input','ns-ts-input'].forEach(id=>{document.getElementById(id).value='•'.repeat(20);});}
   const nsStatus=document.getElementById('ns-config-status');
   if(nsStatus) nsStatus.innerHTML=cfg.ck?'<span style="color:var(--green);">✅ Credenciales configuradas</span>':'<span style="color:var(--red);">⚠️ Sin credenciales TBA</span>';
@@ -2198,7 +2202,7 @@ function saveOcrKey(){
   document.getElementById('ocr-status-tag').className='tag tag-green';
   document.getElementById('ocr-status-tag').textContent='Configurado ✓';
   document.getElementById('ocr-key-status').innerHTML='<span style="color:var(--green);font-size:12px;">✅ Guardado en este dispositivo</span>';
-  showToast('API key guardada','green');
+  showToast('API key guardada','green');saveCredsToSupabase();
 }
 function clearOcrKey(){localStorage.removeItem('batab_ocr_key');document.getElementById('ocr-key-input').value='';document.getElementById('ocr-status-tag').className='tag tag-red';document.getElementById('ocr-status-tag').textContent='Sin configurar';document.getElementById('ocr-key-status').innerHTML='';showToast('Clave eliminada','red');}
 function exportData(){
@@ -2211,6 +2215,7 @@ function clearApproved(){saveRecords(getRecords().filter(r=>r.status!=='approved
 // ═══════ NETSUITE TBA CONFIG ═══════
 const getNsConfig=()=>{
   return {
+    url:   localStorage.getItem('batab_ns_url')||'',
     ck:    localStorage.getItem('batab_ns_ck')||'',
     cs:    localStorage.getItem('batab_ns_cs')||'',
     ti:    localStorage.getItem('batab_ns_ti')||'',
@@ -2218,11 +2223,14 @@ const getNsConfig=()=>{
   };
 };
 function saveNsConfig(){
+  const url=document.getElementById('ns-url-input').value.trim();
   const ck=document.getElementById('ns-ck-input').value.trim();
   const cs=document.getElementById('ns-cs-input').value.trim();
   const ti=document.getElementById('ns-ti-input').value.trim();
   const ts=document.getElementById('ns-ts-input').value.trim();
+  if(!url){showToast('Ingresa la URL del RESTlet','red');return;}
   if(!ck||!cs||!ti||!ts){showToast('Completa las 4 credenciales TBA','red');return;}
+  localStorage.setItem('batab_ns_url',url);
   localStorage.setItem('batab_ns_ck',ck);
   localStorage.setItem('batab_ns_cs',cs);
   localStorage.setItem('batab_ns_ti',ti);
@@ -2233,11 +2241,11 @@ function saveNsConfig(){
   document.getElementById('ns-ti-input').value='•'.repeat(20);
   document.getElementById('ns-ts-input').value='•'.repeat(20);
   document.getElementById('ns-config-status').innerHTML='<span style="color:var(--green);">✅ Credenciales guardadas en este dispositivo</span>';
-  showToast('Credenciales NetSuite guardadas','green');
+  showToast('Credenciales NetSuite guardadas','green');saveCredsToSupabase();
 }
 function clearNsConfig(){
-  ['batab_ns_ck','batab_ns_cs','batab_ns_ti','batab_ns_ts'].forEach(k=>localStorage.removeItem(k));
-  ['ns-ck-input','ns-cs-input','ns-ti-input','ns-ts-input'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  ['batab_ns_url','batab_ns_ck','batab_ns_cs','batab_ns_ti','batab_ns_ts'].forEach(k=>localStorage.removeItem(k));
+  ['ns-url-input','ns-ck-input','ns-cs-input','ns-ti-input','ns-ts-input'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   document.getElementById('ns-config-status').textContent='';
   showToast('Credenciales NetSuite eliminadas','red');
 }
@@ -2274,73 +2282,67 @@ async function buildOAuthHeader(method, url){
   const headerParts=Object.keys(params)
     .map(k=>enc(k)+'="'+enc(params[k])+'"').join(', ');
   // Extraer account ID de la URL
-  const accountMatch=url.match(/^https?:\/\/(\d{7,8})\./);
+  const accountMatch=url.match(/(\d{7,8})\.(?:restlets|suitetalk)/);
   const realm=accountMatch?accountMatch[1]:'7905968';
   return 'OAuth realm="'+realm+'", '+headerParts;
 }
 
-// ═══════ REST RECORD API + SUPABASE LOG ═══════
-const NS_REST_URL='https://7905968.suitetalk.api.netsuite.com/services/rest/record/v1/customrecord_batab_produccion';
+// ═══════ CONFIGURACION SUPABASE + REST NETSUITE ═══════
 const SB_URL='https://szrcmvlgxxpmvgrfmxak.supabase.co';
 const SB_KEY='sb_publishable_VOhn9Z2Ev8gYK3nFKr44Sw_VngbAX4N';
+const NS_REST_URL='https://7905968.suitetalk.api.netsuite.com/services/rest/record/v1/customrecord_batab_produccion';
 
-async function logToSupabase(log){
+async function saveCredsToSupabase(){
   try{
-    await fetch(SB_URL+'/rest/v1/produccion_logs',{
-      method:'POST',
-      headers:{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'return=minimal'},
-      body:JSON.stringify({folio:log.folio||null,http_status:log.status||null,location:log.location||null,record_id:log.recordId||null,error:log.error||null,payload:log.payload?JSON.parse(log.payload):null,response_body:log.body||null})
-    });
-  }catch(e){console.warn('Supabase log error:',e.message);}
+    const data={id:'batab_main',ocr_key:localStorage.getItem('batab_ocr_key')||null,ns_ck:localStorage.getItem('batab_ns_ck')||null,ns_cs:localStorage.getItem('batab_ns_cs')||null,ns_ti:localStorage.getItem('batab_ns_ti')||null,ns_ts:localStorage.getItem('batab_ns_ts')||null,updated_at:new Date().toISOString()};
+    await fetch(SB_URL+'/rest/v1/app_credentials',{method:'POST',headers:{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'resolution=merge-duplicates'},body:JSON.stringify(data)});
+  }catch(e){console.warn('SB save:',e.message);}
+}
+
+async function loadCredsFromSupabase(){
+  try{
+    const res=await fetch(SB_URL+'/rest/v1/app_credentials?id=eq.batab_main',{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}});
+    if(!res.ok)return;
+    const rows=await res.json();
+    if(!rows||!rows.length)return;
+    const d=rows[0];
+    if(d.ocr_key&&!localStorage.getItem('batab_ocr_key'))localStorage.setItem('batab_ocr_key',d.ocr_key);
+    if(d.ns_ck&&!localStorage.getItem('batab_ns_ck'))localStorage.setItem('batab_ns_ck',d.ns_ck);
+    if(d.ns_cs&&!localStorage.getItem('batab_ns_cs'))localStorage.setItem('batab_ns_cs',d.ns_cs);
+    if(d.ns_ti&&!localStorage.getItem('batab_ns_ti'))localStorage.setItem('batab_ns_ti',d.ns_ti);
+    if(d.ns_ts&&!localStorage.getItem('batab_ns_ts'))localStorage.setItem('batab_ns_ts',d.ns_ts);
+  }catch(e){console.warn('SB load:',e.message);}
 }
 
 async function uploadToNetsuite(record){
   const cfg=getNsConfig();
-  if(!cfg.ck||!cfg.cs||!cfg.ti||!cfg.ts) throw new Error('Credenciales NetSuite no configuradas. Ve a Ajustes.');
+  if(!cfg.ck||!cfg.cs||!cfg.ti||!cfg.ts)throw new Error('Credenciales NetSuite no configuradas. Ve a Ajustes.');
   const clean={...record};
-  delete clean.dosiPhoto; delete clean.dosiPhoto2; delete clean.dosiPhotosExtra;
-  if(clean.pesajes) clean.pesajes=clean.pesajes.map(p=>({...p,photo:null,photoVacia:null,photoLlena:null}));
-  const payload={
-    name:                            record.folio||'',
-    externalId:                      record.id||'',
-    custrecord_batab_folio:          record.folio||'',
-    custrecord_batab_linea:          record.linea||'',
-    custrecord_batab_lote:           record.lote||'',
-    custrecord_batab_turno:          record.turno||'',
-    custrecord_batab_articulo:       record.articulo||'',
-    custrecord_batab_fecha:          record.fecha||new Date().toISOString().split('T')[0],
-    custrecord_batab_operador:       record.operador||'',
-    custrecord_batab_prod_reportada: parseInt(record.prodReportada)||0,
-    custrecord_batab_bachadas:       parseInt(record.totalesConsumo&&record.totalesConsumo.bachadas)||0,
-    custrecord_batab_aprobado_por:   record.approvedBy||'',
-    custrecord_batab_json_payload:   JSON.stringify(clean)
-  };
-  const log={ts:new Date().toISOString(),folio:record.folio,status:null,location:null,recordId:null,error:null,payload:JSON.stringify(payload).substring(0,500)};
+  delete clean.dosiPhoto;delete clean.dosiPhoto2;delete clean.dosiPhotosExtra;
+  if(clean.pesajes)clean.pesajes=clean.pesajes.map(p=>({...p,photo:null,photoVacia:null,photoLlena:null}));
+  const payload={name:record.folio||'',custrecord_batab_folio:record.folio||'',custrecord_batab_linea:record.linea||'',custrecord_batab_lote:record.lote||'',custrecord_batab_turno:record.turno||'',custrecord_batab_articulo:record.articulo||'',custrecord_batab_fecha:record.fecha||new Date().toISOString().split('T')[0],custrecord_batab_operador:record.operador||'',custrecord_batab_prod_reportada:parseInt(record.prodReportada)||0,custrecord_batab_bachadas:parseInt((record.totalesConsumo||{}).bachadas)||0,custrecord_batab_aprobado_por:record.approvedBy||'',custrecord_batab_json_payload:JSON.stringify(clean)};
   const authHeader=await buildOAuthHeader('POST',NS_REST_URL);
+  const log={ts:new Date().toISOString(),folio:record.folio,status:null,location:null,recordId:null,error:null};
   let res;
   try{
     res=await fetch(NS_REST_URL,{method:'POST',headers:{'Content-Type':'application/json','Authorization':authHeader},body:JSON.stringify(payload)});
   }catch(netErr){
-    log.error='RED: '+netErr.message;
+    log.error='RED:'+netErr.message;
     localStorage.setItem('batab_ns_lastlog',JSON.stringify(log));
-    await logToSupabase(log);
     throw new Error('Error de red: '+netErr.message);
   }
   log.status=res.status;
   log.location=res.headers.get('Location')||'';
   if(res.status===204||res.status===200){
-    const idMatch=log.location.match(/\/(\d+)$/);
-    log.recordId=idMatch?idMatch[1]:null;
+    const m=log.location.match(/\/(\d+)$/);
+    log.recordId=m?m[1]:null;
     localStorage.setItem('batab_ns_lastlog',JSON.stringify(log));
-    await logToSupabase(log);
     return {success:true,recordId:log.recordId,folio:record.folio};
   }
   const txt=await res.text();
-  log.body=txt.substring(0,500);
-  log.error='HTTP '+res.status;
+  log.error='HTTP '+res.status+': '+txt.substring(0,200);
   localStorage.setItem('batab_ns_lastlog',JSON.stringify(log));
-  await logToSupabase(log);
-  throw new Error('HTTP '+res.status+': '+txt.substring(0,300));
+  throw new Error('HTTP '+res.status+': '+txt.substring(0,200));
 }
 
 // ═══════ IMAGE UTILS ═══════
@@ -2402,7 +2404,7 @@ let toastT;
 function showToast(msg,type=''){const t=document.getElementById('toast');t.textContent=msg;t.className='toast show '+type;clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),2800);}
 
 // ═══════ START ═══════
-init();
+loadCredsFromSupabase().then(()=>init());
 </script>
 </body>
 </html>
