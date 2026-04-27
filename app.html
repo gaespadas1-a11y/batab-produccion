@@ -667,7 +667,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);
             <tr><td><select id="mp-t3-mat" onchange="updateTotalesOCR()"><option value="">(opcional) Tolva 3 —</option><option value="MATERIAS PRIMAS - AGREGADOS - ARENA 3/16 AFI">Arena 3/16 AFI</option><option value="MATERIAS PRIMAS - AGREGADOS - POLVO 3/16 AFI">Polvo 3/16 AFI</option><option value="MATERIAS PRIMAS - AGREGADOS - SELLO1/4">Sello 1/4</option><option value="MATERIAS PRIMAS - AGREGADOS - SELLO3/8">Sello 3/8</option></select></td><td><input type="number" id="mp-t3-kg" min="0" step="0.1" placeholder="0" oninput="updateTotalesOCR()"></td><td style="color:var(--text3)">kg</td></tr>
             <tr><td style="color:var(--text2)">Agua</td><td><input type="number" id="mp-agua" min="0" step="0.1" placeholder="0" oninput="updateTotalesOCR()"></td><td style="color:var(--text3)">L</td></tr>
             <tr><td><select id="mp-aditivo-tipo" onchange="updateTotalesOCR()"><option value="">— Aditivo —</option><option value="MATERIAS PRIMAS - ADITIVOS - EUCOLITH DC">Eucolith DC</option><option value="MATERIAS PRIMAS - ADITIVOS - EUCOLITH R">Eucolith R</option></select></td><td><input type="number" id="mp-aditivo-cc" min="0" step="0.001" placeholder="0" oninput="updateTotalesOCR()"></td><td style="color:var(--text3)">cc</td></tr>
-            <tr id="row-pigmento" style="display:none;"><td><select id="mp-pigmento-tipo"><option value="">— Pigmento —</option><option value="MATERIAS PRIMAS - PIGMENTOS - ADOBE C-800">Adobe C-800</option><option value="MATERIAS PRIMAS - PIGMENTOS - AMARILLO A-1300">Amarillo A-1300</option><option value="MATERIAS PRIMAS - PIGMENTOS - CHOCOLATE C-879">Chocolate C-879</option><option value="MATERIAS PRIMAS - PIGMENTOS - NEGRO N-1400">Negro N-1400</option><option value="MATERIAS PRIMAS - PIGMENTOS - ROJO R-1120">Rojo R-1120</option></select></td><td><input type="number" id="mp-pigmento-kg" min="0" step="0.1" placeholder="0"></td><td style="color:var(--text3)">kg</td></tr>
+            <tr id="row-pigmento" style="display:none;"><td><select id="mp-pigmento-tipo" onchange="updateTotalesOCR()"><option value="">— Pigmento —</option><option value="MATERIAS PRIMAS - PIGMENTOS - ADOBE C-800">Adobe C-800</option><option value="MATERIAS PRIMAS - PIGMENTOS - AMARILLO A-1300">Amarillo A-1300</option><option value="MATERIAS PRIMAS - PIGMENTOS - CHOCOLATE C-879">Chocolate C-879</option><option value="MATERIAS PRIMAS - PIGMENTOS - NEGRO N-1400">Negro N-1400</option><option value="MATERIAS PRIMAS - PIGMENTOS - ROJO R-1120">Rojo R-1120</option></select></td><td><input type="number" id="mp-pigmento-kg" min="0" step="0.001" placeholder="0" oninput="updateTotalesOCR()"></td><td style="color:var(--text3)">kg</td></tr>
           </tbody>
         </table>
       </div>
@@ -1383,7 +1383,7 @@ FORMATO HOJA BATAB:
 - TOTALES${hasDos?' (Foto 2)':''}: Fila TOTAL al final de tablas con consumos acumulados del turno: cemento total, tolva1 total, tolva2, tolva3, agua, aditivo.
 
 Devuelve SOLO JSON sin markdown:
-{"linea":"B1|B2|CO|null","lote":"null","bachadas":0,"peso_placa":0.0,"peso_humedo":0.0,"humedad":0.0,"modulo_finura":0.0,"cemento_tipo":"","cemento_kg":0,"tolva1_material":"","tolva1_kg":0,"tolva2_material":null,"tolva2_kg":null,"tolva3_material":"","tolva3_kg":0,"agua_litros":0,"aditivo_tipo":"","aditivo_cc":0,"pigmento_tipo":null,"pigmento_kg":null,"total_cemento_turno":0,"total_tolva1_turno":0,"total_tolva2_turno":null,"total_tolva3_turno":0,"total_agua_turno":0,"total_aditivo_turno":0,"produccion_reportada":0}
+{"linea":"B1|B2|CO|null","lote":"null","bachadas":0,"peso_placa":0.0,"peso_humedo":0.0,"humedad":0.0,"modulo_finura":0.0,"cemento_tipo":"","cemento_kg":0,"tolva1_material":"","tolva1_kg":0,"tolva2_material":null,"tolva2_kg":null,"tolva3_material":"","tolva3_kg":0,"agua_litros":0,"aditivo_tipo":"","aditivo_cc":0,"pigmento_tipo":null,"pigmento_kg":null,"total_cemento_turno":0,"total_tolva1_turno":0,"total_tolva2_turno":null,"total_tolva3_turno":0,"total_agua_turno":0,"total_aditivo_turno":0,"total_pigmento_turno":null,"produccion_reportada":0}
 CLAVE: Los kg/bachada están en la fila de cantidades del ENCABEZADO (debajo de los nombres de materiales), NO en las tablas.
 IMPORTANTE AGUA vs ADITIVO: El AGUA está en la columna AGUA y es en LITROS (típicamente 150-400 L/bachada). El ADITIVO está en columna ADITIVO y es en KGS (típicamente 0.5-2 kg/bachada). Son valores muy distintos - no los confundas.
 TOLVA 1 (Agregado 1): El primer agregado. Si ves "Sello 15/8", "Sello 3/8", "Sell 15/8", "Sello" → tolva1_material = "Sello 3/8". Si ves "Arena" → tolva1_material = "Arena 3/16 AFI". Si ves "Polvo" → tolva1_material = "Polvo 3/16 AFI". Aunque el texto esté abreviado o mal escrito, interpreta el material más cercano.
@@ -1430,22 +1430,17 @@ TOTALES: La fila TOTAL al final de cada bloque de 10 bachadas y la fila de TOTAL
       return v;
     };
     setVal('f-linea',p.linea); updateFolio();
-    if(p.lote){
+    // LOTE: NO sobreescribir si ya fue capturado en Paso 1
+    // El lote es dato del operador — el OCR solo lo sugiere si está vacío
+    const loteActual = document.getElementById('f-lote').value.trim();
+    if(!loteActual && p.lote){
       const tl=S.form.turno==='M'?'M':'V';
       const lo=String(p.lote).toUpperCase().trim();
-      // Si ya tiene M o V después de una letra de mes, no duplicar
-      const yaTiene = /[A-Z][MV]\d/.test(lo) || /[A-Z][MV]$/.test(lo);
+      const yaTiene = /[A-Z][MV]\d/.test(lo)||/[A-Z][MV]$/.test(lo);
       if(!yaTiene){
-        // Insertar turno después de la SEGUNDA letra del lote
-        // Ej: "3C26D26" → segunda letra es D → "3C26DM26"
-        // Regex: todo hasta la segunda letra + segunda letra + resto
-        const conTurno = lo.replace(/^([^A-Z]*[A-Z][^A-Z]*)([A-Z])(\d+)$/, '$1$2'+tl+'$3');
-        // Si el regex no coincidió (solo 1 letra, como "3C26026" con D leída como 0)
-        // mostrar el lote tal cual para que el operador lo corrija manualmente
-        setVal('f-lote', conTurno !== lo ? conTurno : lo);
-      } else {
-        setVal('f-lote', lo);
-      }
+        const conTurno=lo.replace(/^([^A-Z]*[A-Z][^A-Z]*)([A-Z])(\d+)$/,'$1$2'+tl+'$3');
+        setVal('f-lote', conTurno!==lo?conTurno:lo);
+      }else setVal('f-lote',lo);
     }
     setVal('f-mf',p.modulo_finura); setVal('f-humedad',p.humedad);
     setVal('mp-cemento-tipo',mapM(p.cemento_tipo)); setVal('mp-cemento-kg',p.cemento_kg);
@@ -1464,7 +1459,7 @@ TOTALES: La fila TOTAL al final de cada bloque de 10 bachadas y la fila de TOTAL
     // Auto-corregir total aditivo si tiene decimal perdido
     let totalAditivo = p.total_aditivo_turno;
     if(totalAditivo > 500 && totalAditivo < 50000){ totalAditivo = totalAditivo / 100; }
-    S.totalesOCR={cemento:p.total_cemento_turno,tolva1:p.total_tolva1_turno,tolva2:p.total_tolva2_turno,tolva3:p.total_tolva3_turno,agua:p.total_agua_turno,aditivo:totalAditivo};S.pesoHumedo=p.peso_humedo||null;if(p.peso_humedo){document.getElementById('t-peso-humedo').value=p.peso_humedo;}updateTotalesOCR();
+    S.totalesOCR={cemento:p.total_cemento_turno,tolva1:p.total_tolva1_turno,tolva2:p.total_tolva2_turno,tolva3:p.total_tolva3_turno,agua:p.total_agua_turno,aditivo:totalAditivo,pigmento:p.total_pigmento_turno||null};S.pesoHumedo=p.peso_humedo||null;if(p.peso_humedo){document.getElementById('t-peso-humedo').value=p.peso_humedo;}updateTotalesOCR();
     calcMetrics();
     const extras=hasDos?' + totales acumulados':'';
     document.getElementById('ocr-status').textContent=`✅ Datos extraídos${extras} — verifica y corrige si es necesario`;
@@ -1481,7 +1476,8 @@ const RANGOS_TURNO = {
   tolva2:  [5000,  150000],
   tolva3:  [5000,  150000],
   agua:    [3000,  20000],
-  aditivo: [5,     200],
+  aditivo:  [5,     200],
+  pigmento: [0.1,   500],  // opcional — solo blocks de color
 };
 const TOTALES_CAMPOS = [
   { key:'cemento', label:'Cemento',  inputId:'tot-cemento', selectId:'mp-cemento-tipo', unidad:'kg' },
@@ -1489,7 +1485,8 @@ const TOTALES_CAMPOS = [
   { key:'tolva2',  label:'Tolva 2',  inputId:'tot-tolva2',  selectId:'mp-t2-mat',       unidad:'kg' },
   { key:'tolva3',  label:'Tolva 3',  inputId:'tot-tolva3',  selectId:'mp-t3-mat',       unidad:'kg' },
   { key:'agua',    label:'Agua',     inputId:'tot-agua',    selectId:null,              unidad:'L'  },
-  { key:'aditivo', label:'Aditivo',  inputId:'tot-aditivo', selectId:'mp-aditivo-tipo', unidad:'kg' },
+  { key:'aditivo',  label:'Aditivo',   inputId:'tot-aditivo',  selectId:'mp-aditivo-tipo',  unidad:'kg' },
+  { key:'pigmento', label:'Pigmento',  inputId:'tot-pigmento', selectId:'mp-pigmento-tipo', unidad:'kg' },
 ];
 
 // Obtener nombre legible del material seleccionado en un select
@@ -1520,12 +1517,13 @@ function updateTotalesOCR(){
 
   // Cantidades de diseño por bachada
   const kgBachada = {
-    cemento: parseFloat(document.getElementById('mp-cemento-kg').value)||0,
-    tolva1:  parseFloat(document.getElementById('mp-t1-kg').value)||0,
-    tolva2:  parseFloat(document.getElementById('mp-t2-kg').value)||0,
-    tolva3:  parseFloat(document.getElementById('mp-t3-kg').value)||0,
-    agua:    parseFloat(document.getElementById('mp-agua').value)||0,
-    aditivo: parseFloat(document.getElementById('mp-aditivo-cc').value)||0,
+    cemento:  parseFloat(document.getElementById('mp-cemento-kg').value)||0,
+    tolva1:   parseFloat(document.getElementById('mp-t1-kg').value)||0,
+    tolva2:   parseFloat(document.getElementById('mp-t2-kg').value)||0,
+    tolva3:   parseFloat(document.getElementById('mp-t3-kg').value)||0,
+    agua:     parseFloat(document.getElementById('mp-agua').value)||0,
+    aditivo:  parseFloat(document.getElementById('mp-aditivo-cc').value)||0,
+    pigmento: parseFloat(document.getElementById('mp-pigmento-kg').value)||0,
   };
 
   const section = document.getElementById('totales-ocr-section');
@@ -1646,6 +1644,7 @@ function calcPiezasEstimadas(){
     const v = el ? parseFloat(el.value)||0 : (S.totalesOCR[c.key]||0);
     totalMP += v;
   });
+  // Pigmento: solo agregar si no está ya en TOTALES_CAMPOS (evitar doble conteo)
   const estimadas = Math.round(totalMP / pesoHumedo);
   document.getElementById('t-piezas-estimadas').textContent = estimadas.toLocaleString();
   document.getElementById('t-formula-detail').textContent =
@@ -1714,7 +1713,7 @@ function buildResumen(){
   const paramKg = LINEA_PARAM_KG[linea] || null;
   let rendimientoHTML = '—';
   if(paramKg && S.totalesOCR){
-    const totalMP = (S.totalesOCR.cemento||0)+(S.totalesOCR.tolva1||0)+(S.totalesOCR.tolva2||0)+(S.totalesOCR.tolva3||0)+(S.totalesOCR.agua||0)+(S.totalesOCR.aditivo||0);
+    const totalMP = (S.totalesOCR.cemento||0)+(S.totalesOCR.tolva1||0)+(S.totalesOCR.tolva2||0)+(S.totalesOCR.tolva3||0)+(S.totalesOCR.agua||0)+(S.totalesOCR.aditivo||0)+(S.totalesOCR.pigmento||0);
     if(totalMP > 0){
       const rend = (totalMP / paramKg * 100);
       const color = rend >= 90?'var(--green)':rend>=70?'var(--yellow)':'var(--red)';
