@@ -249,6 +249,9 @@ textarea.fn{resize:none;font-size:14px;min-height:70px}
 <body>
 
 <!-- LOGIN -->
+<!-- INPUTS DE FOTO FIJOS — compatibles con iOS y Android -->
+<input type="file" accept="image/*" capture="environment" id="cam-pesaje" style="display:none" onchange="routeCamPesaje(event)">
+<input type="file" accept="image/*" capture="environment" id="cam-dos" style="display:none" onchange="routeCamDos(event)">
 <div class="screen" id="sl">
   <div class="lg"></div>
   <div class="li">🏭</div>
@@ -437,8 +440,8 @@ textarea.fn{resize:none;font-size:14px;min-height:70px}
         <div>Esta fotografía se toma <strong>al terminar el turno</strong>.<br>
         Contiene el resumen de materias primas utilizadas y número de bachadas.</div>
       </div>
-      <div class="cz" id="cz2"><input type="file" accept="image/*" capture="environment" onchange="captura(event,'dos')">
-        <div class="ci">📄</div><div class="ct">Fotografiar la hoja de dosificación</div>
+      <div class="cz" id="cz2" onclick="document.getElementById('cam-dos').click()" style="cursor:pointer">
+        <div class="ci">📄</div><div class="ct">Tocar para fotografiar</div>
         <div class="ch">Reporte de materias primas y bachadas del turno</div>
         <img class="cp" id="pv2"></div>
       <div id="ocr2"></div>
@@ -451,11 +454,12 @@ textarea.fn{resize:none;font-size:14px;min-height:70px}
           <tr>
             <td><select class="fn" id="mp-ce-sel" style="font-size:14px;padding:6px 8px" onchange="recalc()">
               <option value="">— Cemento —</option>
-              <option value="CPC-30">CPC-30</option>
-              <option value="CPC-30R-RS">CPC-30R-RS</option>
-              <option value="CPC-40">CPC-40</option>
-              <option value="CPC-40R">CPC-40R</option>
-              <option value="CPC-40R-RS">CPC-40R-RS</option>
+              <option value="1232">CPC-40</option>
+              <option value="1231">CPC-40R</option>
+              <option value="1230">CPC-40R-RS</option>
+              <option value="1234">CPC-30</option>
+              <option value="1233">CPC-30R-RS</option>
+              <option value="522">CPC-40 RS Granel</option>
             </select></td>
             <td class="ti"><input class="fn" type="number" id="m-ce" placeholder="0" oninput="recalc()"></td>
             <td class="tu">kg</td>
@@ -464,10 +468,10 @@ textarea.fn{resize:none;font-size:14px;min-height:70px}
           <tr style="background:rgba(56,142,210,.06)">
             <td><select class="fn" id="t1-mat" style="font-size:14px;padding:6px 8px;border-left:3px solid #378ADD" onchange="recalc()">
               <option value="">⚙️ Tolva 1 — material</option>
-              <option value="Arena 3/16 AFI">Arena 3/16 AFI</option>
-              <option value="Polvo 3/16 AFI">Polvo 3/16 AFI</option>
-              <option value="Sello 1/4">Sello 1/4</option>
-              <option value="Sello 3/8">Sello 3/8</option>
+              <option value="1348">Arena 3/16 AFI</option>
+              <option value="1347">Polvo 3/16 AFI</option>
+              <option value="1349">Sello 1/4</option>
+              <option value="1350">Sello 3/8</option>
             </select></td>
             <td class="ti"><input class="fn" type="number" id="t1-kg" placeholder="0" oninput="recalc()"></td>
             <td class="tu">kg</td>
@@ -476,10 +480,10 @@ textarea.fn{resize:none;font-size:14px;min-height:70px}
           <tr style="background:rgba(56,142,210,.06)">
             <td><select class="fn" id="t2-mat" style="font-size:14px;padding:6px 8px;border-left:3px solid #378ADD" onchange="recalc()">
               <option value="">⚙️ Tolva 2 — material (opcional)</option>
-              <option value="Arena 3/16 AFI">Arena 3/16 AFI</option>
-              <option value="Polvo 3/16 AFI">Polvo 3/16 AFI</option>
-              <option value="Sello 1/4">Sello 1/4</option>
-              <option value="Sello 3/8">Sello 3/8</option>
+              <option value="1348">Arena 3/16 AFI</option>
+              <option value="1347">Polvo 3/16 AFI</option>
+              <option value="1349">Sello 1/4</option>
+              <option value="1350">Sello 3/8</option>
             </select></td>
             <td class="ti"><input class="fn" type="number" id="t2-kg" placeholder="0" oninput="recalc()"></td>
             <td class="tu">kg</td>
@@ -488,10 +492,10 @@ textarea.fn{resize:none;font-size:14px;min-height:70px}
           <tr style="background:rgba(56,142,210,.06)">
             <td><select class="fn" id="t3-mat" style="font-size:14px;padding:6px 8px;border-left:3px solid #378ADD" onchange="recalc()">
               <option value="">⚙️ Tolva 3 — material (opcional)</option>
-              <option value="Arena 3/16 AFI">Arena 3/16 AFI</option>
-              <option value="Polvo 3/16 AFI">Polvo 3/16 AFI</option>
-              <option value="Sello 1/4">Sello 1/4</option>
-              <option value="Sello 3/8">Sello 3/8</option>
+              <option value="1348">Arena 3/16 AFI</option>
+              <option value="1347">Polvo 3/16 AFI</option>
+              <option value="1349">Sello 1/4</option>
+              <option value="1350">Sello 3/8</option>
             </select></td>
             <td class="ti"><input class="fn" type="number" id="t3-kg" placeholder="0" oninput="recalc()"></td>
             <td class="tu">kg</td>
@@ -504,8 +508,9 @@ textarea.fn{resize:none;font-size:14px;min-height:70px}
           <tr>
             <td><select class="fn" id="mp-ad-sel" style="font-size:14px;padding:6px 8px" onchange="recalc()">
               <option value="">— Aditivo —</option>
-              <option value="Eucolith DC">Eucolith DC</option>
-              <option value="Eucolith R">Eucolith R</option>
+              <option value="1237">Eucolith DC</option>
+              <option value="1236">Eucolith R</option>
+              <option value="520">Eucolithr Granel</option>
             </select></td>
             <td class="ti"><input class="fn" type="number" id="m-ad" placeholder="0" step="1" oninput="recalc()"></td>
             <td class="tu">cc</td>
@@ -514,11 +519,11 @@ textarea.fn{resize:none;font-size:14px;min-height:70px}
           <tr id="row-pig" style="display:none">
             <td><select class="fn" id="mp-pig-sel" style="font-size:14px;padding:6px 8px">
               <option value="">— Pigmento —</option>
-              <option value="MATERIAS PRIMAS - PIGMENTOS - ADOBE C-800">Adobe C-800</option>
-              <option value="MATERIAS PRIMAS - PIGMENTOS - AMARILLO A-1300">Amarillo A-1300</option>
-              <option value="MATERIAS PRIMAS - PIGMENTOS - CHOCOLATE C-879">Chocolate C-879</option>
-              <option value="MATERIAS PRIMAS - PIGMENTOS - NEGRO N-1400">Negro N-1400</option>
-              <option value="MATERIAS PRIMAS - PIGMENTOS - ROJO R-1120">Rojo R-1120</option>
+              <option value="1250">Adobe C-800</option>
+              <option value="1246">Amarillo A-1300</option>
+              <option value="1248">Chocolate C-879</option>
+              <option value="1249">Negro N-1400</option>
+              <option value="1247">Rojo R-1120</option>
             </select></td>
             <td class="ti"><input class="fn" type="number" id="m-pig" placeholder="0" step="0.01" oninput="recalc()"></td>
             <td class="tu">kg</td>
@@ -1231,6 +1236,20 @@ document.getElementById('hgr').textContent='Gerardo';
 document.getElementById('hdt').textContent=new Date().toLocaleDateString('es-MX',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
 refreshHome();
 show('sh');
+
+// ══ CAMARA FIJA — compatible iOS y Android ══
+let currentPesajeId = null;
+function abrirCamPesaje(id){
+  currentPesajeId = id;
+  document.getElementById('cam-pesaje').value = '';
+  document.getElementById('cam-pesaje').click();
+}
+function routeCamPesaje(evt){
+  if(currentPesajeId !== null) capturaPesaje(evt, currentPesajeId);
+}
+function routeCamDos(evt){
+  captura(evt, 'dos');
+}
 </script>
 </body>
 </html>
