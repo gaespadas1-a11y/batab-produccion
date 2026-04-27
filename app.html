@@ -26,6 +26,15 @@ html,body{height:100%;overflow:hidden;background:var(--bg0);color:var(--tx);
 .screen.active{display:flex}
 @keyframes up{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
 .enter{animation:up .3s cubic-bezier(.2,.8,.3,1) both}
+
+.kpi{background:var(--bg2);border:1px solid var(--bdr);border-radius:12px;padding:14px;text-align:center}
+.kl{font-size:11px;color:var(--tx2);font-weight:600;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px}
+.kv{font-size:28px;font-weight:700;color:var(--tea)}
+.ac{background:var(--bg2);border:1px solid var(--bdr);border-radius:12px;padding:14px;text-align:center}
+.ai{font-size:24px;margin-bottom:6px}
+.al2{font-size:15px;font-weight:700;color:var(--tx)}
+.as{font-size:12px;color:var(--tx2);margin-top:2px}
+.stl{font-size:13px;font-weight:700;color:var(--tx2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;margin-top:4px}
 /* TOPBAR */
 .topbar{height:52px;display:flex;align-items:center;padding:0 16px;gap:10px;
   border-bottom:1px solid var(--bdr);flex-shrink:0}
@@ -278,6 +287,48 @@ textarea.fn{resize:none;font-size:14px;min-height:70px}
     </div>
   </div>
 
+</div>
+
+<!-- HOME -->
+<div class="screen" id="sh">
+  <div class="topbar">
+    <div class="tt">BATAB · Producción</div>
+    <div class="pil pid" id="tbu">—</div>
+  </div>
+  <div class="scroll enter" style="padding:16px">
+    <div id="hgr" style="font-size:20px;font-weight:700;color:var(--tx);margin-bottom:2px">Bienvenido</div>
+    <div id="hdt" style="font-size:13px;color:var(--tx2);margin-bottom:16px"></div>
+
+    <!-- KPIs -->
+    <div class="kpi-row">
+      <div class="kpi">
+        <div class="kl">Piezas hoy</div>
+        <div class="kv" id="kp">0</div>
+      </div>
+      <div class="kpi">
+        <div class="kl">Pendientes</div>
+        <div class="kv" id="kpd">0</div>
+      </div>
+    </div>
+
+    <!-- Acciones -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px">
+      <div class="ac" onclick="startForm()" style="cursor:pointer">
+        <div class="ai">📋</div>
+        <div class="al2">Nueva captura</div>
+        <div class="as">Registrar producción</div>
+      </div>
+      <div class="ac" onclick="openSup()" style="cursor:pointer">
+        <div class="ai">✓</div>
+        <div class="al2">Supervisor</div>
+        <div class="as">Aprobar y subir</div>
+      </div>
+    </div>
+
+    <!-- Registros recientes -->
+    <div class="stl">Registros recientes</div>
+    <div id="hlist"></div>
+  </div>
 </div>
 
 <!-- FORM -->
