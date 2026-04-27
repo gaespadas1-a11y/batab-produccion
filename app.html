@@ -2391,7 +2391,8 @@ async function buildOAuthHeader(method, url){
 }
 
 // ═══════ REST RECORD API — sin CORS ═══════
-const NS_REST_URL='https://7905968.suitetalk.api.netsuite.com/services/rest/record/v1/customrecord_batab_produccion';
+// Edge Function proxy — sin CORS, credenciales seguras en servidor
+const NS_REST_URL='https://szrcmvlgxxpmvgrfmxak.supabase.co/functions/v1/netsuite-proxy';
 
 async function uploadToNetsuite(record){
   const cfg=getNsConfig();
@@ -2424,22 +2425,23 @@ async function uploadToNetsuite(record){
   const woNum=parseInt(record.netsuiteWO);
   if(!isNaN(woNum)&&woNum>0) payload.custrecord_batab_workorder=woNum;
 
-  const authHeader=await buildOAuthHeader('POST',NS_REST_URL);
+  // Llama a la Edge Function de Supabase (sin CORS, sin OAuth en el browser)
   const res=await fetch(NS_REST_URL,{
     method:'POST',
-    headers:{'Content-Type':'application/json','Authorization':authHeader},
+    headers:{
+      'Content-Type':'application/json',
+      'apikey':'sb_publishable_VOhn9Z2Ev8gYK3nFKr44Sw_VngbAX4N',
+      'Authorization':'Bearer sb_publishable_VOhn9Z2Ev8gYK3nFKr44Sw_VngbAX4N'
+    },
     body:JSON.stringify(payload)
   });
 
-  // REST Record API responde 204 (sin cuerpo) al crear — ID viene en Location header
-  if(res.status===204||res.status===200){
-    const loc=res.headers.get('Location')||'';
-    const idMatch=loc.match(/\/(\d+)$/);
-    const recordId=idMatch?idMatch[1]:null;
-    return {success:true, recordId, folio:record.folio};
+  // Edge Function devuelve JSON con {success, recordId} o {error}
+  const json=await res.json();
+  if(res.ok&&json.success){
+    return {success:true, recordId:json.recordId, folio:record.folio};
   }
-  const txt=await res.text();
-  throw new Error('HTTP '+res.status+': '+txt.substring(0,300));
+  throw new Error('HTTP '+res.status+': '+(json.error||JSON.stringify(json)).substring(0,300));
 }
 
 // ═══════ IMAGE UTILS ═══════
