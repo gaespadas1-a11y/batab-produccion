@@ -635,15 +635,27 @@ html,body{height:100%;background:var(--bg);color:var(--text);
     <div class="step" id="step4">
       <div class="info-box" style="margin-bottom:16px;">📋 Fotografía tomada <strong>al terminar el turno</strong>.</div>
       <div class="form-group">
-        <label class="form-label">Foto hoja de dosificación <span class="req">*</span></label>
+        <label class="form-label">📄 Foto 1 — Encabezado de dosificación <span class="req">*</span></label>
         <div class="photo-area" id="dosi-photo-area" onclick="captureDosiPhoto()">
-          <div class="photo-icon">📄</div><div class="photo-label">Tocar para fotografiar</div>
-          <div class="photo-hint">Hoja de dosificación — al terminar el turno</div>
+          <div class="photo-icon">📄</div>
+          <div class="photo-label">Fotografiar parte SUPERIOR de la hoja</div>
+          <div class="photo-hint">Logo BATAB · Lote · Materiales · kg por bachada</div>
         </div>
         <input type="file" id="dosi-photo-input" accept="image/*" capture="environment" style="display:none" onchange="onDosiPhotoSelected(event)">
-        <button class="ocr-btn" id="ocr-btn" onclick="runOCR()" disabled>🔍 Extraer datos con OCR</button>
-        <div class="ocr-status" id="ocr-status"></div>
       </div>
+
+      <div class="form-group">
+        <label class="form-label">📋 Foto 2 — Resumen final del turno</label>
+        <div class="photo-area" id="dosi-photo2-area" onclick="captureDosiPhoto2()">
+          <div class="photo-icon">📋</div>
+          <div class="photo-label">Fotografiar TOTALES acumulados</div>
+          <div class="photo-hint">Fila TOTAL del turno · Consumo real de cada material</div>
+        </div>
+        <input type="file" id="dosi-photo2-input" accept="image/*" capture="environment" style="display:none" onchange="onDosiPhoto2Selected(event)">
+      </div>
+
+      <button class="ocr-btn" id="ocr-btn" onclick="runOCR()" disabled>🔍 Extraer datos con OCR (ambas fotos)</button>
+      <div class="ocr-status" id="ocr-status"></div>
       <div class="form-group">
         <label class="form-label">Materias primas — cantidad por bachada</label>
         <table class="mp-table">
@@ -895,21 +907,89 @@ html,body{height:100%;background:var(--bg);color:var(--text);
 <div class="modal-overlay" id="pesaje-modal">
   <div class="modal-sheet">
     <div class="modal-handle"></div>
-    <div class="modal-title">Agregar pesaje</div>
-    <div class="modal-sub">Foto + peso medido</div>
+    <div class="modal-title">Pesaje de placa</div>
+    <div class="modal-sub">2 fotos + cálculo automático · Cada 10 bachadas</div>
+
+    <!-- FOTO 1: Placa vacía -->
     <div class="form-group">
-      <div class="photo-area" id="pesaje-photo-area" onclick="capturePesajePhoto()">
-        <div class="photo-icon">📸</div><div class="photo-label">Fotografiar placa</div><div class="photo-hint">Opcional</div>
+      <label class="form-label">📷 Foto 1 — Placa vacía <span class="req">*</span></label>
+      <div class="photo-area" id="pesaje-photo1-area" onclick="capturePesajeFoto(1)">
+        <div class="photo-icon">⬜</div>
+        <div class="photo-label">Fotografiar placa vacía</div>
+        <div class="photo-hint">Antes de colocar los blocks</div>
       </div>
-      <input type="file" id="pesaje-photo-input" accept="image/*" capture="environment" style="display:none" onchange="onPesajePhotoSelected(event)">
+      <input type="file" id="pesaje-photo1-input" accept="image/*" capture="environment" style="display:none" onchange="onPesajeFotoSelected(event,1)">
     </div>
+
+    <!-- Peso placa vacía -->
     <div class="form-group">
-      <label class="form-label">Peso (kg/pieza) <span class="req">*</span></label>
-      <input type="number" class="form-input" id="pesaje-kg-input" step="0.01" min="0" placeholder="0.000" style="font-family:'IBM Plex Mono',monospace;font-size:28px;text-align:center;">
+      <label class="form-label">Peso placa vacía — Tara (kg) <span class="req">*</span></label>
+      <input type="number" class="form-input" id="pesaje-vacia-input" step="0.001" min="0"
+        placeholder="Ej. 15.200" oninput="calcKgPieza()"
+        style="font-family:'IBM Plex Mono',monospace;font-size:24px;text-align:center;">
     </div>
+
+    <!-- FOTO 2: Placa con blocks -->
+    <div class="form-group">
+      <label class="form-label">📷 Foto 2 — Placa con blocks <span class="req">*</span></label>
+      <div class="photo-area" id="pesaje-photo2-area" onclick="capturePesajeFoto(2)">
+        <div class="photo-icon">🟫</div>
+        <div class="photo-label">Fotografiar báscula con blocks</div>
+        <div class="photo-hint">Con el producto ya colocado en la placa</div>
+      </div>
+      <input type="file" id="pesaje-photo2-input" accept="image/*" capture="environment" style="display:none" onchange="onPesajeFotoSelected(event,2)">
+    </div>
+
+    <!-- Peso bruto (placa + blocks) -->
+    <div class="form-group">
+      <label class="form-label">Peso placa + blocks — Bruto (kg) <span class="req">*</span></label>
+      <input type="number" class="form-input" id="pesaje-bruto-input" step="0.001" min="0"
+        placeholder="Ej. 108.500" oninput="calcKgPieza()"
+        style="font-family:'IBM Plex Mono',monospace;font-size:24px;text-align:center;">
+    </div>
+
+    <!-- Piezas en placa -->
+    <div class="form-group">
+      <label class="form-label">Piezas en la placa <span class="req">*</span></label>
+      <input type="number" class="form-input" id="pesaje-pzs-input" step="1" min="1"
+        placeholder="Ej. 8" oninput="calcKgPieza()"
+        style="font-family:'IBM Plex Mono',monospace;font-size:24px;text-align:center;">
+    </div>
+
+    <!-- Resultado calculado en tiempo real -->
+    <div style="background:#E4ECF7;border:2px solid #093F89;border-radius:var(--radius);padding:16px;margin-bottom:16px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center;margin-bottom:12px;">
+        <div>
+          <div style="font-size:10px;color:#5A6E90;font-weight:700;text-transform:uppercase;">Neto blocks</div>
+          <div id="pesaje-neto" style="font-size:18px;font-weight:700;font-family:'IBM Plex Mono',monospace;color:#093F89;">—</div>
+          <div style="font-size:10px;color:#5A6E90;">kg</div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:center;font-size:20px;color:#093F89;">÷</div>
+        <div>
+          <div style="font-size:10px;color:#5A6E90;font-weight:700;text-transform:uppercase;">Piezas</div>
+          <div id="pesaje-pzs-result" style="font-size:18px;font-weight:700;font-family:'IBM Plex Mono',monospace;color:#093F89;">—</div>
+          <div style="font-size:10px;color:#5A6E90;">pzs</div>
+        </div>
+      </div>
+      <div style="text-align:center;border-top:1px solid #B8CCE8;padding-top:10px;">
+        <div style="font-size:11px;color:#093F89;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;">= kg por pieza</div>
+        <div id="pesaje-resultado" style="font-size:40px;font-weight:700;font-family:'IBM Plex Mono',monospace;color:#093F89;">—</div>
+        <div id="pesaje-formula" style="font-size:11px;color:#5A6E90;margin-top:2px;">Bruto − Tara ÷ Piezas</div>
+      </div>
+    </div>
+
+    <!-- Bachada de referencia -->
+    <div class="form-group">
+      <label class="form-label">Bachada de referencia</label>
+      <input type="number" class="form-input" id="pesaje-bachada-input" step="1" min="1"
+        placeholder="Ej. 10, 20, 30..."
+        style="font-family:'IBM Plex Mono',monospace;font-size:20px;text-align:center;">
+      <div class="form-hint">¿En qué bachada tomaste este pesaje?</div>
+    </div>
+
     <div style="display:flex;gap:10px;">
       <button class="btn btn-secondary" onclick="closePesajeModal()">Cancelar</button>
-      <button class="btn btn-primary" onclick="savePesaje()">+ Guardar</button>
+      <button class="btn btn-primary" onclick="savePesaje()">+ Guardar pesaje</button>
     </div>
   </div>
 </div>
@@ -948,7 +1028,7 @@ const CHECKLIST_ITEMS=[
 ];
 
 // ═══════ STATE ═══════
-let S={currentUser:null,currentStep:1,form:{turno:'M'},pesajes:[],dosiPhotoB64:null,superUser:null,reviewRecordId:null,checks:{}};
+let S={currentUser:null,currentStep:1,form:{turno:'M'},pesajes:[],dosiPhotoB64:null,dosiPhotoB64_2:null,totalesOCR:null,superUser:null,reviewRecordId:null,checks:{}};
 let tempPesajePhoto=null;
 
 // ═══════ STORAGE ═══════
@@ -1039,7 +1119,7 @@ function goForm(){
   document.getElementById('f-operador-display').textContent=S.currentUser?.nombre||'—';
   document.getElementById('dosi-photo-area').className='photo-area';
   document.getElementById('dosi-photo-area').innerHTML='<div class="photo-icon">📄</div><div class="photo-label">Tocar para fotografiar</div><div class="photo-hint">Hoja de dosificación — al terminar el turno</div>';
-  document.getElementById('ocr-btn').disabled=true;
+  document.getElementById('dosi-photo2-area').className='photo-area';document.getElementById('dosi-photo2-area').innerHTML='<div class="photo-icon">📋</div><div class="photo-label">Fotografiar TOTALES acumulados</div><div class="photo-hint">Fila TOTAL del turno · Consumo real de cada material</div>';document.getElementById('ocr-btn').disabled=true;
   document.getElementById('ocr-status').textContent='';
   renderPesajes();calcMetrics();updateStepUI();
   showScreen('screen-form');selectTurno('M');
@@ -1102,7 +1182,7 @@ function renderPesajes(){
     <div class="pesaje-card fade-in">
       ${p.photo?`<img class="pesaje-thumb" src="${p.photo}" onclick="openLightbox('${p.photo}','Pesaje ${i+1} · ${p.kg.toFixed(3)} kg/pz')">`
         :`<div class="pesaje-thumb pesaje-thumb-placeholder" style="background:var(--bg3);">📸</div>`}
-      <div class="pesaje-info"><div class="pesaje-kg">${p.kg.toFixed(3)} <span style="font-size:14px;color:var(--text3);">kg/pz</span></div><div class="pesaje-time">${p.time}</div></div>
+      <div class="pesaje-info"><div class="pesaje-kg">${p.kg.toFixed(3)} <span style="font-size:14px;color:var(--text3);">kg/pz</span></div><div class="pesaje-time">${p.tara?p.tara+'kg 00f7 '+p.pzs+'pzs · ':''}${p.time}</div></div>
       <button class="pesaje-delete" onclick="deletePesaje(${i})">🗑️</button>
     </div>`).join('')
     :'<div class="empty-state" style="padding:20px 0;"><div class="empty-icon">⚖️</div><div class="empty-text">Agrega el primer pesaje.</div></div>';
@@ -1118,132 +1198,198 @@ function updPesajesStats(){
   const ve=document.getElementById('stat-var');ve.textContent=(max-min).toFixed(3);ve.className='stat-val '+((max-min)>0.1?'warn':'ok');
 }
 function deletePesaje(i){S.pesajes.splice(i,1);renderPesajes();}
+
+let modoPesaje='tara';
+let tempPesajePhoto1=null, tempPesajePhoto2=null;
+
+function setModoPesaje(modo){modoPesaje=modo;}
+
+function calcKgPieza(){
+  const vacia  = parseFloat(document.getElementById('pesaje-vacia-input').value)||0;
+  const bruto  = parseFloat(document.getElementById('pesaje-bruto-input').value)||0;
+  const pzs    = parseInt(document.getElementById('pesaje-pzs-input').value)||0;
+  const neto   = bruto > vacia ? bruto - vacia : 0;
+  document.getElementById('pesaje-neto').textContent   = neto>0 ? neto.toFixed(3) : '—';
+  document.getElementById('pesaje-pzs-result').textContent = pzs||'—';
+  if(neto>0 && pzs>0){
+    const kg = neto/pzs;
+    document.getElementById('pesaje-resultado').textContent = kg.toFixed(3);
+    document.getElementById('pesaje-formula').textContent   = `(${bruto} - ${vacia}) ÷ ${pzs} pzs`;
+  }else{
+    document.getElementById('pesaje-resultado').textContent = '—';
+    document.getElementById('pesaje-formula').textContent   = 'Bruto − Tara ÷ Piezas';
+  }
+}
+
 function showAddPesaje(){
-  tempPesajePhoto=null;document.getElementById('pesaje-kg-input').value='';
-  const pa=document.getElementById('pesaje-photo-area');
-  pa.className='photo-area';pa.innerHTML='<div class="photo-icon">📸</div><div class="photo-label">Fotografiar placa</div><div class="photo-hint">Opcional</div>';
+  tempPesajePhoto1=null; tempPesajePhoto2=null;
+  ['pesaje-vacia-input','pesaje-bruto-input','pesaje-pzs-input','pesaje-bachada-input'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('pesaje-resultado').textContent='—';
+  document.getElementById('pesaje-neto').textContent='—';
+  document.getElementById('pesaje-pzs-result').textContent='—';
+  document.getElementById('pesaje-formula').textContent='Bruto − Tara ÷ Piezas';
+  const resetPhoto = (areaId, icon, label, hint) => {
+    const pa=document.getElementById(areaId);
+    pa.className='photo-area';
+    pa.innerHTML=`<div class="photo-icon">${icon}</div><div class="photo-label">${label}</div><div class="photo-hint">${hint}</div>`;
+  };
+  resetPhoto('pesaje-photo1-area','⬜','Fotografiar placa vacía','Antes de colocar los blocks');
+  resetPhoto('pesaje-photo2-area','🟫','Fotografiar báscula con blocks','Con el producto ya colocado');
   document.getElementById('pesaje-modal').classList.add('active');
 }
+
 function closePesajeModal(){document.getElementById('pesaje-modal').classList.remove('active');}
-function capturePesajePhoto(){document.getElementById('pesaje-photo-input').click();}
-async function onPesajePhotoSelected(e){
-  const f=e.target.files[0];if(!f)return;
-  tempPesajePhoto=await compressImage(f);
-  const pa=document.getElementById('pesaje-photo-area');
-  pa.className='photo-area has-photo';pa.innerHTML=`<img src="${tempPesajePhoto}" style="border-radius:10px;"><div class="photo-overlay"><button class="photo-btn-sm" onclick="capturePesajePhoto()">📷 Retomar</button></div>`;
+
+function capturePesajeFoto(num){ document.getElementById(`pesaje-photo${num}-input`).click(); }
+// Keep old function name for compatibility
+function capturePesajePhoto(){ capturePesajeFoto(1); }
+
+async function onPesajeFotoSelected(e, num){
+  const f=e.target.files[0]; if(!f) return;
+  const b64 = await compressImage(f);
+  if(num===1){ tempPesajePhoto1=b64; }
+  else        { tempPesajePhoto2=b64; }
+  const areaId = `pesaje-photo${num}-area`;
+  const pa=document.getElementById(areaId);
+  pa.className='photo-area has-photo';
+  pa.innerHTML=`<img src="${b64}" style="border-radius:10px;max-height:180px;"><div class="photo-overlay"><button class="photo-btn-sm" onclick="capturePesajeFoto(${num})">📷 Retomar</button></div>`;
   e.target.value='';
 }
+// Keep old function for compatibility
+async function onPesajePhotoSelected(e){ await onPesajeFotoSelected(e,1); }
+
 function savePesaje(){
-  const kg=parseFloat(document.getElementById('pesaje-kg-input').value);
-  if(!kg||kg<=0){showToast('Ingresa el peso','red');return;}
-  const now=new Date();
-  S.pesajes.push({kg,photo:tempPesajePhoto,time:now.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'}),ts:now.toISOString()});
-  closePesajeModal();renderPesajes();
+  const vacia = parseFloat(document.getElementById('pesaje-vacia-input').value)||0;
+  const bruto = parseFloat(document.getElementById('pesaje-bruto-input').value)||0;
+  const pzs   = parseInt(document.getElementById('pesaje-pzs-input').value)||0;
+  const bachada = parseInt(document.getElementById('pesaje-bachada-input').value)||null;
+  if(!vacia||vacia<=0){ showToast('Ingresa el peso de la placa vacía','red'); return; }
+  if(!bruto||bruto<=0){ showToast('Ingresa el peso bruto (placa + blocks)','red'); return; }
+  if(bruto<=vacia)    { showToast('El peso bruto debe ser mayor que la tara','red'); return; }
+  if(!pzs||pzs<=0)   { showToast('Ingresa el número de piezas','red'); return; }
+  const neto = bruto - vacia;
+  const kg   = parseFloat((neto/pzs).toFixed(3));
+  const now  = new Date();
+  S.pesajes.push({
+    kg, neto, vacia, bruto, pzs, bachada,
+    photo: tempPesajePhoto2 || tempPesajePhoto1,  // foto principal = placa llena
+    photoVacia: tempPesajePhoto1,
+    photoLlena: tempPesajePhoto2,
+    time: now.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'}),
+    ts: now.toISOString()
+  });
+  closePesajeModal(); renderPesajes();
 }
 
 // ═══════ DOSIFICACIÓN + OCR ═══════
 function captureDosiPhoto(){document.getElementById('dosi-photo-input').click();}
+function captureDosiPhoto2(){document.getElementById('dosi-photo2-input').click();}
+
 async function onDosiPhotoSelected(e){
   const f=e.target.files[0];if(!f)return;
-  showLoading('Procesando foto...');
+  showLoading('Procesando foto 1...');
   S.dosiPhotoB64=await compressImage(f,1200);hideLoading();
   const pa=document.getElementById('dosi-photo-area');
   pa.className='photo-area has-photo';
-  pa.innerHTML=`<img src="${S.dosiPhotoB64}" style="max-height:280px;" onclick="openLightbox('${S.dosiPhotoB64}','Hoja de dosificación')"><div class="photo-overlay"><button class="photo-btn-sm" onclick="captureDosiPhoto()">📷 Retomar</button><button class="photo-btn-sm" onclick="openLightbox('${S.dosiPhotoB64}','Hoja de dosificación')">🔍 Ver</button></div>`;
+  pa.innerHTML=`<img src="${S.dosiPhotoB64}" style="max-height:200px;" onclick="openLightbox('${S.dosiPhotoB64}','Encabezado dosificación')"><div class="photo-overlay"><button class="photo-btn-sm" onclick="captureDosiPhoto()">📷 Retomar</button><button class="photo-btn-sm" onclick="openLightbox('${S.dosiPhotoB64}','Encabezado')">🔍 Ver</button></div>`;
+  const hasKey=!!getOcrKey();
+  const hasBoth=!!(S.dosiPhotoB64&&S.dosiPhotoB64_2);
   document.getElementById('ocr-btn').disabled=false;
-  document.getElementById('ocr-status').textContent=getOcrKey()?'✅ OCR listo':'⚠️ Configura tu API key en Ajustes';
+  document.getElementById('ocr-status').textContent=hasKey?(hasBoth?'✅ Ambas fotos listas para OCR':'📄 Foto 1 lista — agrega Foto 2 para análisis completo'):'⚠️ Configura tu API key en Ajustes';
+  e.target.value='';
+}
+
+async function onDosiPhoto2Selected(e){
+  const f=e.target.files[0];if(!f)return;
+  showLoading('Procesando foto 2...');
+  S.dosiPhotoB64_2=await compressImage(f,1200);hideLoading();
+  const pa=document.getElementById('dosi-photo2-area');
+  pa.className='photo-area has-photo';
+  pa.innerHTML=`<img src="${S.dosiPhotoB64_2}" style="max-height:200px;" onclick="openLightbox('${S.dosiPhotoB64_2}','Resumen final turno')"><div class="photo-overlay"><button class="photo-btn-sm" onclick="captureDosiPhoto2()">📷 Retomar</button><button class="photo-btn-sm" onclick="openLightbox('${S.dosiPhotoB64_2}','Resumen final')">🔍 Ver</button></div>`;
+  document.getElementById('ocr-btn').disabled=false;
+  document.getElementById('ocr-status').textContent=S.dosiPhotoB64?'✅ Ambas fotos listas — toca OCR':'📋 Foto 2 lista — agrega Foto 1 también';
   e.target.value='';
 }
 async function runOCR(){
   const key=getOcrKey();if(!key){showToast('Configura tu API key en Ajustes','red');return;}
-  if(!S.dosiPhotoB64){showToast('Primero toma la foto','red');return;}
+  if(!S.dosiPhotoB64){showToast('Primero toma la Foto 1 (encabezado)','red');return;}
   const btn=document.getElementById('ocr-btn');btn.disabled=true;
-  document.getElementById('ocr-status').textContent='⏳ Analizando imagen...';
-  const b64=S.dosiPhotoB64.replace(/^data:image\/\w+;base64,/,'');
-  const mt=S.dosiPhotoB64.startsWith('data:image/png')?'image/png':'image/jpeg';
+  const toB64=(d)=>d.replace(/^data:image\/\w+;base64,/,'');
+  const toMt=(d)=>d.startsWith('data:image/png')?'image/png':'image/jpeg';
+  const blocks=[];
+  blocks.push({type:'image',source:{type:'base64',media_type:toMt(S.dosiPhotoB64),data:toB64(S.dosiPhotoB64)}});
+  if(S.dosiPhotoB64_2){
+    blocks.push({type:'image',source:{type:'base64',media_type:toMt(S.dosiPhotoB64_2),data:toB64(S.dosiPhotoB64_2)}});
+    document.getElementById('ocr-status').textContent='⏳ Analizando 2 fotos...';
+  }else{
+    document.getElementById('ocr-status').textContent='⏳ Analizando foto 1...';
+  }
+  const hasDos=!!S.dosiPhotoB64_2;
+  blocks.push({type:'text',text:`Eres experto en hojas de dosificación BATAB (Tabasco, México). ${hasDos?'Se envían DOS fotos: Foto 1=encabezado, Foto 2=totales acumulados del turno.':'Se envía UNA foto del encabezado.'}
+
+FORMATO HOJA BATAB:
+- ENCABEZADO: Humedad%, Módulo Finura, Peso Húmedo, Peso Placa (esquina sup. der.). Casilla X=máquina (B1/B2/CO). Total bachada y Lote. Fila materiales con KGS POR BACHADA.
+- TOTALES${hasDos?' (Foto 2)':''}: Fila TOTAL al final de tablas con consumos acumulados del turno: cemento total, tolva1 total, tolva2, tolva3, agua, aditivo.
+
+Devuelve SOLO JSON sin markdown:
+{"linea":"B1|B2|CO|null","lote":"null","bachadas":0,"peso_placa":0.0,"peso_humedo":0.0,"humedad":0.0,"modulo_finura":0.0,"cemento_tipo":"","cemento_kg":0,"tolva1_material":"","tolva1_kg":0,"tolva2_material":null,"tolva2_kg":null,"tolva3_material":"","tolva3_kg":0,"agua_litros":0,"aditivo_tipo":"","aditivo_cc":0,"pigmento_tipo":null,"pigmento_kg":null,"total_cemento_turno":0,"total_tolva1_turno":0,"total_tolva2_turno":null,"total_tolva3_turno":0,"total_agua_turno":0,"total_aditivo_turno":0,"produccion_reportada":0}
+CLAVE: kg/bachada están en fila del ENCABEZADO. Totales acumulados en fila TOTAL de las tablas.`});
   try{
     const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',
       headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-      body:JSON.stringify({model:'claude-opus-4-6',max_tokens:1200,messages:[{role:'user',content:[
-        {type:'image',source:{type:'base64',media_type:mt,data:b64}},
-        {type:'text',text:`Eres un sistema experto en lectura de hojas de dosificación de la planta BATAB (Bloques y Agregados de Tabasco, México).
-
-FORMATO EXACTO DE LA HOJA BATAB:
-- Esquina superior derecha: "Humedad diaria X.X%" y "Modulo Finura X.X", "Total Placas XXXX", "Peso Húmedo XX.XX", "Peso Placa XX.X"
-- Casillas de máquina con X: Besser 1 = B1, Besser 2 = B2, Columbia = CO
-- "Total bachada: XX" y "Lote XXXXXX" en el encabezado central
-- Fila de nombres de materiales: Cemento (marca), Agregado 1 (Tolva 1), Agregado 2 (Tolva 2), Agregado 3 (Tolva 3), Aditivo, Agua
-- Fila de cantidades POR BACHADA en KGS inmediatamente debajo de los nombres
-- Tablas de registro bachada por bachada con columnas: NUM, CEMENTO, TOLVA 1, TOLVA 2, TOLVA 3, T.AGREGADOS, ADITIVO, AGUA, TIEMPO
-- Fila TOTAL al final de cada tabla con sumas acumuladas
-
-INSTRUCCIÓN: Analiza toda la imagen y extrae. Devuelve ÚNICAMENTE JSON válido sin texto ni markdown adicional:
-{"linea":"B1 o B2 o CO o null","lote":"número de lote o null","bachadas":0,"total_placas":0,"peso_placa":0.0,"peso_humedo":0.0,"humedad":0.0,"modulo_finura":0.0,"cemento_tipo":"marca del cemento","cemento_kg":0,"tolva1_material":"nombre material Tolva 1","tolva1_kg":0,"tolva2_material":null,"tolva2_kg":null,"tolva3_material":"nombre material Tolva 3","tolva3_kg":0,"agua_litros":0,"aditivo_tipo":"nombre aditivo","aditivo_cc":0,"pigmento_tipo":null,"pigmento_kg":null,"total_cemento":0,"total_tolva1":0,"total_tolva2":null,"total_tolva3":0,"total_agua":0,"produccion_reportada":0}
-CLAVE: Los kg/bachada están en la fila de cantidades del ENCABEZADO, no en las tablas de registro detallado.`}
-      ]}]})
+      body:JSON.stringify({model:'claude-opus-4-6',max_tokens:1200,messages:[{role:'user',content:blocks}]})
     });
     if(!res.ok)throw new Error((await res.json()).error?.message||res.statusText);
     const d=await res.json();
     const text=d.content.find(c=>c.type==='text')?.text||'';
     const p=JSON.parse(text.replace(/```json|```/g,'').trim());
-    // Helper: set value on input or select
     const setVal=(id,v)=>{
       if(v==null||v===''||v===0)return;
       const el=document.getElementById(id);if(!el)return;
       if(el.tagName==='SELECT'){
-        // Try exact match first, then partial
         const opts=[...el.options];
-        const exact=opts.find(o=>o.value===v||o.value.toLowerCase()===String(v).toLowerCase());
-        const partial=opts.find(o=>o.value.toLowerCase().includes(String(v).toLowerCase())||String(v).toLowerCase().includes(o.value.toLowerCase()));
-        if(exact)el.value=exact.value;
-        else if(partial)el.value=partial.value;
-      }else{el.value=v;}
+        const ex=opts.find(o=>o.value===v||o.value.toLowerCase()===String(v).toLowerCase());
+        const pt=opts.find(o=>o.value.toLowerCase().includes(String(v).toLowerCase())||String(v).toLowerCase().includes(o.value.toLowerCase()));
+        if(ex)el.value=ex.value; else if(pt)el.value=pt.value;
+      }else el.value=v;
     };
-    // Mapeo de abreviaturas de hoja → nombres exactos NetSuite
-    const mapMaterial = (v) => {
-      if(!v) return null;
-      const s = String(v).toUpperCase().trim();
-      // Cemento: proveedor → producto NetSuite
-      if(s.includes('CEMEX') || s.includes('CPC40') || s.includes('CPC-40RS') || s.includes('CPC-40-RS')) return 'MATERIAS PRIMA - CEMENTO PORTLAND - CPC-40-RS';
-      if(s.includes('CPC40R') || s.includes('CPC-40R')) return 'MATERIAS PRIMA - CEMENTO PORTLAND - CPC-40R';
-      if(s.includes('CPC30') || s.includes('CPC-30')) return 'MATERIAS PRIMA - CEMENTO PORTLAND - CPC-30R-RS';
-      // Agregados: abreviaciones → NetSuite
-      if(s.includes('SELLO') && (s.includes('3/8') || s.includes('38') || s.includes('15/8'))) return 'MATERIAS PRIMAS - AGREGADOS - SELLO3/8';
-      if(s.includes('SELLO') && (s.includes('1/4') || s.includes('14'))) return 'MATERIAS PRIMAS - AGREGADOS - SELLO1/4';
-      if(s.includes('POLVO') || s.includes('POLVOP') || s.includes('POLVO P')) return 'MATERIAS PRIMAS - AGREGADOS - POLVO 3/16 AFI';
+    const mapM=(v)=>{
+      if(!v)return null; const s=String(v).toUpperCase().trim();
+      if(s.includes('CEMEX')||s.includes('CPC40')||s.includes('CPC-40RS')||s.includes('CPC-40-RS')) return 'MATERIAS PRIMA - CEMENTO PORTLAND - CPC-40-RS';
+      if(s.includes('CPC40R')||s.includes('CPC-40R')) return 'MATERIAS PRIMA - CEMENTO PORTLAND - CPC-40R';
+      if(s.includes('CPC30')||s.includes('CPC-30')) return 'MATERIAS PRIMA - CEMENTO PORTLAND - CPC-30R-RS';
+      if(s.includes('SELLO')&&(s.includes('3/8')||s.includes('38')||s.includes('15/8'))) return 'MATERIAS PRIMAS - AGREGADOS - SELLO3/8';
+      if(s.includes('SELLO')&&(s.includes('1/4')||s.includes('14'))) return 'MATERIAS PRIMAS - AGREGADOS - SELLO1/4';
+      if(s.includes('POLVO')||s.includes('POLVOP')) return 'MATERIAS PRIMAS - AGREGADOS - POLVO 3/16 AFI';
       if(s.includes('ARENA')) return 'MATERIAS PRIMAS - AGREGADOS - ARENA 3/16 AFI';
-      // Aditivo: A-D-C, A-DC, ADC → Eucolith DC
-      if(s.includes('A-D-C') || s.includes('ADC') || s.includes('A-DC') || s.includes('DC')) return 'MATERIAS PRIMAS - ADITIVOS - EUCOLITH DC';
-      if(s.includes('EUCOLITH') && s.includes('R')) return 'MATERIAS PRIMAS - ADITIVOS - EUCOLITH R';
+      if(s.includes('A-D-C')||s.includes('ADC')||s.includes('A-DC')||s.includes('DC')) return 'MATERIAS PRIMAS - ADITIVOS - EUCOLITH DC';
+      if(s.includes('EUCOLITH')&&s.includes('R')) return 'MATERIAS PRIMAS - ADITIVOS - EUCOLITH R';
       if(s.includes('EUCOLITH')) return 'MATERIAS PRIMAS - ADITIVOS - EUCOLITH DC';
-      if(s.includes('GRANEL') && s.includes('EUCOLITH')) return 'MATERIAS PRIMAS - ADITIVOS - EUCOLITH R';
-      // Pigmentos
-      if(s.includes('C-800') || s.includes('ADOBE')) return 'MATERIAS PRIMAS - PIGMENTOS - ADOBE C-800';
-      if(s.includes('A-1300') || s.includes('AMARILLO')) return 'MATERIAS PRIMAS - PIGMENTOS - AMARILLO A-1300';
-      if(s.includes('C-879') || s.includes('CHOCOLATE')) return 'MATERIAS PRIMAS - PIGMENTOS - CHOCOLATE C-879';
-      if(s.includes('N-1400') || s.includes('NEGRO')) return 'MATERIAS PRIMAS - PIGMENTOS - NEGRO N-1400';
-      if(s.includes('R-1120') || s.includes('ROJO')) return 'MATERIAS PRIMAS - PIGMENTOS - ROJO R-1120';
-      return v; // devuelve original si no hay mapeo
+      if(s.includes('C-800')||s.includes('ADOBE')) return 'MATERIAS PRIMAS - PIGMENTOS - ADOBE C-800';
+      if(s.includes('A-1300')||s.includes('AMARILLO')) return 'MATERIAS PRIMAS - PIGMENTOS - AMARILLO A-1300';
+      if(s.includes('C-879')||s.includes('CHOCOLATE')) return 'MATERIAS PRIMAS - PIGMENTOS - CHOCOLATE C-879';
+      if(s.includes('N-1400')||s.includes('NEGRO')) return 'MATERIAS PRIMAS - PIGMENTOS - NEGRO N-1400';
+      if(s.includes('R-1120')||s.includes('ROJO')) return 'MATERIAS PRIMAS - PIGMENTOS - ROJO R-1120';
+      return v;
     };
-    // Pre-fill todos los campos — todos quedan editables
     setVal('f-linea',p.linea); updateFolio();
-    // Lote: auto-agregar M/V del turno si la IA lo extrajo
-    if(p.lote){ const turnoLetra=S.form.turno==='M'?'M':'V'; const loteOCR=String(p.lote).toUpperCase(); const yaTimbre=/[MV]$/.test(loteOCR); setVal('f-lote', yaTimbre?loteOCR:loteOCR+turnoLetra); }
-    setVal('f-mf',p.modulo_finura);
-    setVal('f-humedad',p.humedad);
-    // Mapear abreviaturas → nombres exactos NetSuite
-    setVal('mp-cemento-tipo',mapMaterial(p.cemento_tipo)); setVal('mp-cemento-kg',p.cemento_kg);
-    setVal('mp-t1-mat',mapMaterial(p.tolva1_material));    setVal('mp-t1-kg',p.tolva1_kg);
-    setVal('mp-t2-mat',mapMaterial(p.tolva2_material));    setVal('mp-t2-kg',p.tolva2_kg);
-    setVal('mp-t3-mat',mapMaterial(p.tolva3_material));    setVal('mp-t3-kg',p.tolva3_kg);
+    if(p.lote){const tl=S.form.turno==='M'?'M':'V';const lo=String(p.lote).toUpperCase();setVal('f-lote',/[MV]$/.test(lo)?lo:lo+tl);}
+    setVal('f-mf',p.modulo_finura); setVal('f-humedad',p.humedad);
+    setVal('mp-cemento-tipo',mapM(p.cemento_tipo)); setVal('mp-cemento-kg',p.cemento_kg);
+    setVal('mp-t1-mat',mapM(p.tolva1_material));    setVal('mp-t1-kg',p.tolva1_kg);
+    setVal('mp-t2-mat',mapM(p.tolva2_material));    setVal('mp-t2-kg',p.tolva2_kg);
+    setVal('mp-t3-mat',mapM(p.tolva3_material));    setVal('mp-t3-kg',p.tolva3_kg);
     setVal('mp-agua',p.agua_litros);
-    setVal('mp-aditivo-tipo',mapMaterial(p.aditivo_tipo)); setVal('mp-aditivo-cc',p.aditivo_cc);
-    if(p.pigmento_tipo){setVal('mp-pigmento-tipo',mapMaterial(p.pigmento_tipo));document.getElementById('row-pigmento').style.display='';}
+    setVal('mp-aditivo-tipo',mapM(p.aditivo_tipo)); setVal('mp-aditivo-cc',p.aditivo_cc);
+    if(p.pigmento_tipo){setVal('mp-pigmento-tipo',mapM(p.pigmento_tipo));document.getElementById('row-pigmento').style.display='';}
     setVal('mp-pigmento-kg',p.pigmento_kg);
     setVal('f-bachadas',p.bachadas);
-    // Total Placas ya NO se usa en producción reportada — campo manual
     if(p.produccion_reportada) setVal('f-prod-reportada',p.produccion_reportada);
-    calcMetrics();document.getElementById('ocr-status').textContent='✅ Datos extraídos — verifica y corrige si es necesario';showToast('OCR completado ✅','green');
+    S.totalesOCR={cemento:p.total_cemento_turno,tolva1:p.total_tolva1_turno,tolva2:p.total_tolva2_turno,tolva3:p.total_tolva3_turno,agua:p.total_agua_turno,aditivo:p.total_aditivo_turno};
+    calcMetrics();
+    const extras=hasDos?' + totales acumulados':'';
+    document.getElementById('ocr-status').textContent=`✅ Datos extraídos${extras} — verifica y corrige si es necesario`;
+    showToast('OCR completado ✅','green');
   }catch(err){document.getElementById('ocr-status').textContent='❌ Error: '+err.message;showToast('Error OCR','red');}
   btn.disabled=false;
 }
