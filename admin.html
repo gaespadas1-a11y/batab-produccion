@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BATAB — Panel de Administración</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',sans-serif;background:#F4F6FA;color:#0F1A2E;font-size:14px}
+.hdr{background:#2A5298;padding:14px 20px;display:flex;align-items:center;justify-content:space-between}
+.hdr-logo{font-size:18px;font-weight:800;color:#fff;letter-spacing:.06em}
+.hdr-sub{font-size:11px;color:#A0BCE0}
+.hdr-right{display:flex;align-items:center;gap:10px}
+.sync-btn{padding:7px 14px;background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:20px;font-size:12px;cursor:pointer;font-weight:600}
+.sync-btn:hover{background:rgba(255,255,255,.25)}
+.last-sync{font-size:11px;color:#A0BCE0}
+.wrap{max-width:1100px;margin:0 auto;padding:20px}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.kpi{background:#fff;border:1px solid #C8CDD8;border-radius:10px;padding:16px;text-align:center}
+.kpi-n{font-size:28px;font-weight:700;line-height:1;margin-bottom:4px}
+.kpi-l{font-size:11px;color:#7A84A0;font-weight:500;text-transform:uppercase;letter-spacing:.06em}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
+.card{background:#fff;border:1px solid #C8CDD8;border-radius:10px;padding:16px}
+.card-title{font-size:11px;font-weight:700;color:#7A84A0;text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;padding:8px 10px;font-size:11px;font-weight:600;color:#7A84A0;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid #ECEEF2}
+td{padding:9px 10px;border-bottom:1px solid #F4F6FA;vertical-align:top}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#F8F9FC}
+.pill{display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;border-radius:3px}
+.pill-r{background:#FDEAEA;color:#7A1A1A}
+.pill-a{background:#FFF3DC;color:#7A4A00}
+.pill-v{background:#EBF0F8;color:#2A5298}
+.pill-g{background:#ECEEF2;color:#4A4E5A}
+.pill-ok{background:#E8F5ED;color:#1A6B3A}
+.pill-pend{background:#FFF3DC;color:#7A4A00}
+.thumb{width:44px;height:33px;object-fit:cover;border-radius:4px;border:1px solid #C8CDD8}
+.empty{text-align:center;padding:30px;color:#7A84A0;font-size:13px}
+.loading{text-align:center;padding:30px;color:#7A84A0}
+.spin{display:inline-block;width:16px;height:16px;border:2px solid #C8CDD8;border-top-color:#2A5298;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.bar-wrap{height:6px;background:#ECEEF2;border-radius:3px;overflow:hidden;margin-top:4px}
+.bar-fill{height:100%;border-radius:3px}
+.vend-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #F4F6FA;font-size:13px}
+.vend-row:last-child{border-bottom:none}
+.alert-row{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid #F4F6FA;align-items:flex-start}
+.alert-row:last-child{border-bottom:none}
+.filter-bar{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.filter-btn{padding:5px 12px;border:1px solid #C8CDD8;border-radius:20px;font-size:12px;cursor:pointer;background:#fff;color:#4A4E5A}
+.filter-btn.on{background:#2A5298;border-color:#2A5298;color:#fff;font-weight:600}
+input[type=text]{padding:7px 12px;border:1px solid #C8CDD8;border-radius:8px;font-size:13px;width:200px;color:#0F1A2E;background:#fff}
+input[type=text]:focus{outline:none;border-color:#2A5298}
+.export-btn{padding:7px 14px;background:#2A5298;color:#fff;border:none;border-radius:8px;font-size:12px;cursor:pointer;font-weight:600}
+@media(max-width:700px){.kpis{grid-template-columns:repeat(2,1fr)}.g2{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div>
+    <div class="hdr-logo">BATAB</div>
+    <div class="hdr-sub">Panel de Administración · Datos en tiempo real</div>
+  </div>
+  <div class="hdr-right">
+    <span class="last-sync" id="last-sync">Cargando...</span>
+    <button class="sync-btn" onclick="cargarTodo()">Actualizar</button>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- KPIs -->
+  <div class="kpis" id="kpis">
+    <div class="kpi"><div class="spin"></div></div>
+    <div class="kpi"><div class="spin"></div></div>
+    <div class="kpi"><div class="spin"></div></div>
+    <div class="kpi"><div class="spin"></div></div>
+  </div>
+
+  <!-- Fila 1 -->
+  <div class="g2">
+    <div class="card">
+      <div class="card-title">Actividad por vendedor</div>
+      <div id="vendedores-tabla"><div class="loading"><span class="spin"></span>Cargando...</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Usuarios registrados en la app</div>
+      <div id="usuarios-tabla"><div class="loading"><span class="spin"></span>Cargando...</div></div>
+    </div>
+  </div>
+
+  <!-- Alertas críticas -->
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-title">
+      Alertas críticas — Score ≥ 75
+      <button class="export-btn" onclick="exportarCSV()">Exportar CSV</button>
+    </div>
+    <div id="alertas-content"><div class="loading"><span class="spin"></span>Cargando...</div></div>
+  </div>
+
+  <!-- Todos los registros -->
+  <div class="card">
+    <div class="card-title">Todos los registros de campo</div>
+    <div class="filter-bar">
+      <button class="filter-btn on" onclick="filtrar('todos',this)">Todos</button>
+      <button class="filter-btn" onclick="filtrar('CRÍTICO',this)">Críticos</button>
+      <button class="filter-btn" onclick="filtrar('URGENTE',this)">Urgentes</button>
+      <button class="filter-btn" onclick="filtrar('ACTIVO',this)">Activos</button>
+      <input type="text" id="buscar" placeholder="Buscar vendedor o tipo..." oninput="buscarRegistros(this.value)">
+    </div>
+    <div style="overflow-x:auto">
+      <table>
+        <thead><tr>
+          <th>Foto</th><th>Tipo de obra</th><th>Etapa</th><th>Criterio</th>
+          <th>Score</th><th>Días</th><th>Producto</th><th>Vendedor</th><th>GPS</th><th>Fecha</th>
+        </tr></thead>
+        <tbody id="prospectos-tbody"><tr><td colspan="10" class="loading"><span class="spin"></span>Cargando registros...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const SB='https://szrcmvlgxxpmvgrfmxak.supabase.co';
+const SK='sb_publishable_VOhn9Z2Ev8gYK3nFKr44Sw_VngbAX4N';
+const HDR={'apikey':SK,'Authorization':'Bearer '+SK};
+
+let todosProspectos=[];
+let filtroActual='todos';
+
+async function sbGet(t,q){
+  const r=await fetch(SB+'/rest/v1/'+t+(q?'?'+q:''),{headers:HDR});
+  if(!r.ok)throw new Error('Error '+r.status);
+  return r.json();
+}
+
+function cap(s){return s?s.charAt(0).toUpperCase()+s.slice(1):'—'}
+function pillNivel(n){const m={'CRÍTICO':'pill-r','URGENTE':'pill-a','ACTIVO':'pill-v','SEGUIMIENTO':'pill-g','PENDIENTE':'pill-g'};return m[n]||'pill-g';}
+
+async function cargarTodo(){
+  document.getElementById('last-sync').textContent='Actualizando...';
+  try{
+    const [prospectos,usuarios]=await Promise.all([
+      sbGet('prospectos','order=fecha.desc&limit=500'),
+      sbGet('usuarios','order=fecha_registro.desc&limit=100')
+    ]);
+    todosProspectos=Array.isArray(prospectos)?prospectos:[];
+    renderKPIs(todosProspectos);
+    renderVendedores(todosProspectos);
+    renderUsuarios(Array.isArray(usuarios)?usuarios:[]);
+    renderAlertas(todosProspectos);
+    renderTabla(todosProspectos);
+    document.getElementById('last-sync').textContent='Actualizado: '+new Date().toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'});
+  }catch(e){
+    document.getElementById('last-sync').textContent='Error al cargar — '+e.message;
+  }
+}
+
+function renderKPIs(data){
+  const total=data.length;
+  const criticos=data.filter(p=>p.nivel==='CRÍTICO').length;
+  const sinSeg=data.filter(p=>p.score>=75&&(!p.visitas||!p.visitas.length)).length;
+  const vendedores=new Set(data.map(p=>p.vendedor).filter(Boolean)).size;
+  document.getElementById('kpis').innerHTML=
+    `<div class="kpi"><div class="kpi-n">${total}</div><div class="kpi-l">Total obras</div></div>`+
+    `<div class="kpi"><div class="kpi-n" style="color:#7A1A1A">${criticos}</div><div class="kpi-l">Críticas</div></div>`+
+    `<div class="kpi"><div class="kpi-n" style="color:#7A4A00">${sinSeg}</div><div class="kpi-l">Sin seguimiento</div></div>`+
+    `<div class="kpi"><div class="kpi-n" style="color:#2A5298">${vendedores}</div><div class="kpi-l">Vendedores activos</div></div>`;
+}
+
+function renderVendedores(data){
+  const el=document.getElementById('vendedores-tabla');
+  const vMap={};
+  data.forEach(p=>{
+    const v=p.vendedor||'Sin nombre';
+    if(!vMap[v])vMap[v]={total:0,criticos:0,ultima:p.fecha_str||''};
+    vMap[v].total++;
+    if(p.nivel==='CRÍTICO')vMap[v].criticos++;
+  });
+  const vList=Object.entries(vMap).sort((a,b)=>b[1].total-a[1].total);
+  if(!vList.length){el.innerHTML='<div class="empty">Sin registros aún.</div>';return;}
+  el.innerHTML=vList.map(([v,d])=>`
+    <div class="vend-row">
+      <div>
+        <div style="font-weight:600">${v}</div>
+        <div style="font-size:11px;color:#7A84A0">${d.total} registros · ${d.criticos} críticos · ${d.ultima}</div>
+      </div>
+      <div class="bar-wrap" style="width:80px">
+        <div class="bar-fill" style="width:${Math.min(100,d.total*10)}%;background:#2A5298"></div>
+      </div>
+    </div>`).join('');
+}
+
+function renderUsuarios(data){
+  const el=document.getElementById('usuarios-tabla');
+  if(!data.length){el.innerHTML='<div class="empty">Sin usuarios registrados aún.</div>';return;}
+  el.innerHTML='<table><thead><tr><th>Nombre</th><th>Rol</th><th>Estado</th><th>Origen</th></tr></thead><tbody>'+
+    data.map(u=>`<tr>
+      <td style="font-weight:600">${u.nombre||'—'}</td>
+      <td><span class="pill ${u.rol==='director'?'pill-r':u.rol==='gerente'?'pill-a':'pill-v'}">${(u.rol||'vendedor').toUpperCase()}</span></td>
+      <td><span class="pill ${u.estado==='activo'?'pill-ok':'pill-pend'}">${u.estado||'—'}</span></td>
+      <td style="font-size:11px;color:#7A84A0">${u.origen||'app'}</td>
+    </tr>`).join('')+'</tbody></table>';
+}
+
+function renderAlertas(data){
+  const el=document.getElementById('alertas-content');
+  const criticas=data.filter(p=>p.score>=75);
+  if(!criticas.length){el.innerHTML='<div class="empty" style="color:#1A6B3A">Sin alertas críticas activas.</div>';return;}
+  el.innerHTML=criticas.map(p=>`
+    <div class="alert-row">
+      ${p.foto_thumb?`<img class="thumb" src="${p.foto_thumb}">`:'<div class="thumb" style="background:#ECEEF2;display:flex;align-items:center;justify-content:center;font-size:18px;color:#C8CDD8">+</div>'}
+      <div style="flex:1">
+        <div style="font-weight:600;font-size:13px">${cap(p.tipo_obra||'—')} — ${p.etapa_nombre||'—'}</div>
+        <div style="font-size:12px;color:#7A1A1A;font-weight:600">Score ${p.score}/100 — ${p.nivel}</div>
+        <div style="font-size:11px;color:#7A84A0">${p.vendedor||'—'} · ${p.fecha_str||'—'}</div>
+        ${p.notas?`<div style="font-size:11px;color:#4A4E5A;margin-top:3px">${p.notas}</div>`:''}
+      </div>
+      ${p.lat&&p.lng?`<a href="https://maps.google.com/?q=${p.lat},${p.lng}" target="_blank" style="font-size:11px;color:#2A5298;text-decoration:none;white-space:nowrap">Ver en mapa</a>`:''}
+    </div>`).join('');
+}
+
+function renderTabla(data){
+  const tbody=document.getElementById('prospectos-tbody');
+  if(!data.length){tbody.innerHTML='<tr><td colspan="10" class="empty">Sin registros.</td></tr>';return;}
+  tbody.innerHTML=data.map(p=>`<tr>
+    <td>${p.foto_thumb?`<img class="thumb" src="${p.foto_thumb}">`:'<div class="thumb" style="background:#ECEEF2"></div>'}</td>
+    <td style="font-weight:600;max-width:130px">${cap(p.tipo_obra||'—')}</td>
+    <td style="max-width:120px;font-size:12px">${p.etapa_nombre||'—'}</td>
+    <td style="font-size:11px;max-width:110px;color:#4A4E5A">${p.criterio_label||'—'}</td>
+    <td><span class="pill ${pillNivel(p.nivel)}">${p.score||0}/100</span></td>
+    <td style="font-weight:600;color:${(p.dias||0)<=7?'#7A1A1A':(p.dias||0)<=21?'#7A4A00':'#2A5298'}">${p.dias>=0?p.dias+'d':'—'}</td>
+    <td style="font-size:11px;max-width:120px;color:#4A4E5A">${p.producto_codigo||'—'}</td>
+    <td style="font-weight:500">${p.vendedor||'—'}</td>
+    <td>${p.lat&&p.lng?`<a href="https://maps.google.com/?q=${p.lat},${p.lng}" target="_blank" style="font-size:11px;color:#2A5298">📍 Ver</a>`:'—'}</td>
+    <td style="font-size:11px;color:#7A84A0;white-space:nowrap">${p.fecha_str||'—'}</td>
+  </tr>`).join('');
+}
+
+function filtrar(nivel,btn){
+  filtroActual=nivel;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  const data=nivel==='todos'?todosProspectos:todosProspectos.filter(p=>p.nivel===nivel);
+  renderTabla(data);
+}
+
+function buscarRegistros(q){
+  const data=q?todosProspectos.filter(p=>(p.vendedor||'').toLowerCase().includes(q.toLowerCase())||(p.tipo_obra||'').toLowerCase().includes(q.toLowerCase())):todosProspectos;
+  renderTabla(data);
+}
+
+function exportarCSV(){
+  if(!todosProspectos.length){alert('Sin datos para exportar');return;}
+  const h='ID,Tipo,Etapa,Criterio,Score,Nivel,Dias,Producto,Vendedor,Lat,Lng,Notas,Fecha\n';
+  const r=todosProspectos.map(p=>[p.id,'"'+(p.tipo_obra||'')+'"','"'+(p.etapa_nombre||'')+'"','"'+(p.criterio_label||'')+'"',p.score,p.nivel,p.dias,'"'+(p.producto_codigo||'')+'"','"'+(p.vendedor||'')+'"',p.lat||'',p.lng||'','"'+(p.notas||'')+'"','"'+(p.fecha_str||'')+'"'].join(',')).join('\n');
+  const b=new Blob([h+r],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='batab_admin_'+new Date().toISOString().slice(0,10)+'.csv';a.click();
+}
+
+cargarTodo();
+setInterval(cargarTodo,60000);
+</script>
+</body>
+</html>
