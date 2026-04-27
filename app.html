@@ -654,6 +654,11 @@ html,body{height:100%;background:var(--bg);color:var(--text);
         <input type="file" id="dosi-photo2-input" accept="image/*" capture="environment" style="display:none" onchange="onDosiPhoto2Selected(event)">
       </div>
 
+      <!-- Fotos extra de dosificación -->
+      <div id="dosi-extra-container" style="margin-bottom:4px;"></div>
+      <button class="btn btn-secondary" style="width:100%;margin-bottom:12px;font-size:13px;" onclick="addDosiPhotoExtra()">+ Agregar hoja de dosificación</button>
+      <input type="file" id="dosi-extra-input" accept="image/*" capture="environment" style="display:none" onchange="onDosiExtraSelected(event)">
+
       <button class="ocr-btn" id="ocr-btn" onclick="runOCR()" disabled>🔍 Extraer datos con OCR (ambas fotos)</button>
       <div class="ocr-status" id="ocr-status"></div>
       <div class="form-group">
@@ -918,6 +923,36 @@ html,body{height:100%;background:var(--bg);color:var(--text);
           <div id="ocr-key-status"></div>
         </div>
       </div>
+      <!-- ═══ NETSUITE TBA ═══ -->
+      <div class="section-title" style="margin-bottom:12px;">NetSuite · Integración</div>
+      <div class="settings-section">
+        <div class="settings-row" style="flex-direction:column;align-items:flex-start;gap:10px;">
+          <div><div class="settings-label">URL del RESTlet</div><div class="settings-desc">Copia la URL exacta del deployment en NetSuite › Customization › Scripts › Deployments</div></div>
+          <input type="url" class="form-input" id="ns-url-input" placeholder="https://7905968.restlets.api.netsuite.com/app/site/hosting/restlet.nl?script=XXX&amp;deploy=1" autocomplete="off">
+        </div>
+        <div class="settings-row" style="flex-direction:column;align-items:flex-start;gap:10px;margin-top:10px;">
+          <div class="settings-label">Consumer Key</div>
+          <input type="password" class="form-input" id="ns-ck-input" placeholder="Consumer Key (TBA)" autocomplete="off">
+        </div>
+        <div class="settings-row" style="flex-direction:column;align-items:flex-start;gap:10px;">
+          <div class="settings-label">Consumer Secret</div>
+          <input type="password" class="form-input" id="ns-cs-input" placeholder="Consumer Secret (TBA)" autocomplete="off">
+        </div>
+        <div class="settings-row" style="flex-direction:column;align-items:flex-start;gap:10px;">
+          <div class="settings-label">Token ID</div>
+          <input type="password" class="form-input" id="ns-ti-input" placeholder="Token ID (TBA)" autocomplete="off">
+        </div>
+        <div class="settings-row" style="flex-direction:column;align-items:flex-start;gap:10px;">
+          <div class="settings-label">Token Secret</div>
+          <input type="password" class="form-input" id="ns-ts-input" placeholder="Token Secret (TBA)" autocomplete="off">
+        </div>
+        <div style="display:flex;gap:10px;margin-top:10px;">
+          <button class="settings-btn" style="flex:1;" onclick="saveNsConfig()">💾 Guardar credenciales</button>
+          <button class="settings-btn" style="color:var(--red);" onclick="clearNsConfig()">🗑️</button>
+        </div>
+        <div id="ns-config-status" style="font-size:12px;color:var(--text3);margin-top:6px;"></div>
+        <div class="info-box" style="margin-top:10px;">🔐 Las credenciales solo se guardan en este dispositivo. Nunca salen a GitHub ni al servidor.</div>
+      </div>
       <div class="section-title" style="margin-bottom:12px;">Estado</div>
       <div class="settings-section">
         <div class="settings-row"><div><div class="settings-label">OCR</div></div><span id="ocr-status-tag" class="tag tag-red">Sin configurar</span></div>
@@ -1075,7 +1110,7 @@ const CHECKLIST_ITEMS=[
 ];
 
 // ═══════ STATE ═══════
-let S={currentUser:null,currentStep:1,form:{turno:'M'},pesajes:[],dosiPhotoB64:null,dosiPhotoB64_2:null,totalesOCR:null,superUser:null,reviewRecordId:null,checks:{}};
+let S={currentUser:null,currentStep:1,form:{turno:'M'},pesajes:[],dosiPhotoB64:null,dosiPhotoB64_2:null,dosiPhotosExtra:[],totalesOCR:null,superUser:null,reviewRecordId:null,checks:{}};
 let tempPesajePhoto=null;
 
 // ═══════ STORAGE ═══════
@@ -1163,7 +1198,7 @@ function updateHome(){
 // ═══════ FORM ═══════
 const STEP_TITLES=['Datos generales','Datos de lab.','Pesajes de placa','Hoja de dosif.','Resumen'];
 function goForm(){
-  S.currentStep=1;S.pesajes=[];S.dosiPhotoB64=null;S.form={turno:'M'};
+  S.currentStep=1;S.pesajes=[];S.dosiPhotoB64=null;S.dosiPhotoB64_2=null;S.dosiPhotosExtra=[];S.form={turno:'M'};
   document.getElementById('f-fecha').valueAsDate=new Date();
   ['f-linea','f-articulo','f-lote','f-mf','f-humedad','f-obs-lab','f-bachadas','f-prod-reportada','f-real-empacada','f-obs'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('f-folio').textContent='— seleccionar línea —';
@@ -1171,6 +1206,7 @@ function goForm(){
   document.getElementById('dosi-photo-area').className='photo-area';
   document.getElementById('dosi-photo-area').innerHTML='<div class="photo-icon">📄</div><div class="photo-label">Tocar para fotografiar</div><div class="photo-hint">Hoja de dosificación — al terminar el turno</div>';
   document.getElementById('dosi-photo2-area').className='photo-area';document.getElementById('dosi-photo2-area').innerHTML='<div class="photo-icon">📋</div><div class="photo-label">Fotografiar TOTALES acumulados</div><div class="photo-hint">Fila TOTAL del turno · Consumo real de cada material</div>';document.getElementById('ocr-btn').disabled=true;
+  const ec=document.getElementById('dosi-extra-container');if(ec)ec.innerHTML='';
   document.getElementById('ocr-status').textContent='';
   renderPesajes();calcMetrics();updateStepUI();
   showScreen('screen-form');selectTurno('M');
@@ -1346,6 +1382,38 @@ function savePesaje(){
 // ═══════ DOSIFICACIÓN + OCR ═══════
 function captureDosiPhoto(){document.getElementById('dosi-photo-input').click();}
 function captureDosiPhoto2(){document.getElementById('dosi-photo2-input').click();}
+function addDosiPhotoExtra(){document.getElementById('dosi-extra-input').click();}
+async function onDosiExtraSelected(e){
+  const f=e.target.files[0];if(!f)return;
+  showLoading('Procesando foto extra...');
+  const b64=await compressImage(f,1200);
+  hideLoading();
+  S.dosiPhotosExtra.push(b64);
+  renderDosiExtras();
+  e.target.value='';
+  showToast('Foto '+S.dosiPhotosExtra.length+' agregada','green');
+}
+function removeDosiExtra(idx){
+  S.dosiPhotosExtra.splice(idx,1);
+  renderDosiExtras();
+}
+function renderDosiExtras(){
+  const c=document.getElementById('dosi-extra-container');
+  if(!c)return;
+  if(!S.dosiPhotosExtra.length){c.innerHTML='';return;}
+  c.innerHTML=S.dosiPhotosExtra.map((b64,i)=>`
+    <div style="position:relative;margin-bottom:10px;">
+      <div style="font-size:11px;font-weight:600;color:var(--text3);margin-bottom:4px;">📄 Hoja ${i+3}</div>
+      <div class="photo-area has-photo" style="padding:0;overflow:hidden;">
+        <img src="${b64}" style="width:100%;max-height:200px;object-fit:cover;display:block;"
+          onclick="openLightbox('${b64}','Hoja ${i+3} de dosificación')">
+        <div class="photo-overlay">
+          <button class="photo-btn-sm" onclick="openLightbox('${b64}','Hoja ${i+3}')">🔍 Ver</button>
+          <button class="photo-btn-sm" style="color:#ffaaaa;" onclick="removeDosiExtra(${i})">🗑️ Quitar</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
 
 async function onDosiPhotoSelected(e){
   const f=e.target.files[0];if(!f)return;
@@ -1763,7 +1831,7 @@ function saveRecord(){
   const num=incCounter(linea),year=new Date().getFullYear();
   d.folio=`${linea}-${year}-${String(num).padStart(4,'0')}`;
   const rec={...d,id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),
-    dosiPhoto:S.dosiPhotoB64,createdAt:new Date().toISOString(),piezasEstimadas:S.piezasEstimadas||null,pesoHumedo:S.pesoHumedo||null,
+    dosiPhoto:S.dosiPhotoB64,dosiPhoto2:S.dosiPhotoB64_2||null,dosiPhotosExtra:[...S.dosiPhotosExtra],createdAt:new Date().toISOString(),piezasEstimadas:S.piezasEstimadas||null,pesoHumedo:S.pesoHumedo||null,
     totalesConsumo:S.totalesOCR||null,
     status:'pending',netsuiteWO:null,approvedBy:null,approvedAt:null};
   const recs=getRecords();recs.push(rec);
@@ -1771,14 +1839,22 @@ function saveRecord(){
     saveRecords(recs);
   }catch(e){
     // localStorage lleno — guardar sin fotos para no perder el registro
-    const recSinFotos={...rec,dosiPhoto:null,pesajes:rec.pesajes?.map(p=>({...p,photo:null,photoVacia:null,photoLlena:null}))||[]};
+    const recSinFotos={...rec,dosiPhoto:null,dosiPhoto2:null,dosiPhotosExtra:[],pesajes:rec.pesajes?.map(p=>({...p,photo:null,photoVacia:null,photoLlena:null}))||[]};
     const recsSinFotos=getRecords();recsSinFotos.push(recSinFotos);
     try{ saveRecords(recsSinFotos); }
     catch(e2){ showToast('Error al guardar: almacenamiento lleno','red'); return; }
     showToast('Guardado sin fotos — almacenamiento limitado','red');
   }
   document.getElementById('success-folio').textContent=d.folio;
-  showScreen('screen-success');
+  // Supervisor/director → ir directo a revisar el registro recién guardado
+  const rol=S.currentUser?.rol;
+  if(rol==='supervisor'||rol==='director'){
+    S.superUser=S.currentUser;
+    openReview(rec.id);
+    navTo('screen-review','nav-super');
+  } else {
+    showScreen('screen-success');
+  }
 }
 
 // ═══════ SUPERVISOR ═══════
@@ -1853,29 +1929,74 @@ function renderReviewScreen(rec){
       ${rec.eficiencia?`<span class="rv-chip ${rec.eficiencia>=95?'ok':rec.eficiencia>=85?'warn':'bad'}">⚡ ${rec.eficiencia.toFixed(1)}% efic.</span>`:''}
     </div>`;
 
-  // Foto dosificación
+  // Fotos dosificación — mostrar AMBAS (encabezado + totales acumulados)
   const dosiBody=document.getElementById('rv-dosi-photo-body');
+  let dosiHtml='';
   if(rec.dosiPhoto){
-    dosiBody.innerHTML=`
-      <img class="rv-photo-main" src="${rec.dosiPhoto}" alt="Hoja de dosificación"
-        onclick="openLightbox('${rec.dosiPhoto}','Hoja de dosificación · ${rec.folio}')">
-      <div class="rv-photo-hint">📌 Toca para ver en pantalla completa y verificar datos</div>`;
-    document.getElementById('rv-dosi-indicator').innerHTML='<span style="color:var(--green);font-size:11px;">✅ Con foto</span>';
+    dosiHtml+=`<div style="margin-bottom:8px;">
+      <div style="font-size:11px;font-weight:600;color:var(--text3);margin-bottom:4px;">📄 ENCABEZADO</div>
+      <img class="rv-photo-main" src="${rec.dosiPhoto}" alt="Encabezado dosificación"
+        onclick="openLightbox('${rec.dosiPhoto}','Encabezado dosificación · ${rec.folio}')">
+    </div>`;
+  }
+  if(rec.dosiPhoto2){
+    dosiHtml+=`<div style="margin-bottom:8px;">
+      <div style="font-size:11px;font-weight:600;color:var(--text3);margin-bottom:4px;">📊 TOTALES ACUMULADOS</div>
+      <img class="rv-photo-main" src="${rec.dosiPhoto2}" alt="Totales acumulados"
+        onclick="openLightbox('${rec.dosiPhoto2}','Totales acumulados · ${rec.folio}')">
+    </div>`;
+  }
+  // Fotos extra de dosificación
+  if(rec.dosiPhotosExtra&&rec.dosiPhotosExtra.length){
+    rec.dosiPhotosExtra.forEach((b64,i)=>{
+      dosiHtml+=`<div style="margin-bottom:8px;">
+        <div style="font-size:11px;font-weight:600;color:var(--text3);margin-bottom:4px;">📄 HOJA ${i+3}</div>
+        <img class="rv-photo-main" src="${b64}" alt="Hoja extra ${i+3}"
+          onclick="openLightbox('${b64}','Hoja ${i+3} de dosificación · ${rec.folio}')">
+      </div>`;
+    });
+  }
+  if(dosiHtml){
+    dosiBody.innerHTML=dosiHtml+'<div class="rv-photo-hint">📌 Toca cualquier foto para verla en pantalla completa</div>';
+    const nFotos=(rec.dosiPhoto?1:0)+(rec.dosiPhoto2?1:0)+(rec.dosiPhotosExtra?.length||0);
+    document.getElementById('rv-dosi-indicator').innerHTML=`<span style="color:var(--green);font-size:11px;">✅ ${nFotos} foto${nFotos>1?'s':''}</span>`;
   }else{
     dosiBody.innerHTML='<div class="rv-no-photo">📷 Sin foto adjunta</div>';
     document.getElementById('rv-dosi-indicator').innerHTML='<span style="color:var(--red);font-size:11px;">⚠️ Sin foto</span>';
   }
 
-  // Pesajes grid
+  // Pesajes — mostrar ambas fotos (vacía + llena) por cada pesaje
   const pg=document.getElementById('rv-pesajes-grid');
   if(rec.pesajes&&rec.pesajes.length){
-    pg.innerHTML=rec.pesajes.map((p,i)=>`
-      <div class="rv-pesaje-item" onclick="${p.photo?`openLightbox('${p.photo}','Pesaje ${i+1} · ${p.kg.toFixed(3)} kg/pz')`:'void(0)'}">
-        ${p.photo?`<img class="rv-pesaje-img" src="${p.photo}" alt="">`
-          :`<div class="rv-pesaje-no-img">📸</div>`}
-        <div class="rv-pesaje-kg">${p.kg.toFixed(3)}</div>
-        <div class="rv-pesaje-time">${p.time}</div>
-      </div>`).join('');
+    pg.innerHTML=rec.pesajes.map((p,i)=>{
+      const fVacia=p.photoVacia||null;
+      const fLlena=p.photoLlena||p.photo||null;
+      return `<div class="rv-pesaje-item" style="cursor:default;">
+        <div style="font-size:11px;font-weight:700;color:var(--text3);margin-bottom:6px;text-align:center;">
+          PESAJE ${i+1} · Bachada ${p.bachada||'—'} · ${p.time}
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px;">
+          <div>
+            <div style="font-size:10px;color:var(--text3);text-align:center;margin-bottom:2px;">PLACA VACÍA (tara)</div>
+            ${fVacia
+              ?`<img src="${fVacia}" style="width:100%;border-radius:6px;cursor:pointer;" onclick="openLightbox('${fVacia}','Placa vacía · Pesaje ${i+1}')">`
+              :`<div style="background:var(--bg3);border-radius:6px;height:70px;display:flex;align-items:center;justify-content:center;font-size:18px;">📸</div>`}
+            <div style="font-size:11px;text-align:center;color:var(--text2);margin-top:2px;">${p.vacia?.toFixed(1)||'—'} kg</div>
+          </div>
+          <div>
+            <div style="font-size:10px;color:var(--text3);text-align:center;margin-bottom:2px;">PLACA LLENA (bruto)</div>
+            ${fLlena
+              ?`<img src="${fLlena}" style="width:100%;border-radius:6px;cursor:pointer;" onclick="openLightbox('${fLlena}','Placa llena · Pesaje ${i+1}')">`
+              :`<div style="background:var(--bg3);border-radius:6px;height:70px;display:flex;align-items:center;justify-content:center;font-size:18px;">📸</div>`}
+            <div style="font-size:11px;text-align:center;color:var(--text2);margin-top:2px;">${p.bruto?.toFixed(1)||'—'} kg</div>
+          </div>
+        </div>
+        <div style="background:var(--bg3);border-radius:6px;padding:6px;text-align:center;">
+          <span style="font-size:13px;font-weight:700;color:var(--accent);">${p.kg.toFixed(3)} kg/pz</span>
+          <span style="font-size:11px;color:var(--text3);margin-left:6px;">(${p.pzs} pzas · neto ${p.neto?.toFixed(1)||'—'} kg)</span>
+        </div>
+      </div>`;
+    }).join('');
     const vals=rec.pesajes.map(p=>p.kg);
     const avg=vals.reduce((a,b)=>a+b,0)/vals.length;
     const varVal=Math.max(...vals)-Math.min(...vals);
@@ -1994,11 +2115,11 @@ async function doApprove(withNetsuite){
   if(withNetsuite&&woId){
     showLoading('Subiendo a NetSuite...');
     try{
-      // TODO: implementar OAuth cuando lleguen las credenciales NetSuite
-      await new Promise(r=>setTimeout(r,1200)); // simulación
+        const nsResult = await uploadToNetsuite(recs[idx]);
       recs[idx].netsuiteStatus='uploaded';
+      recs[idx].netsuiteRecordId=nsResult.recordId||null;
       saveRecords(recs);hideLoading();
-      showToast('✅ Aprobado y subido a NetSuite','green');
+      showToast('✅ Aprobado y subido a NetSuite · ID: '+(nsResult.recordId||'—'),'green');
     }catch(e){recs[idx].netsuiteStatus='error';saveRecords(recs);hideLoading();showToast('Aprobado · Error NetSuite: '+e.message,'red');}
   }else{saveRecords(recs);showToast('✓ Registro aprobado','green');}
   // Refresh review screen
@@ -2022,6 +2143,12 @@ function goSettings(){
   if(key){tag.className='tag tag-green';tag.textContent='Configurado ✓';}
   else{tag.className='tag tag-red';tag.textContent='Sin configurar';}
   document.getElementById('settings-records-count').textContent=getRecords().length;
+  // Cargar estado NS
+  const cfg=getNsConfig();
+  document.getElementById('ns-url-input').value=cfg.url||'';
+  if(cfg.ck){['ns-ck-input','ns-cs-input','ns-ti-input','ns-ts-input'].forEach(id=>{document.getElementById(id).value='•'.repeat(20);});}
+  const nsStatus=document.getElementById('ns-config-status');
+  if(nsStatus) nsStatus.innerHTML=cfg.ck?'<span style="color:var(--green);">✅ Credenciales configuradas</span>':'<span style="color:var(--red);">⚠️ Sin credenciales TBA</span>';
 }
 function saveOcrKey(){
   const v=document.getElementById('ocr-key-input').value.trim();
@@ -2040,6 +2167,108 @@ function exportData(){
   a.click();showToast('Exportado ✅','green');
 }
 function clearApproved(){saveRecords(getRecords().filter(r=>r.status!=='approved'));showToast('Registros aprobados eliminados','green');goSettings();}
+
+// ═══════ NETSUITE TBA CONFIG ═══════
+const getNsConfig=()=>{
+  return {
+    url:   localStorage.getItem('batab_ns_url')||'',
+    ck:    localStorage.getItem('batab_ns_ck')||'',
+    cs:    localStorage.getItem('batab_ns_cs')||'',
+    ti:    localStorage.getItem('batab_ns_ti')||'',
+    ts:    localStorage.getItem('batab_ns_ts')||''
+  };
+};
+function saveNsConfig(){
+  const url=document.getElementById('ns-url-input').value.trim();
+  const ck=document.getElementById('ns-ck-input').value.trim();
+  const cs=document.getElementById('ns-cs-input').value.trim();
+  const ti=document.getElementById('ns-ti-input').value.trim();
+  const ts=document.getElementById('ns-ts-input').value.trim();
+  if(!url){showToast('Ingresa la URL del RESTlet','red');return;}
+  if(!ck||!cs||!ti||!ts){showToast('Completa las 4 credenciales TBA','red');return;}
+  localStorage.setItem('batab_ns_url',url);
+  localStorage.setItem('batab_ns_ck',ck);
+  localStorage.setItem('batab_ns_cs',cs);
+  localStorage.setItem('batab_ns_ti',ti);
+  localStorage.setItem('batab_ns_ts',ts);
+  // Limpiar campos por seguridad
+  document.getElementById('ns-ck-input').value='•'.repeat(20);
+  document.getElementById('ns-cs-input').value='•'.repeat(20);
+  document.getElementById('ns-ti-input').value='•'.repeat(20);
+  document.getElementById('ns-ts-input').value='•'.repeat(20);
+  document.getElementById('ns-config-status').innerHTML='<span style="color:var(--green);">✅ Credenciales guardadas en este dispositivo</span>';
+  showToast('Credenciales NetSuite guardadas','green');
+}
+function clearNsConfig(){
+  ['batab_ns_url','batab_ns_ck','batab_ns_cs','batab_ns_ti','batab_ns_ts'].forEach(k=>localStorage.removeItem(k));
+  ['ns-url-input','ns-ck-input','ns-cs-input','ns-ti-input','ns-ts-input'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('ns-config-status').textContent='';
+  showToast('Credenciales NetSuite eliminadas','red');
+}
+
+// ═══════ OAUTH 1.0 TBA (HMAC-SHA256) ═══════
+async function buildOAuthHeader(method, url){
+  const cfg=getNsConfig();
+  if(!cfg.ck||!cfg.cs||!cfg.ti||!cfg.ts) throw new Error('Credenciales NetSuite no configuradas. Ve a Ajustes.');
+  const ts   = Math.floor(Date.now()/1000).toString();
+  const nonce= Array.from(crypto.getRandomValues(new Uint8Array(12)))
+               .map(b=>b.toString(36)).join('').substring(0,16);
+  const params={
+    oauth_consumer_key:    cfg.ck,
+    oauth_nonce:           nonce,
+    oauth_signature_method:'HMAC-SHA256',
+    oauth_timestamp:       ts,
+    oauth_token:           cfg.ti,
+    oauth_version:         '1.0'
+  };
+  // Signature base string
+  const enc=encodeURIComponent;
+  const paramStr=Object.keys(params).sort()
+    .map(k=>enc(k)+'='+enc(params[k])).join('&');
+  const baseStr=[method.toUpperCase(),enc(url),enc(paramStr)].join('&');
+  // Signing key
+  const signingKey=enc(cfg.cs)+'&'+enc(cfg.ts);
+  const encoder=new TextEncoder();
+  const key=await crypto.subtle.importKey(
+    'raw',encoder.encode(signingKey),{name:'HMAC',hash:'SHA-256'},false,['sign']
+  );
+  const sig=await crypto.subtle.sign('HMAC',key,encoder.encode(baseStr));
+  const sigB64=btoa(String.fromCharCode(...new Uint8Array(sig)));
+  params.oauth_signature=sigB64;
+  const headerParts=Object.keys(params)
+    .map(k=>enc(k)+'="'+enc(params[k])+'"').join(', ');
+  // Extraer account ID de la URL
+  const accountMatch=cfg.url.match(/(\d{7,8})\.restlets/);
+  const realm=accountMatch?accountMatch[1]:'7905968';
+  return 'OAuth realm="'+realm+'", '+headerParts;
+}
+
+// ═══════ LLAMADA REAL AL RESTLET ═══════
+async function uploadToNetsuite(record){
+  const cfg=getNsConfig();
+  if(!cfg.url) throw new Error('URL del RESTlet no configurada. Ve a Ajustes.');
+  // Preparar payload — sin imágenes base64
+  const payload={...record};
+  delete payload.dosiPhoto;
+  delete payload.dosiPhoto2;
+  if(payload.pesajes) payload.pesajes=payload.pesajes.map(p=>({...p,photo:null,photoVacia:null,photoLlena:null}));
+  const authHeader=await buildOAuthHeader('POST',cfg.url);
+  const res=await fetch(cfg.url,{
+    method:'POST',
+    headers:{
+      'Content-Type':'application/json',
+      'Authorization':authHeader
+    },
+    body:JSON.stringify(payload)
+  });
+  if(!res.ok){
+    const txt=await res.text();
+    throw new Error('HTTP '+res.status+': '+txt.substring(0,200));
+  }
+  const json=await res.json();
+  if(!json.success) throw new Error(json.error||'Error desconocido en NetSuite');
+  return json; // { success, recordId, folio, message }
+}
 
 // ═══════ IMAGE UTILS ═══════
 function compressImage(file,maxW=800){
