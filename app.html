@@ -671,9 +671,33 @@ html,body{height:100%;background:var(--bg);color:var(--text);
           </tbody>
         </table>
       </div>
+      <!-- TOTALES ACUMULADOS DEL TURNO (de Foto 2 OCR) -->
+      <div id="totales-ocr-section" style="display:none;margin-bottom:18px;">
+        <div style="background:#E4ECF7;border:2px solid #093F89;border-radius:var(--radius);overflow:hidden;">
+          <div style="background:#093F89;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;">
+            <span style="color:#FFCD24;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;">📊 Consumos totales del turno</span>
+            <span style="color:rgba(255,255,255,.6);font-size:11px;" id="totales-validacion-status">—</span>
+          </div>
+          <table style="width:100%;border-collapse:collapse;" id="totales-ocr-table">
+            <thead>
+              <tr style="background:rgba(9,63,137,.08);">
+                <th style="padding:8px 12px;text-align:left;font-size:11px;color:#5A6E90;text-transform:uppercase;font-weight:600;">Material</th>
+                <th style="padding:8px 12px;text-align:right;font-size:11px;color:#5A6E90;text-transform:uppercase;font-weight:600;">Teórico</th>
+                <th style="padding:8px 12px;text-align:right;font-size:11px;color:#5A6E90;text-transform:uppercase;font-weight:600;">Real (hoja)</th>
+                <th style="padding:8px 12px;text-align:right;font-size:11px;color:#5A6E90;text-transform:uppercase;font-weight:600;">Dif.</th>
+              </tr>
+            </thead>
+            <tbody id="totales-ocr-body"></tbody>
+          </table>
+          <div style="padding:8px 12px;font-size:11px;color:#5A6E90;">
+            ℹ️ Teórico = kg/bachada × bachadas capturadas. Diferencia aceptable ±5%.
+          </div>
+        </div>
+      </div>
+
       <div class="form-group">
         <label class="form-label">Bachadas realizadas <span class="req">*</span></label>
-        <input type="number" class="form-input" id="f-bachadas" min="0" step="1" placeholder="0" style="font-family:'IBM Plex Mono',monospace;font-size:24px;text-align:center;" oninput="calcMetrics()">
+        <input type="number" class="form-input" id="f-bachadas" min="0" step="1" placeholder="0" style="font-family:'IBM Plex Mono',monospace;font-size:24px;text-align:center;" oninput="calcMetrics();updateTotalesOCR()">
       </div>
       <div class="form-group">
         <label class="form-label">Prod. reportada (pzas) <span class="req">*</span></label>
@@ -1333,7 +1357,10 @@ FORMATO HOJA BATAB:
 
 Devuelve SOLO JSON sin markdown:
 {"linea":"B1|B2|CO|null","lote":"null","bachadas":0,"peso_placa":0.0,"peso_humedo":0.0,"humedad":0.0,"modulo_finura":0.0,"cemento_tipo":"","cemento_kg":0,"tolva1_material":"","tolva1_kg":0,"tolva2_material":null,"tolva2_kg":null,"tolva3_material":"","tolva3_kg":0,"agua_litros":0,"aditivo_tipo":"","aditivo_cc":0,"pigmento_tipo":null,"pigmento_kg":null,"total_cemento_turno":0,"total_tolva1_turno":0,"total_tolva2_turno":null,"total_tolva3_turno":0,"total_agua_turno":0,"total_aditivo_turno":0,"produccion_reportada":0}
-CLAVE: kg/bachada están en fila del ENCABEZADO. Totales acumulados en fila TOTAL de las tablas.`});
+CLAVE: Los kg/bachada están en la fila de cantidades del ENCABEZADO (debajo de los nombres de materiales), NO en las tablas.
+IMPORTANTE AGUA vs ADITIVO: El AGUA está en la columna AGUA y es en LITROS (típicamente 150-400 L/bachada). El ADITIVO está en columna ADITIVO y es en KGS (típicamente 0.5-2 kg/bachada). Son valores muy distintos - no los confundas.
+TOLVA 1: Es el primer agregado (Sello 3/8, Arena, Polvo). Si ves "Sello" en la columna Agregado 1, mapea como tolva1_material.
+TOTALES: La fila TOTAL al final de cada bloque de 10 bachadas y la fila de TOTALES GENERALES al final de la hoja son los consumos acumulados reales del turno completo.`});
   try{
     const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',
       headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
@@ -1385,13 +1412,59 @@ CLAVE: kg/bachada están en fila del ENCABEZADO. Totales acumulados en fila TOTA
     setVal('mp-pigmento-kg',p.pigmento_kg);
     setVal('f-bachadas',p.bachadas);
     if(p.produccion_reportada) setVal('f-prod-reportada',p.produccion_reportada);
-    S.totalesOCR={cemento:p.total_cemento_turno,tolva1:p.total_tolva1_turno,tolva2:p.total_tolva2_turno,tolva3:p.total_tolva3_turno,agua:p.total_agua_turno,aditivo:p.total_aditivo_turno};
+    S.totalesOCR={cemento:p.total_cemento_turno,tolva1:p.total_tolva1_turno,tolva2:p.total_tolva2_turno,tolva3:p.total_tolva3_turno,agua:p.total_agua_turno,aditivo:p.total_aditivo_turno}; updateTotalesOCR();
     calcMetrics();
     const extras=hasDos?' + totales acumulados':'';
     document.getElementById('ocr-status').textContent=`✅ Datos extraídos${extras} — verifica y corrige si es necesario`;
     showToast('OCR completado ✅','green');
   }catch(err){document.getElementById('ocr-status').textContent='❌ Error: '+err.message;showToast('Error OCR','red');}
   btn.disabled=false;
+}
+
+// ═══════ TOTALES ACUMULADOS OCR ═══════
+function updateTotalesOCR(){
+  if(!S.totalesOCR) return;
+  const t = S.totalesOCR;
+  const bach = parseInt(document.getElementById('f-bachadas').value)||0;
+
+  // Datos de diseño por bachada
+  const diseno = {
+    'Cemento':   { kg: parseFloat(document.getElementById('mp-cemento-kg').value)||0, real: t.cemento },
+    'Tolva 1':   { kg: parseFloat(document.getElementById('mp-t1-kg').value)||0,      real: t.tolva1  },
+    'Tolva 2':   { kg: parseFloat(document.getElementById('mp-t2-kg').value)||0,      real: t.tolva2  },
+    'Tolva 3':   { kg: parseFloat(document.getElementById('mp-t3-kg').value)||0,      real: t.tolva3  },
+    'Agua (L)':  { kg: parseFloat(document.getElementById('mp-agua').value)||0,       real: t.agua    },
+    'Aditivo':   { kg: parseFloat(document.getElementById('mp-aditivo-cc').value)||0, real: t.aditivo },
+  };
+
+  const section = document.getElementById('totales-ocr-section');
+  const tbody   = document.getElementById('totales-ocr-body');
+  let hasData=false, allOk=true;
+
+  tbody.innerHTML = Object.entries(diseno).map(([nombre, d])=>{
+    if(!d.real && !d.kg) return '';
+    hasData=true;
+    const teorico = bach > 0 && d.kg > 0 ? d.kg * bach : null;
+    const real    = d.real || null;
+    const diff    = (teorico && real) ? real - teorico : null;
+    const pct     = (teorico && real) ? (diff/teorico*100) : null;
+    const ok      = pct === null || Math.abs(pct) <= 5;
+    if(!ok) allOk=false;
+    const color   = ok ? '#1A7A4A' : (Math.abs(pct)||0) <= 10 ? '#93700A' : '#C0392B';
+    const icon    = ok ? '✅' : '⚠️';
+    return `<tr style="border-bottom:1px solid #C8D4E8;">
+      <td style="padding:8px 12px;font-size:13px;font-weight:600;">${nombre}</td>
+      <td style="padding:8px 12px;text-align:right;font-size:13px;font-family:'IBM Plex Mono',monospace;color:#5A6E90;">${teorico!=null?teorico.toFixed(0):'—'}</td>
+      <td style="padding:8px 12px;text-align:right;font-size:13px;font-family:'IBM Plex Mono',monospace;font-weight:700;color:#093F89;">${real!=null?real.toFixed(0):'—'}</td>
+      <td style="padding:8px 12px;text-align:right;font-size:13px;font-family:'IBM Plex Mono',monospace;color:${color};">${diff!=null?(diff>0?'+':'')+diff.toFixed(0)+' ('+icon+')':'—'}</td>
+    </tr>`;
+  }).join('');
+
+  if(hasData){
+    section.style.display='';
+    document.getElementById('totales-validacion-status').textContent =
+      allOk ? '✅ Consumos dentro del rango' : '⚠️ Revisar diferencias';
+  }
 }
 
 // ═══════ METRICS ═══════
