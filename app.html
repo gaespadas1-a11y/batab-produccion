@@ -519,7 +519,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);
 <div class="screen" id="screen-home">
   <div class="header"><div class="header-inner">
     <div style="flex:1;">
-      <div class="header-title">🏭 BATAB · Producción</div>
+      <div class="header-title">🏭 BATAB · Producción</div><div style="font-size:10px;background:#FFCD24;color:#093F89;font-weight:700;padding:2px 7px;border-radius:10px;display:inline-block;margin-left:6px;vertical-align:middle;">v8</div>
       <div class="header-sub" id="home-user">—</div>
     </div>
     <button class="header-action" onclick="logout()">Salir</button>
@@ -908,7 +908,6 @@ html,body{height:100%;background:var(--bg);color:var(--text);
         <div class="form-hint">Si no tienes el WO ahora, puedes aprobar sin él. Se puede agregar después.</div>
         <div class="rv-actions">
           <button class="btn btn-primary" onclick="doApprove(true)" id="rv-btn-approve">✓ Aprobar y subir a NetSuite</button>
-          <button class="btn btn-ghost" onclick="doApprove(false)">✓ Solo aprobar (sin subir)</button>
           <button class="btn btn-danger" onclick="doReject()">✗ Rechazar — solicitar corrección</button>
         </div>
       </div>
@@ -940,11 +939,8 @@ html,body{height:100%;background:var(--bg);color:var(--text);
       <!-- ═══ NETSUITE TBA ═══ -->
       <div class="section-title" style="margin-bottom:12px;">NetSuite · Integración</div>
       <div class="settings-section">
+        <div class="info-box" style="margin-bottom:10px;">🔗 Conecta a <strong>REST Record API</strong> de BATAB · Account <code>7905968</code></div>
         <div class="settings-row" style="flex-direction:column;align-items:flex-start;gap:10px;">
-          <div><div class="settings-label">URL del RESTlet</div><div class="settings-desc">Copia la URL exacta del deployment en NetSuite › Customization › Scripts › Deployments</div></div>
-          <input type="url" class="form-input" id="ns-url-input" placeholder="https://7905968.restlets.api.netsuite.com/app/site/hosting/restlet.nl?script=XXX&amp;deploy=1" autocomplete="off">
-        </div>
-        <div class="settings-row" style="flex-direction:column;align-items:flex-start;gap:10px;margin-top:10px;">
           <div class="settings-label">Consumer Key</div>
           <input type="password" class="form-input" id="ns-ck-input" placeholder="Consumer Key (TBA)" autocomplete="off">
         </div>
@@ -967,7 +963,16 @@ html,body{height:100%;background:var(--bg);color:var(--text);
         <div id="ns-config-status" style="font-size:12px;color:var(--text3);margin-top:6px;"></div>
         <div class="info-box" style="margin-top:10px;">🔐 Las credenciales solo se guardan en este dispositivo. Nunca salen a GitHub ni al servidor.</div>
       </div>
+      <div class="section-title" style="margin-bottom:12px;">🔬 Diagnóstico NetSuite</div>
+      <div class="settings-section">
+        <div style="font-size:12px;color:var(--text3);margin-bottom:8px;">Resultado del último intento de subida:</div>
+        <div id="ns-diag-panel" style="background:var(--surface2);border-radius:8px;padding:10px;font-size:11px;font-family:'IBM Plex Mono',monospace;color:var(--text2);white-space:pre-wrap;word-break:break-all;min-height:40px;">Sin intentos aún.</div>
+        <button class="settings-btn" style="margin-top:8px;font-size:12px;width:100%;" onclick="loadNsDiag()">🔄 Actualizar</button>
+      </div>
       <div class="section-title" style="margin-bottom:12px;">Estado</div>
+      <div class="settings-section" style="margin-bottom:0;">
+        <div class="settings-row"><div><div class="settings-label">Versión</div></div><span style="font-size:13px;font-weight:700;color:#093F89;font-family:'IBM Plex Mono',monospace;">v8</span></div>
+      </div>
       <div class="settings-section">
         <div class="settings-row"><div><div class="settings-label">OCR</div></div><span id="ocr-status-tag" class="tag tag-red">Sin configurar</span></div>
         <div class="settings-row"><div><div class="settings-label">Registros guardados</div></div><span style="font-size:13px;color:var(--text3);font-family:'IBM Plex Mono',monospace;" id="settings-records-count">0</span></div>
@@ -1500,7 +1505,7 @@ TOTALES: La fila TOTAL al final de cada bloque de 10 bachadas y la fila de TOTAL
   try{
     const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',
       headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-      body:JSON.stringify({model:'claude-opus-4-6',max_tokens:1200,messages:[{role:'user',content:blocks}]})
+      body:JSON.stringify({model:'claude-opus-4-5',max_tokens:1200,messages:[{role:'user',content:blocks}]})
     });
     if(!res.ok)throw new Error((await res.json()).error?.message||res.statusText);
     const d=await res.json();
@@ -1755,7 +1760,7 @@ function checkTotalesValidos(){
 
 function calcPiezasEstimadas(){
   const pesoHumedo = parseFloat(document.getElementById('t-peso-humedo').value)||0;
-  if(!pesoHumedo || !S.totalesOCR) {
+  if(!pesoHumedo) {
     document.getElementById('t-piezas-estimadas').textContent='—';
     return;
   }
@@ -2106,12 +2111,14 @@ function renderReviewScreen(rec){
   // WO field
   document.getElementById('rv-wo-id').value=rec.netsuiteWO||'';
 
-  // Btn state si ya fue aprobado
+  // Btn state — deshabilitar solo si ya fue subido a NetSuite
   const approved=rec.status==='approved';
-  document.getElementById('rv-btn-approve').disabled=approved;
-  document.getElementById('rv-btn-approve').textContent=approved?'✓ Ya aprobado':'✓ Aprobar y subir a NetSuite';
+  const uploaded=rec.netsuiteStatus==='uploaded';
+  document.getElementById('rv-btn-approve').disabled=uploaded;
+  document.getElementById('rv-btn-approve').textContent=uploaded?'✓ Ya subido a NetSuite':approved?'↑ Reintentar subida a NetSuite':'✓ Aprobar y subir a NetSuite';
   const chip=document.getElementById('rv-status-chip');
-  if(approved){chip.style.background='rgba(34,197,94,.15)';chip.style.color='var(--green)';chip.textContent='APROBADO';}
+  if(uploaded){chip.style.background='rgba(34,197,94,.15)';chip.style.color='var(--green)';chip.textContent='EN NETSUITE';}
+  else if(approved){chip.style.background='rgba(34,197,94,.15)';chip.style.color='var(--green)';chip.textContent='APROBADO';}
   else{chip.style.background='rgba(234,179,8,.15)';chip.style.color='var(--yellow)';chip.textContent='PENDIENTE';}
 }
 
@@ -2156,12 +2163,13 @@ async function doApprove(withNetsuite){
   recs[idx].approvedAt=new Date().toISOString();
   recs[idx].netsuiteWO=woId||null;
   recs[idx].checksCompleted=Object.values(S.checks).filter(Boolean).length;
-  if(withNetsuite&&woId){
+  if(withNetsuite){
     showLoading('Subiendo a NetSuite...');
     try{
-        const nsResult = await uploadToNetsuite(recs[idx]);
+      const nsResult = await uploadToNetsuite(recs[idx]);
       recs[idx].netsuiteStatus='uploaded';
       recs[idx].netsuiteRecordId=nsResult.recordId||null;
+      recs[idx].netsuiteWO=nsResult.recordId||woId||null;
       saveRecords(recs);hideLoading();
       showToast('✅ Aprobado y subido a NetSuite · ID: '+(nsResult.recordId||'—'),'green');
     }catch(e){recs[idx].netsuiteStatus='error';saveRecords(recs);hideLoading();showToast('Aprobado · Error NetSuite: '+e.message,'red');}
@@ -2189,7 +2197,6 @@ function goSettings(){
   document.getElementById('settings-records-count').textContent=getRecords().length;
   // Cargar estado NS
   const cfg=getNsConfig();
-  document.getElementById('ns-url-input').value=cfg.url||'';
   if(cfg.ck){['ns-ck-input','ns-cs-input','ns-ti-input','ns-ts-input'].forEach(id=>{document.getElementById(id).value='•'.repeat(20);});}
   const nsStatus=document.getElementById('ns-config-status');
   if(nsStatus) nsStatus.innerHTML=cfg.ck?'<span style="color:var(--green);">✅ Credenciales configuradas</span>':'<span style="color:var(--red);">⚠️ Sin credenciales TBA</span>';
@@ -2215,7 +2222,6 @@ function clearApproved(){saveRecords(getRecords().filter(r=>r.status!=='approved
 // ═══════ NETSUITE TBA CONFIG ═══════
 const getNsConfig=()=>{
   return {
-    url:   localStorage.getItem('batab_ns_url')||'',
     ck:    localStorage.getItem('batab_ns_ck')||'',
     cs:    localStorage.getItem('batab_ns_cs')||'',
     ti:    localStorage.getItem('batab_ns_ti')||'',
@@ -2223,14 +2229,11 @@ const getNsConfig=()=>{
   };
 };
 function saveNsConfig(){
-  const url=document.getElementById('ns-url-input').value.trim();
   const ck=document.getElementById('ns-ck-input').value.trim();
   const cs=document.getElementById('ns-cs-input').value.trim();
   const ti=document.getElementById('ns-ti-input').value.trim();
   const ts=document.getElementById('ns-ts-input').value.trim();
-  if(!url){showToast('Ingresa la URL del RESTlet','red');return;}
   if(!ck||!cs||!ti||!ts){showToast('Completa las 4 credenciales TBA','red');return;}
-  localStorage.setItem('batab_ns_url',url);
   localStorage.setItem('batab_ns_ck',ck);
   localStorage.setItem('batab_ns_cs',cs);
   localStorage.setItem('batab_ns_ti',ti);
@@ -2244,8 +2247,8 @@ function saveNsConfig(){
   showToast('Credenciales NetSuite guardadas','green');
 }
 function clearNsConfig(){
-  ['batab_ns_url','batab_ns_ck','batab_ns_cs','batab_ns_ti','batab_ns_ts'].forEach(k=>localStorage.removeItem(k));
-  ['ns-url-input','ns-ck-input','ns-cs-input','ns-ti-input','ns-ts-input'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  ['batab_ns_ck','batab_ns_cs','batab_ns_ti','batab_ns_ts'].forEach(k=>localStorage.removeItem(k));
+  ['ns-ck-input','ns-cs-input','ns-ti-input','ns-ts-input'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   document.getElementById('ns-config-status').textContent='';
   showToast('Credenciales NetSuite eliminadas','red');
 }
@@ -2281,37 +2284,96 @@ async function buildOAuthHeader(method, url){
   params.oauth_signature=sigB64;
   const headerParts=Object.keys(params)
     .map(k=>enc(k)+'="'+enc(params[k])+'"').join(', ');
-  // Extraer account ID de la URL
-  const accountMatch=cfg.url.match(/(\d{7,8})\.restlets/);
+  // Extraer account ID de la URL (soporta restlets y suitetalk)
+  const accountMatch=url.match(/^https?:\/\/(\d{7,8})\./);
   const realm=accountMatch?accountMatch[1]:'7905968';
   return 'OAuth realm="'+realm+'", '+headerParts;
 }
 
-// ═══════ LLAMADA REAL AL RESTLET ═══════
+// ═══════ REST RECORD API — sin CORS ═══════
+const NS_REST_URL='https://7905968.suitetalk.api.netsuite.com/services/rest/record/v1/customrecord_batab_produccion';
+const SB_URL='https://szrcmvlgxxpmvgrfmxak.supabase.co';
+const SB_KEY='sb_publishable_VOhn9Z2Ev8gYK3nFKr44Sw_VngbAX4N';
+
+async function logToSupabase(log){
+  try{
+    await fetch(SB_URL+'/rest/v1/produccion_logs',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'return=minimal'},
+      body:JSON.stringify({
+        folio:log.folio||null,
+        http_status:log.status||null,
+        location:log.location||null,
+        record_id:log.recordId||null,
+        error:log.error||null,
+        payload:log.payload?JSON.parse(log.payload):null,
+        response_body:log.body||null
+      })
+    });
+  }catch(e){ console.warn('Supabase log error:',e.message); }
+}
+
 async function uploadToNetsuite(record){
   const cfg=getNsConfig();
-  if(!cfg.url) throw new Error('URL del RESTlet no configurada. Ve a Ajustes.');
-  // Preparar payload — sin imágenes base64
-  const payload={...record};
-  delete payload.dosiPhoto;
-  delete payload.dosiPhoto2;
-  if(payload.pesajes) payload.pesajes=payload.pesajes.map(p=>({...p,photo:null,photoVacia:null,photoLlena:null}));
-  const authHeader=await buildOAuthHeader('POST',cfg.url);
-  const res=await fetch(cfg.url,{
-    method:'POST',
-    headers:{
-      'Content-Type':'application/json',
-      'Authorization':authHeader
-    },
-    body:JSON.stringify(payload)
-  });
-  if(!res.ok){
-    const txt=await res.text();
-    throw new Error('HTTP '+res.status+': '+txt.substring(0,200));
+  if(!cfg.ck||!cfg.cs||!cfg.ti||!cfg.ts) throw new Error('Credenciales NetSuite no configuradas. Ve a Ajustes.');
+
+  // JSON completo sin imágenes base64
+  const clean={...record};
+  delete clean.dosiPhoto; delete clean.dosiPhoto2; delete clean.dosiPhotosExtra;
+  if(clean.pesajes) clean.pesajes=clean.pesajes.map(p=>({...p,photo:null,photoVacia:null,photoLlena:null}));
+
+  // Mapeo a campos del customrecord_batab_produccion
+  const payload={
+    name:                             record.folio||'',
+    externalId:                       record.id||'',
+    custrecord_batab_folio:           record.folio||'',
+    custrecord_batab_linea:           record.linea||'',
+    custrecord_batab_lote:            record.lote||'',
+    custrecord_batab_turno:           record.turno||'',
+    custrecord_batab_articulo:        record.articulo||'',
+    custrecord_batab_fecha:           record.fecha||new Date().toISOString().split('T')[0],
+    custrecord_batab_operador:        record.operador||'',
+    custrecord_batab_prod_reportada:  parseInt(record.prodReportada)||0,
+    custrecord_batab_bachadas:        parseInt(record.totalesConsumo?.bachadas)||0,
+    custrecord_batab_aprobado_por:    record.approvedBy||'',
+    custrecord_batab_json_payload:    JSON.stringify(clean)
+  };
+  // WO solo si es un número válido
+  const woNum=parseInt(record.netsuiteWO);
+  if(!isNaN(woNum)&&woNum>0) payload.custrecord_batab_workorder=woNum;
+
+  const authHeader=await buildOAuthHeader('POST',NS_REST_URL);
+  const log={ts:new Date().toISOString(),url:NS_REST_URL,folio:record.folio,status:null,location:null,body:null,error:null,payload:JSON.stringify(payload).substring(0,500)};
+  let res;
+  try{
+    res=await fetch(NS_REST_URL,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':authHeader},
+      body:JSON.stringify(payload)
+    });
+  }catch(netErr){
+    log.error='RED: '+netErr.message;
+    localStorage.setItem('batab_ns_lastlog',JSON.stringify(log));
+    await logToSupabase(log);
+    throw new Error('Error de red: '+netErr.message);
   }
-  const json=await res.json();
-  if(!json.success) throw new Error(json.error||'Error desconocido en NetSuite');
-  return json; // { success, recordId, folio, message }
+  log.status=res.status;
+  log.location=res.headers.get('Location')||'(vacío)';
+
+  if(res.status===204||res.status===200){
+    const idMatch=log.location.match(/\/(\d+)$/);
+    const recordId=idMatch?idMatch[1]:null;
+    log.recordId=recordId;
+    localStorage.setItem('batab_ns_lastlog',JSON.stringify(log));
+    await logToSupabase(log);
+    return {success:true, recordId, folio:record.folio};
+  }
+  const txt=await res.text();
+  log.body=txt.substring(0,500);
+  log.error='HTTP '+res.status;
+  localStorage.setItem('batab_ns_lastlog',JSON.stringify(log));
+  await logToSupabase(log);
+  throw new Error('HTTP '+res.status+': '+txt.substring(0,300));
 }
 
 // ═══════ IMAGE UTILS ═══════
@@ -2371,6 +2433,27 @@ function showLoading(msg){document.getElementById('loading-msg').textContent=msg
 function hideLoading(){document.getElementById('loading').classList.remove('active');}
 let toastT;
 function showToast(msg,type=''){const t=document.getElementById('toast');t.textContent=msg;t.className='toast show '+type;clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),2800);}
+
+// ═══════ DIAGNÓSTICO NS ═══════
+function loadNsDiag(){
+  const panel=document.getElementById('ns-diag-panel');
+  if(!panel)return;
+  const raw=localStorage.getItem('batab_ns_lastlog');
+  if(!raw){panel.textContent='Sin intentos registrados aún.';return;}
+  try{
+    const d=JSON.parse(raw);
+    panel.textContent=[
+      '📅 '+d.ts,
+      '📋 Folio: '+(d.folio||'—'),
+      '🌐 HTTP: '+(d.status||'—'),
+      '📍 Location: '+(d.location||'—'),
+      '🆔 Record ID: '+(d.recordId||'—'),
+      d.error?'❌ Error: '+d.error:'✅ Sin error',
+      d.body?'📄 Respuesta: '+d.body:'',
+    ].filter(Boolean).join('
+');
+  }catch(e){panel.textContent='Error leyendo log: '+e.message;}
+}
 
 // ═══════ START ═══════
 init();
