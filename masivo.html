@@ -139,11 +139,13 @@ const WOS = [
 let ST = WOS.map(w=>({...w,st:'wait',ab:''}));
 let halt = false;
 
+function getCreds(){return{ck:document.getElementById('ck').value.trim(),cs:document.getElementById('cs').value.trim(),ti:document.getElementById('ti').value.trim(),ts:document.getElementById('ts').value.trim()};}
 async function proxy(endpoint, method, payload) {
+  const {ck,cs,ti,ts}=getCreds();
   const r = await fetch(PROXY, {
     method: 'POST',
     headers: {'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY},
-    body: JSON.stringify({endpoint, method, payload})
+    body: JSON.stringify({endpoint, method, payload, ck, cs, ti, ts})
   });
   const j = await r.json();
   if (!j.success) throw new Error(`HTTP ${j.status}: ${(j.error||JSON.stringify(j.data)||'').substring(0,250)}`);
@@ -153,10 +155,11 @@ async function proxy(endpoint, method, payload) {
 async function testConn() {
   lg('🔌 Probando conexión a NetSuite via proxy...', 'inf');
   try {
+    const {ck,cs,ti,ts}=getCreds();
     const r = await fetch(PROXY, {
       method: 'POST',
       headers: {'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY},
-      body: JSON.stringify({endpoint:'/services/rest/record/v1/customrecord_batab_produccion?limit=1', method:'GET'})
+      body: JSON.stringify({endpoint:'/services/rest/record/v1/customrecord_batab_produccion?limit=1', method:'GET', ck, cs, ti, ts})
     });
     const j = await r.json();
     if (j.status < 400 || j.success) {
