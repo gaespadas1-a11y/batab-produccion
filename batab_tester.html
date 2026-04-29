@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>BATAB · Tester de RESTlet v2</title>
+<style>
+  :root { --azul:#093F89; --amarillo:#FFCD24; --bg:#0f1012; --card:#181a1f; --txt:#e7e9ed; --muted:#7d8696; --ok:#1ed16b; --err:#ff5566; }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);font-family:'Nunito','Segoe UI',sans-serif;padding:20px;min-height:100vh}
+  h1{font-family:'Rajdhani','Segoe UI',sans-serif;color:var(--amarillo);margin:0 0 4px;font-weight:700;letter-spacing:1px}
+  h1 span{color:var(--azul);background:var(--amarillo);padding:2px 10px;border-radius:6px;font-size:.7em}
+  h2{font-family:'Rajdhani',sans-serif;color:var(--amarillo);margin:24px 0 8px;font-size:1.2em;letter-spacing:.5px}
+  .sub{color:var(--muted);margin:0 0 24px;font-size:.9em}
+  .card{background:var(--card);border:1px solid #2a2d35;border-radius:12px;padding:20px;margin-bottom:16px}
+  label{display:block;font-size:.78em;color:var(--muted);margin:8px 0 4px;text-transform:uppercase;letter-spacing:.5px}
+  input,textarea{width:100%;background:#0f1014;color:var(--txt);border:1px solid #2a2d35;border-radius:6px;padding:8px 10px;font-family:'JetBrains Mono','Consolas',monospace;font-size:.9em}
+  input:focus,textarea:focus{outline:none;border-color:var(--azul)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+  button{background:var(--azul);color:white;border:none;border-radius:6px;padding:12px 18px;font-weight:700;cursor:pointer;font-family:'Rajdhani',sans-serif;font-size:1.05em;letter-spacing:.5px;margin:4px 4px 4px 0;transition:opacity .15s}
+  button:hover{opacity:.85}
+  button:disabled{opacity:.4;cursor:not-allowed}
+  button.amber{background:var(--amarillo);color:var(--azul)}
+  button.danger{background:#3a1a1d;color:#ff8e9a;border:1px solid #ff5566}
+  pre{background:#0a0c10;border:1px solid #2a2d35;border-radius:6px;padding:12px;overflow:auto;max-height:500px;font-family:'JetBrains Mono','Consolas',monospace;font-size:.82em;white-space:pre-wrap;word-break:break-all;margin:0}
+  .ok{color:var(--ok)} .err{color:var(--err)} .muted{color:var(--muted)}
+  table{width:100%;border-collapse:collapse;font-family:'JetBrains Mono',monospace;font-size:.8em}
+  table th,table td{text-align:left;padding:6px 8px;border-bottom:1px solid #2a2d35}
+  table th{color:var(--amarillo);font-weight:600;text-transform:uppercase;font-size:.7em;letter-spacing:.5px}
+  .badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:.75em;font-weight:600}
+  .badge-ok{background:#0d3a23;color:var(--ok)}
+  .badge-err{background:#3a1a1d;color:var(--err)}
+  .badge-pending{background:#2a2d35;color:var(--muted)}
+  .row-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+  .version{font-size:.7em;color:var(--muted);margin-left:8px}
+</style>
+</head>
+<body>
+
+<h1>🏭 BATAB <span>Tester RESTlet</span><span class="version">v2 · sin dependencias</span></h1>
+<p class="sub">Herramienta de prueba para el flujo Work Order → Assembly Build con inventory detail por status.</p>
+
+<div class="card">
+  <h2>⚙️ Configuración</h2>
+  <label>URL del RESTlet</label>
+  <input id="url" value="https://7905968.restlets.api.netsuite.com/app/site/hosting/restlet.nl?script=2726&deploy=1">
+
+  <div class="grid2" style="margin-top:8px">
+    <div><label>Account ID</label><input id="account" value="7905968"></div>
+    <div><label>Consumer Key</label><input id="ck" value="74cdfa7a2bf19e5530cdbea4f16878e6119fc69a11ed3fb9f1c44cb97fdb941c"></div>
+    <div><label>Consumer Secret</label><input id="cs" value="51a3fed4fc91c21f9c8cf51f0cb7a387d109258b16e95d8b58204bb3d8414522"></div>
+    <div><label>Token ID</label><input id="tk" value="43c4f0d37b580979e7644d1eac75ee8aad111af863086cd187a09fa4fc0c7688"></div>
+    <div style="grid-column:1/3"><label>Token Secret</label><input id="ts" value="e257096399c853e3b2f8ff8e5b01f6cfa839280e4b59d9afb2e373bc6420e56f"></div>
+  </div>
+
+  <div class="row-actions">
+    <button class="amber" onclick="ping()">🏓 Ping (probar conexión)</button>
+    <button onclick="saveCreds()">💾 Guardar en localStorage</button>
+  </div>
+</div>
+
+<div class="card">
+  <h2>1️⃣ Probar UNA WO</h2>
+  <p class="sub">Empieza con la WO 143267 (lote 1B26CV26 — VITTA BP12) para validar el flujo completo.</p>
+  <div class="grid4">
+    <div><label>WO ID</label><input id="wo_id" value="143267"></div>
+    <div><label>Aprobadas</label><input id="apr" value="1683"></div>
+    <div><label>Desperdicio</label><input id="desp" value="37"></div>
+    <div><label>Rechazadas</label><input id="rec" value="10"></div>
+  </div>
+  <div style="margin-top:8px"><label>Lote</label><input id="lote" value="1B26CV26"></div>
+  <div class="row-actions">
+    <button onclick="testOne()">🚀 Crear Assembly Build</button>
+  </div>
+</div>
+
+<div class="card">
+  <h2>2️⃣ Procesar las 37 WOs (masivo)</h2>
+  <p class="sub">Solo después de validar que UNA WO funcione. Procesa todas en una sola llamada.</p>
+  <div class="row-actions">
+    <button class="amber" onclick="renderTable()">📋 Mostrar lista</button>
+    <button class="danger" onclick="processBulk()">⚡ PROCESAR LAS 37 EN NETSUITE</button>
+  </div>
+  <div id="bulkTable" style="margin-top:14px"></div>
+</div>
+
+<div class="card">
+  <h2>📋 Respuesta de NetSuite</h2>
+  <pre id="out">Sin solicitudes aún. Empieza con "Ping" para validar la conexión.</pre>
+</div>
+
+<script>
+const WOS_37 = [
+  {wo_id:143267, lote:"1B26CV26", apr:1683, rec:10,  desp:37},
+  {wo_id:143060, lote:"1B26CM27", apr:6380, rec:270, desp:357},
+  {wo_id:143268, lote:"1B26CV27", apr:1890, rec:40,  desp:1},
+  {wo_id:143269, lote:"3C26CM27", apr:9290, rec:3,   desp:231},
+  {wo_id:143061, lote:"1B26CM28", apr:3496, rec:200, desp:10},
+  {wo_id:143270, lote:"3C26CM28", apr:2400, rec:80,  desp:40},
+  {wo_id:143271, lote:"1B26CM31", apr:4955, rec:170, desp:207},
+  {wo_id:143272, lote:"1B26DM01", apr:5400, rec:120, desp:224},
+  {wo_id:143363, lote:"1B26DV01", apr:6908, rec:160, desp:126},
+  {wo_id:143274, lote:"3C26DM01", apr:1152, rec:72,  desp:126},
+  {wo_id:143273, lote:"1B26DM02", apr:7740, rec:120, desp:291},
+  {wo_id:143463, lote:"1B26DV02", apr:5220, rec:260, desp:15},
+  {wo_id:143563, lote:"3C26DM06", apr:3935, rec:648, desp:181},
+  {wo_id:143063, lote:"1B26DM06", apr:7560, rec:240, desp:87},
+  {wo_id:143275, lote:"1B26DV06", apr:4591, rec:100, desp:119},
+  {wo_id:143276, lote:"1B26DM08", apr:3600, rec:60,  desp:154},
+  {wo_id:143664, lote:"1B26DV08", apr:5705, rec:50,  desp:270},
+  {wo_id:143277, lote:"3C26DM08", apr:2070, rec:150, desp:128},
+  {wo_id:143665, lote:"1B26DM09", apr:4855, rec:48,  desp:68},
+  {wo_id:143278, lote:"1B26DV09", apr:4776, rec:125, desp:145},
+  {wo_id:143764, lote:"3C26DM09", apr:8820, rec:60,  desp:180},
+  {wo_id:143279, lote:"1B26DM10", apr:4240, rec:48,  desp:403},
+  {wo_id:143159, lote:"3C26DM10", apr:9743, rec:25,  desp:135},
+  {wo_id:143864, lote:"1B26DM11", apr:4488, rec:144, desp:222},
+  {wo_id:143964, lote:"1B26DV11", apr:5376, rec:48,  desp:224},
+  {wo_id:143666, lote:"3C26DM11", apr:1622, rec:24,  desp:66},
+  {wo_id:143280, lote:"1B26DM13", apr:5534, rec:162, desp:46},
+  {wo_id:143281, lote:"1B26DV13", apr:5520, rec:126, desp:124},
+  {wo_id:143282, lote:"3C26DM13", apr:4902, rec:247, desp:223},
+  {wo_id:143564, lote:"1B26DM14", apr:6158, rec:65,  desp:128},
+  {wo_id:143283, lote:"1B26DV14", apr:3888, rec:55,  desp:5},
+  {wo_id:143284, lote:"1B26DM15", apr:2432, rec:408, desp:310},
+  {wo_id:143285, lote:"3C26DM15", apr:7920, rec:70,  desp:13},
+  {wo_id:143286, lote:"1B26DM16", apr:4992, rec:120, desp:164},
+  {wo_id:143287, lote:"1B26DV16", apr:2104, rec:111, desp:73},
+  {wo_id:143289, lote:"3C26DM17", apr:6012, rec:12,  desp:132},
+  {wo_id:143302, lote:"1B26DM17", apr:5876, rec:201, desp:207},
+];
+
+// HMAC-SHA256 nativo (Web Crypto API)
+async function hmacSha256B64(keyStr, msgStr) {
+  const enc = new TextEncoder();
+  const cryptoKey = await crypto.subtle.importKey(
+    'raw', enc.encode(keyStr),
+    { name: 'HMAC', hash: { name: 'SHA-256' } },
+    false, ['sign']
+  );
+  const sigBuf = await crypto.subtle.sign('HMAC', cryptoKey, enc.encode(msgStr));
+  let bin = '';
+  const bytes = new Uint8Array(sigBuf);
+  for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+  return btoa(bin);
+}
+
+function getCfg(){
+  return {
+    url:     document.getElementById('url').value.trim(),
+    account: document.getElementById('account').value.trim(),
+    ck:      document.getElementById('ck').value.trim(),
+    cs:      document.getElementById('cs').value.trim(),
+    tk:      document.getElementById('tk').value.trim(),
+    ts:      document.getElementById('ts').value.trim(),
+  };
+}
+function saveCreds(){
+  const c = getCfg();
+  Object.entries(c).forEach(([k,v]) => localStorage.setItem('NS_'+k.toUpperCase(), v));
+  out('💾 Credenciales guardadas en localStorage', 'ok');
+}
+function rfc3986(s){
+  return encodeURIComponent(s).replace(/!/g,'%21').replace(/\*/g,'%2A')
+    .replace(/'/g,'%27').replace(/\(/g,'%28').replace(/\)/g,'%29');
+}
+function nonce(){
+  const a = new Uint8Array(18); crypto.getRandomValues(a);
+  return btoa(String.fromCharCode(...a)).replace(/[^a-zA-Z0-9]/g,'').slice(0,24);
+}
+async function buildAuthHeader(method, urlStr, c){
+  const u = new URL(urlStr);
+  const baseUrl = u.origin + u.pathname;
+  const oauth = {
+    oauth_consumer_key:     c.ck,
+    oauth_token:            c.tk,
+    oauth_signature_method: 'HMAC-SHA256',
+    oauth_timestamp:        Math.floor(Date.now()/1000).toString(),
+    oauth_nonce:            nonce(),
+    oauth_version:          '1.0',
+  };
+  const all = {};
+  u.searchParams.forEach((v,k)=>{ all[k]=v; });
+  Object.assign(all, oauth);
+  const paramStr = Object.keys(all).sort()
+    .map(k => rfc3986(k)+'='+rfc3986(all[k])).join('&');
+  const baseStr = method.toUpperCase()+'&'+rfc3986(baseUrl)+'&'+rfc3986(paramStr);
+  const key = rfc3986(c.cs)+'&'+rfc3986(c.ts);
+  const sig = await hmacSha256B64(key, baseStr);
+  const auth = Object.assign({}, oauth, { oauth_signature: sig });
+  return 'OAuth realm="'+c.account+'",'+
+    Object.keys(auth).sort()
+      .map(k => rfc3986(k)+'="'+rfc3986(auth[k])+'"').join(',');
+}
+
+async function callRestlet(method, body){
+  const c = getCfg();
+  if(!c.ck || !c.cs || !c.tk || !c.ts) throw new Error('Faltan credenciales TBA');
+  const auth = await buildAuthHeader(method, c.url, c);
+  const opts = { method, headers: { 'Authorization': auth, 'Accept':'application/json' } };
+  if(body){
+    opts.headers['Content-Type'] = 'application/json';
+    opts.body = JSON.stringify(body);
+  }
+  const r = await fetch(c.url, opts);
+  const txt = await r.text();
+  let data; try{ data = JSON.parse(txt); } catch{ data = { raw: txt }; }
+  return { status: r.status, ok: r.ok, data };
+}
+
+async function ping(){
+  out('⏳ Probando conexión...', 'muted');
+  try{
+    const r = await callRestlet('GET');
+    if(r.ok && r.data && r.data.ok){
+      out('✅ PING OK — RESTlet vivo y respondiendo\n\n'+JSON.stringify(r.data, null, 2), 'ok');
+    } else {
+      out('❌ Ping falló (HTTP '+r.status+')\n\n'+JSON.stringify(r.data, null, 2), 'err');
+    }
+  } catch(e){
+    out('💥 Error: '+e.message+'\n\nSi dice "Failed to fetch", abre la consola del navegador (F12) para ver el detalle (probablemente CORS).', 'err');
+  }
+}
+
+async function testOne(){
+  const payload = {
+    action: 'createAssemblyBuild',
+    wo_id:  parseInt(document.getElementById('wo_id').value, 10),
+    apr:    parseInt(document.getElementById('apr').value,   10),
+    rec:    parseInt(document.getElementById('rec').value,   10),
+    desp:   parseInt(document.getElementById('desp').value,  10),
+    lote:   document.getElementById('lote').value.trim(),
+  };
+  out('⏳ Creando Assembly Build para WO '+payload.wo_id+' (lote '+payload.lote+')...\nEsta operación toma 10-30 segundos.', 'muted');
+  try{
+    const r = await callRestlet('POST', payload);
+    if(r.ok && r.data && r.data.success){
+      out('✅ ASSEMBLY BUILD CREADO\n\n'+JSON.stringify(r.data, null, 2)+
+        '\n\n👉 Verifica en NetSuite:\nTransacciones → Inventario → Construir ensamblajes → AB ID '+r.data.assembly_build_id, 'ok');
+    } else {
+      out('❌ Falló (HTTP '+r.status+')\n\n'+JSON.stringify(r.data, null, 2), 'err');
+    }
+  } catch(e){ out('💥 Error: '+e.message, 'err'); }
+}
+
+function renderTable(){
+  const div = document.getElementById('bulkTable');
+  let h = '<table><thead><tr><th>#</th><th>WO</th><th>Lote</th><th>APR</th><th>REC</th><th>DESP</th><th>TOTAL</th><th>Estado</th></tr></thead><tbody>';
+  WOS_37.forEach((w,i) => {
+    h += `<tr id="row_${w.wo_id}"><td>${i+1}</td><td>${w.wo_id}</td><td>${w.lote}</td><td>${w.apr}</td><td>${w.rec}</td><td>${w.desp}</td><td><strong>${w.apr+w.rec+w.desp}</strong></td><td><span class="badge badge-pending">pendiente</span></td></tr>`;
+  });
+  h += '</tbody></table>';
+  div.innerHTML = h;
+}
+
+async function processBulk(){
+  if(!confirm('¿Procesar las 37 WOs en NetSuite? Esto creará 37 Assembly Builds reales.')) return;
+  renderTable();
+  out('⚡ Procesando las 37 WOs en una sola llamada al RESTlet...\nEsto puede tomar 1-3 minutos.', 'muted');
+  const t0 = Date.now();
+  try{
+    const r = await callRestlet('POST', { action: 'createAssemblyBuildBulk', batches: WOS_37 });
+    const ms = Date.now() - t0;
+    if(!r.ok){ out('❌ HTTP '+r.status+'\n\n'+JSON.stringify(r.data, null, 2), 'err'); return; }
+    (r.data.results || []).forEach(res => {
+      const row = document.getElementById('row_'+res.wo_id);
+      if(!row) return;
+      const cell = row.querySelector('td:last-child');
+      if(res.success){
+        cell.innerHTML = '<span class="badge badge-ok">AB '+res.assembly_build_id+'</span>';
+      } else {
+        cell.innerHTML = '<span class="badge badge-err" title="'+(res.error||'').replace(/"/g,'&quot;')+'">FALLÓ</span>';
+      }
+    });
+    const s = r.data.summary || {};
+    const css = (s.fail===0) ? 'ok' : 'err';
+    out(`✅ Bulk terminado en ${(ms/1000).toFixed(1)}s
+Total: ${s.total}  ·  OK: ${s.ok}  ·  Falló: ${s.fail}
+
+${JSON.stringify(r.data.results, null, 2)}`, css);
+  } catch(e){ out('💥 Error: '+e.message, 'err'); }
+}
+
+function out(msg, cls){
+  const el = document.getElementById('out');
+  el.className = cls || '';
+  el.textContent = msg;
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  ['url','account','ck','cs','tk','ts'].forEach(k => {
+    const v = localStorage.getItem('NS_'+k.toUpperCase());
+    if(v){ const el = document.getElementById(k); if(el) el.value = v; }
+  });
+});
+</script>
+
+</body>
+</html>
