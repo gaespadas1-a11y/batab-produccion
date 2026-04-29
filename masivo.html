@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BATAB — Ensambles Masivos</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=JetBrains+Mono:wght@400;700&family=Nunito:wght@400;600&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #0f1012; color: #e0e6f0; font-family: 'Nunito', sans-serif; min-height: 100vh; }
+header { background: #093F89; padding: 16px 24px; display: flex; align-items: center; gap: 16px; border-bottom: 3px solid #FFCD24; }
+.logo { font-family: 'Rajdhani', sans-serif; font-size: 28px; font-weight: 700; color: #FFCD24; letter-spacing: 2px; }
+.subtitle { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: rgba(255,255,255,0.7); }
+.container { max-width: 1200px; margin: 0 auto; padding: 24px; }
+.section { background: #16181c; border: 1px solid #1e2228; border-radius: 8px; padding: 20px; margin-bottom: 20px; }
+.section-title { font-family: 'Rajdhani', sans-serif; font-size: 16px; font-weight: 700; color: #FFCD24; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; border-bottom: 1px solid #1e2228; padding-bottom: 8px; }
+.creds-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.field-group { display: flex; flex-direction: column; gap: 4px; }
+.field-group label { font-size: 11px; color: #888; font-family: 'JetBrains Mono', monospace; text-transform: uppercase; }
+.field-group input { background: #0f1012; border: 1px solid #2a2f38; border-radius: 4px; color: #e0e6f0; padding: 8px 10px; font-family: 'JetBrains Mono', monospace; font-size: 11px; outline: none; }
+.field-group input:focus { border-color: #FFCD24; }
+.stats-bar { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
+.stat { background: #16181c; border: 1px solid #1e2228; border-radius: 6px; padding: 12px 16px; text-align: center; }
+.stat-num { font-family: 'JetBrains Mono', monospace; font-size: 28px; font-weight: 700; }
+.stat-lbl { font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
+.stat.green .stat-num { color: #00B050; }
+.stat.yellow .stat-num { color: #FFCD24; }
+.stat.blue .stat-num { color: #5B9BD5; }
+.controls { display: flex; gap: 12px; align-items: center; margin-bottom: 20px; flex-wrap: wrap; }
+.btn { font-family: 'Rajdhani', sans-serif; font-size: 15px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; padding: 10px 24px; border-radius: 6px; border: none; cursor: pointer; transition: all 0.15s; }
+.btn-primary { background: #FFCD24; color: #0f1012; }
+.btn-primary:hover:not(:disabled) { background: #FFD84D; }
+.btn-primary:disabled { background: #3a3a20; color: #666; cursor: not-allowed; }
+.btn-secondary { background: #093F89; color: #fff; }
+.btn-danger { background: #FF4444; color: #fff; }
+.progress-bar-wrap { flex: 1; background: #0f1012; border-radius: 4px; height: 8px; overflow: hidden; min-width: 200px; }
+.progress-bar-fill { height: 100%; background: #FFCD24; border-radius: 4px; transition: width 0.3s; }
+#log { background: #0a0b0d; border: 1px solid #1e2228; border-radius: 6px; padding: 12px; font-family: 'JetBrains Mono', monospace; font-size: 11px; height: 180px; overflow-y: auto; margin-bottom: 16px; }
+.log-ok { color: #00B050; } .log-err { color: #FF6B6B; } .log-info { color: #5B9BD5; } .log-warn { color: #FFCD24; }
+table { width: 100%; border-collapse: collapse; font-size: 12px; }
+thead th { background: #1a1e24; color: #FFCD24; font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; padding: 8px 10px; text-align: center; border-bottom: 2px solid #093F89; position: sticky; top: 0; }
+tbody tr { border-bottom: 1px solid #1a1e24; }
+tbody tr:hover { background: #1a1e24; }
+tbody td { padding: 7px 10px; text-align: center; }
+.lote { font-family: 'JetBrains Mono', monospace; font-weight: 700; color: #FFCD24; }
+.art { font-size: 11px; color: #aaa; text-align: left; }
+.num { font-family: 'JetBrains Mono', monospace; }
+.status-badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+.s-listo { background: #1a3a20; color: #00B050; border: 1px solid #00B050; }
+.s-proc  { background: #0d2a50; color: #5B9BD5; border: 1px solid #5B9BD5; }
+.s-done  { background: #1a3a20; color: #00FF88; border: 1px solid #00FF88; }
+.s-error { background: #3a1010; color: #FF6B6B; border: 1px solid #FF6B6B; }
+.table-wrap { max-height: 500px; overflow-y: auto; border-radius: 6px; border: 1px solid #1e2228; }
+.cred-ok { color: #00B050; font-size: 13px; font-weight: 700; }
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <div class="logo">BATAB</div>
+    <div class="subtitle">PROCESADOR MASIVO — WO → ASSEMBLY BUILD → AJUSTE → TRASLADO</div>
+  </div>
+</header>
+<div class="container">
+
+  <div class="section">
+    <div class="section-title">🔐 Credenciales NetSuite TBA</div>
+    <div class="creds-grid">
+      <div class="field-group"><label>Consumer Key</label>
+        <input id="consumerKey" type="password" value="b6cb93fd46bd2cb6bb46b8239b064005e172a466eb8136340a5c2ff17d8ca900"></div>
+      <div class="field-group"><label>Consumer Secret</label>
+        <input id="consumerSecret" type="password" value="8b069fdadeddf4f38bd7e93042d29bc912f235796875d6e1010128ae4dc8dd6d"></div>
+      <div class="field-group"><label>Token ID</label>
+        <input id="tokenId" type="password" value="0f6a90f65cd1be372e0169001ee54c4bfad8058a38ba114884c1c77af02552d5"></div>
+      <div class="field-group"><label>Token Secret</label>
+        <input id="tokenSecret" type="password" value="8a75a2ca54362a5441f95812c3c380fbf61cda841c55a72d2e91b5ee663c889f"></div>
+    </div>
+    <div style="margin-top:12px"><span class="cred-ok">✅ Credenciales pre-cargadas — listo para usar</span></div>
+  </div>
+
+  <div class="stats-bar">
+    <div class="stat green"><div class="stat-num">37</div><div class="stat-lbl">Sin pigmento listos</div></div>
+    <div class="stat yellow"><div class="stat-num" id="cnt-done">0</div><div class="stat-lbl">✅ Procesados</div></div>
+    <div class="stat"><div class="stat-num" id="cnt-err" style="color:#FF6B6B">0</div><div class="stat-lbl">❌ Errores</div></div>
+    <div class="stat blue"><div class="stat-num" id="cnt-pend">37</div><div class="stat-lbl">Pendientes</div></div>
+  </div>
+
+  <div class="controls">
+    <button class="btn btn-secondary" id="btnTest" onclick="runTest()">🧪 PRUEBA: 1 WO — 1B26CV26</button>
+    <button class="btn btn-primary" id="btnMasivo" onclick="runMasivo()" disabled>🚀 PROCESAR 37 WOs</button>
+    <button class="btn btn-danger" id="btnStop" onclick="stopProcess()" style="display:none">⏹ DETENER</button>
+    <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progressBar" style="width:0%"></div></div>
+    <span id="progressTxt" style="font-size:12px;font-family:'JetBrains Mono',monospace;color:#888">0 / 37</span>
+  </div>
+
+  <div id="log"></div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>#</th><th>WO</th><th>LOTE</th><th>ARTÍCULO</th><th>APR</th><th>REC</th><th>DESP</th><th>TOTAL</th><th>AB ID</th><th>STATUS</th></tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+const ACCOUNT = "7905968";
+const BASE_URL = `https://${ACCOUNT}.suitetalk.api.netsuite.com`;
+
+// 37 WOs SIN PIGMENTO — listos para procesar
+const WOS = [
+  {wo_id:143267,wo_num:"2452",lote:"1B26CV26",fecha:"2026-03-26",asm_id:1304,seg:1,turno:2,apr:1683,rec:10,desp:37,total:1730},
+  {wo_id:143060,wo_num:"2454",lote:"1B26CM27",fecha:"2026-03-27",asm_id:1304,seg:1,turno:1,apr:6380,rec:270,desp:357,total:7007},
+  {wo_id:143268,wo_num:"2455",lote:"1B26CV27",fecha:"2026-03-27",asm_id:1254,seg:1,turno:2,apr:1890,rec:40,desp:1,total:1931},
+  {wo_id:143269,wo_num:"2456",lote:"3C26CM27",fecha:"2026-03-27",asm_id:1261,seg:3,turno:1,apr:9290,rec:3,desp:231,total:9524},
+  {wo_id:143061,wo_num:"2457",lote:"1B26CM28",fecha:"2026-03-28",asm_id:1254,seg:1,turno:1,apr:3496,rec:200,desp:10,total:3706},
+  {wo_id:143270,wo_num:"2458",lote:"3C26CM28",fecha:"2026-03-28",asm_id:1279,seg:3,turno:1,apr:2400,rec:80,desp:40,total:2520},
+  {wo_id:143271,wo_num:"2460",lote:"1B26CM31",fecha:"2026-03-31",asm_id:1254,seg:1,turno:1,apr:4955,rec:170,desp:207,total:5332},
+  {wo_id:143272,wo_num:"2461",lote:"1B26DM01",fecha:"2026-04-01",asm_id:1254,seg:1,turno:1,apr:5400,rec:120,desp:224,total:5744},
+  {wo_id:143363,wo_num:"2462",lote:"1B26DV01",fecha:"2026-04-01",asm_id:1254,seg:1,turno:2,apr:6908,rec:160,desp:126,total:7194},
+  {wo_id:143274,wo_num:"2465",lote:"3C26DM01",fecha:"2026-04-01",asm_id:1263,seg:3,turno:1,apr:1152,rec:72,desp:126,total:1350},
+  {wo_id:143273,wo_num:"2463",lote:"1B26DM02",fecha:"2026-04-02",asm_id:1254,seg:1,turno:1,apr:7740,rec:120,desp:291,total:8151},
+  {wo_id:143463,wo_num:"2464",lote:"1B26DV02",fecha:"2026-04-02",asm_id:1254,seg:1,turno:2,apr:5220,rec:260,desp:15,total:5495},
+  {wo_id:143563,wo_num:"2466",lote:"3C26DM06",fecha:"2026-04-06",asm_id:1263,seg:3,turno:1,apr:3935,rec:648,desp:181,total:4764},
+  {wo_id:143063,wo_num:"2467",lote:"1B26DM06",fecha:"2026-04-06",asm_id:1254,seg:1,turno:1,apr:7560,rec:240,desp:87,total:7887},
+  {wo_id:143275,wo_num:"2468",lote:"1B26DV06",fecha:"2026-04-06",asm_id:1254,seg:1,turno:2,apr:4591,rec:100,desp:119,total:4810},
+  {wo_id:143276,wo_num:"2469",lote:"1B26DM08",fecha:"2026-04-08",asm_id:1263,seg:1,turno:1,apr:3600,rec:60,desp:154,total:3814},
+  {wo_id:143664,wo_num:"2470",lote:"1B26DV08",fecha:"2026-04-08",asm_id:1263,seg:1,turno:2,apr:5705,rec:50,desp:270,total:6025},
+  {wo_id:143277,wo_num:"2471",lote:"3C26DM08",fecha:"2026-04-08",asm_id:1261,seg:3,turno:1,apr:2070,rec:150,desp:128,total:2348},
+  {wo_id:143665,wo_num:"2472",lote:"1B26DM09",fecha:"2026-04-09",asm_id:1263,seg:1,turno:1,apr:4855,rec:48,desp:68,total:4971},
+  {wo_id:143278,wo_num:"2473",lote:"1B26DV09",fecha:"2026-04-09",asm_id:1263,seg:1,turno:2,apr:4776,rec:125,desp:145,total:5046},
+  {wo_id:143764,wo_num:"2474",lote:"3C26DM09",fecha:"2026-04-09",asm_id:1261,seg:3,turno:1,apr:8820,rec:60,desp:180,total:9060},
+  {wo_id:143279,wo_num:"2475",lote:"1B26DM10",fecha:"2026-04-10",asm_id:1263,seg:1,turno:1,apr:4240,rec:48,desp:403,total:4691},
+  {wo_id:143159,wo_num:"2476",lote:"3C26DM10",fecha:"2026-04-10",asm_id:1261,seg:3,turno:1,apr:9743,rec:25,desp:135,total:9903},
+  {wo_id:143864,wo_num:"2477",lote:"1B26DM11",fecha:"2026-04-11",asm_id:1263,seg:1,turno:1,apr:4488,rec:144,desp:222,total:4854},
+  {wo_id:143964,wo_num:"2478",lote:"1B26DV11",fecha:"2026-04-11",asm_id:1263,seg:1,turno:2,apr:5376,rec:48,desp:224,total:5648},
+  {wo_id:143666,wo_num:"2479",lote:"3C26DM11",fecha:"2026-04-11",asm_id:1263,seg:3,turno:1,apr:1622,rec:24,desp:66,total:1712},
+  {wo_id:143280,wo_num:"2480",lote:"1B26DM13",fecha:"2026-04-13",asm_id:1263,seg:1,turno:1,apr:5534,rec:162,desp:46,total:5742},
+  {wo_id:143281,wo_num:"2481",lote:"1B26DV13",fecha:"2026-04-13",asm_id:1263,seg:1,turno:2,apr:5520,rec:126,desp:124,total:5770},
+  {wo_id:143282,wo_num:"2482",lote:"3C26DM13",fecha:"2026-04-13",asm_id:1263,seg:3,turno:1,apr:4902,rec:247,desp:223,total:5372},
+  {wo_id:143564,wo_num:"2483",lote:"1B26DM14",fecha:"2026-04-14",asm_id:1263,seg:1,turno:1,apr:6158,rec:65,desp:128,total:6351},
+  {wo_id:143283,wo_num:"2484",lote:"1B26DV14",fecha:"2026-04-14",asm_id:1263,seg:1,turno:2,apr:3888,rec:55,desp:5,total:3948},
+  {wo_id:143284,wo_num:"2486",lote:"1B26DM15",fecha:"2026-04-15",asm_id:1263,seg:1,turno:1,apr:2432,rec:408,desp:310,total:3150},
+  {wo_id:143285,wo_num:"2487",lote:"3C26DM15",fecha:"2026-04-15",asm_id:1262,seg:3,turno:1,apr:7920,rec:70,desp:13,total:8003},
+  {wo_id:143286,wo_num:"2488",lote:"1B26DM16",fecha:"2026-04-16",asm_id:1263,seg:1,turno:1,apr:4992,rec:120,desp:164,total:5276},
+  {wo_id:143287,wo_num:"2490",lote:"1B26DV16",fecha:"2026-04-16",asm_id:1263,seg:1,turno:2,apr:2104,rec:111,desp:73,total:2288},
+  {wo_id:143289,wo_num:"2493",lote:"3C26DM17",fecha:"2026-04-17",asm_id:1260,seg:3,turno:1,apr:6012,rec:12,desp:132,total:6156},
+  {wo_id:143302,wo_num:"2511",lote:"1B26DM17",fecha:"2026-04-17",asm_id:1263,seg:1,turno:1,apr:5876,rec:201,desp:207,total:6284},
+];
+
+let state = WOS.map(w=>({...w,uiStatus:'listo',ab_id:'',ia_id:'',to_id:''}));
+let shouldStop = false;
+
+function getCreds(){
+  return {
+    consumerKey:    document.getElementById('consumerKey').value.trim(),
+    consumerSecret: document.getElementById('consumerSecret').value.trim(),
+    tokenId:        document.getElementById('tokenId').value.trim(),
+    tokenSecret:    document.getElementById('tokenSecret').value.trim(),
+  };
+}
+
+async function sha256(key, msg){
+  const enc = new TextEncoder();
+  const k = await crypto.subtle.importKey('raw',enc.encode(key),{name:'HMAC',hash:'SHA-256'},false,['sign']);
+  const s = await crypto.subtle.sign('HMAC',k,enc.encode(msg));
+  return btoa(String.fromCharCode(...new Uint8Array(s)));
+}
+
+async function oauthHeader(method, url, creds){
+  const ts = Math.floor(Date.now()/1000).toString();
+  const nonce = crypto.randomUUID().replace(/-/g,'');
+  const p = {
+    oauth_consumer_key: creds.consumerKey,
+    oauth_nonce: nonce,
+    oauth_signature_method: 'HMAC-SHA256',
+    oauth_timestamp: ts,
+    oauth_token: creds.tokenId,
+    oauth_version: '1.0'
+  };
+  const sorted = Object.keys(p).sort()
+    .map(k=>`${encodeURIComponent(k)}=${encodeURIComponent(p[k])}`).join('&');
+  const base = [method.toUpperCase(), encodeURIComponent(url), encodeURIComponent(sorted)].join('&');
+  const sigKey = `${encodeURIComponent(creds.consumerSecret)}&${encodeURIComponent(creds.tokenSecret)}`;
+  p.oauth_signature = await sha256(sigKey, base);
+  return 'OAuth realm="'+ACCOUNT+'",' + Object.entries(p).map(([k,v])=>`${k}="${encodeURIComponent(v)}"`).join(',');
+}
+
+async function nsPost(path, body, creds){
+  const url = BASE_URL + path;
+  const auth = await oauthHeader('POST', url, creds);
+  const r = await fetch(url, {
+    method:'POST',
+    headers:{'Authorization':auth,'Content-Type':'application/json'},
+    body: JSON.stringify(body)
+  });
+  const text = await r.text();
+  if(!r.ok) throw new Error(`HTTP ${r.status}: ${text.substring(0,300)}`);
+  return { status: r.status, location: r.headers.get('location')||'', text };
+}
+
+function extractId(location){
+  const m = location.match(/\/(\d+)(\?|$)/);
+  return m ? m[1] : '';
+}
+
+async function processOne(wo, creds){
+  log(`▶ [WO#${wo.wo_num}] ${wo.lote} — ${wo.total} pzas`, 'info');
+
+  // PASO 1 — Assembly Build via transform
+  const abBody = {
+    type: "assemblybuild",
+    quantity: wo.total,
+    tranDate: wo.fecha,
+    location: {id:"22"},
+    department: {id:"3"},
+    memo: wo.lote,
+    custbody_numero_lote: wo.lote,
+    cseg_batab_segmento: {id: String(wo.seg)},
+    custbody54: {id: String(wo.turno)},
+    custbody_unidades_aprobadas: wo.apr,
+    custbody_unidades_rechazadas: wo.rec,
+    custbody_unidades_desperdicio: wo.desp,
+    inventoryDetail:{
+      inventoryAssignment:{
+        items:[
+          {inventoryStatus:{id:"1"}, quantity:wo.apr,  receiptInventoryNumber:wo.lote},
+          {inventoryStatus:{id:"3"}, quantity:wo.rec,  receiptInventoryNumber:wo.lote},
+          {inventoryStatus:{id:"2"}, quantity:wo.desp, receiptInventoryNumber:wo.lote}
+        ]
+      }
+    }
+  };
+  const ab = await nsPost(`/services/rest/record/v1/workorder/${wo.wo_id}/transform`, abBody, creds);
+  const abId = extractId(ab.location);
+  log(`  ✅ Assembly Build: #${abId}`, 'ok');
+
+  // PASO 2 — Ajuste de Inventario (mermas)
+  const mermas = wo.rec + wo.desp;
+  let iaId = '';
+  try {
+    const iaBody = {
+      subsidiary:{id:"2"}, tranDate:wo.fecha, memo:wo.lote,
+      account:{id:"1047"}, department:{id:"3"}, location:{id:"22"},
+      inventoryAdjustment:{items:[{
+        item:{id:String(wo.asm_id)}, location:{id:"22"},
+        adjustQtyBy: -mermas, memo: wo.lote
+      }]}
+    };
+    const ia = await nsPost('/services/rest/record/v1/inventoryadjustment', iaBody, creds);
+    iaId = extractId(ia.location);
+    log(`  ✅ Ajuste Inventario: #${iaId} (-${mermas} pzas)`, 'ok');
+  } catch(e){ log(`  ⚠️ Ajuste (no crítico): ${e.message.substring(0,80)}`, 'warn'); }
+
+  // PASO 3 — Orden de Traslado
+  let toId = '';
+  try {
+    const toBody = {
+      subsidiary:{id:"2"}, tranDate:wo.fecha, memo:wo.lote,
+      transferlocation:{id:"22"}, location:{id:"5"},
+      item:{items:[{item:{id:String(wo.asm_id)}, quantity:wo.apr, location:{id:"22"}, memo:wo.lote}]}
+    };
+    const to = await nsPost('/services/rest/record/v1/transferorder', toBody, creds);
+    toId = extractId(to.location);
+    log(`  ✅ Orden de Traslado: #${toId} (${wo.apr} pzas → Fábrica Teapa)`, 'ok');
+  } catch(e){ log(`  ⚠️ OT (no crítico): ${e.message.substring(0,80)}`, 'warn'); }
+
+  return {abId, iaId, toId};
+}
+
+async function runTest(){
+  const creds = getCreds();
+  const wo = WOS[0]; // 1B26CV26
+  const idx = 0;
+  state[idx].uiStatus = 'proc';
+  renderTable(); renderStats();
+  log(`\n=== PRUEBA: WO#${wo.wo_num} — ${wo.lote} ===`, 'info');
+  try {
+    const r = await processOne(wo, creds);
+    state[idx].uiStatus = 'done';
+    state[idx].ab_id = r.abId;
+    log(`=== ✅ PRUEBA EXITOSA — AB:${r.abId} ===\nVerifica en NetSuite y autoriza el masivo.`, 'ok');
+    document.getElementById('btnMasivo').disabled = false;
+  } catch(e){
+    state[idx].uiStatus = 'error';
+    log(`=== ❌ ERROR: ${e.message} ===`, 'err');
+  }
+  renderTable(); renderStats();
+}
+
+async function runMasivo(){
+  if(!confirm('¿Procesar los 37 WOs sin pigmento?\n\nSe crearán:\n• 37 Assembly Builds\n• 37 Ajustes de Inventario\n• 37 Órdenes de Traslado')) return;
+  shouldStop = false;
+  document.getElementById('btnMasivo').disabled = true;
+  document.getElementById('btnStop').style.display = 'block';
+  document.getElementById('btnTest').disabled = true;
+  const creds = getCreds();
+  const pending = state.filter(w=>w.uiStatus==='listo');
+  let done=0;
+  log(`\n=== MASIVO: ${pending.length} WOs ===`, 'info');
+  for(const wo of pending){
+    if(shouldStop){ log('=== ⏹ DETENIDO ===','warn'); break; }
+    const idx = state.findIndex(s=>s.wo_id===wo.wo_id);
+    state[idx].uiStatus = 'proc'; renderTable();
+    try {
+      const r = await processOne(wo, creds);
+      state[idx].uiStatus = 'done';
+      state[idx].ab_id = r.abId;
+      done++;
+    } catch(e){
+      state[idx].uiStatus = 'error';
+      log(`❌ [${wo.lote}] ${e.message.substring(0,100)}`, 'err');
+    }
+    const pct = Math.round(done/pending.length*100);
+    document.getElementById('progressBar').style.width = pct+'%';
+    document.getElementById('progressTxt').textContent = `${done} / ${pending.length}`;
+    renderTable(); renderStats();
+    await new Promise(r=>setTimeout(r,400));
+  }
+  document.getElementById('btnStop').style.display = 'none';
+  document.getElementById('btnMasivo').disabled = false;
+  document.getElementById('btnTest').disabled = false;
+  log(`=== ✅ COMPLETADO: ${done}/${pending.length} ===`, 'ok');
+}
+
+function stopProcess(){ shouldStop = true; }
+
+const ASM = {1260:'EMBLEMA BT10',1261:'EMBLEMA BH12',1262:'EMBLEMA BT12',1263:'EMBLEMA BH15',
+             1254:'AVANCE BH12',1259:'EMBLEMA BH10',1279:'FORTALEZA BS12',1280:'FORTALEZA BS15',
+             1290:'PRISMA BH12 C879',1304:'VITTA BP12',1321:'VITTA BP20 C800'};
+const SBADGE = {
+  listo: '<span class="status-badge s-listo">⏳ LISTO</span>',
+  proc:  '<span class="status-badge s-proc">⏳ PROCESANDO</span>',
+  done:  '<span class="status-badge s-done">✅ COMPLETADO</span>',
+  error: '<span class="status-badge s-error">❌ ERROR</span>',
+};
+
+function renderTable(){
+  document.getElementById('tableBody').innerHTML = state.map((w,i)=>`
+    <tr>
+      <td class="num" style="color:#555">${i+1}</td>
+      <td class="num">${w.wo_num}</td>
+      <td class="lote">${w.lote}</td>
+      <td class="art">${ASM[w.asm_id]||w.asm_id}</td>
+      <td class="num">${w.apr.toLocaleString()}</td>
+      <td class="num">${w.rec}</td>
+      <td class="num">${w.desp}</td>
+      <td class="num" style="font-weight:700">${w.total.toLocaleString()}</td>
+      <td class="num" style="color:#5B9BD5">${w.ab_id||'—'}</td>
+      <td>${SBADGE[w.uiStatus]||w.uiStatus}</td>
+    </tr>`).join('');
+}
+
+function renderStats(){
+  document.getElementById('cnt-done').textContent = state.filter(s=>s.uiStatus==='done').length;
+  document.getElementById('cnt-err').textContent  = state.filter(s=>s.uiStatus==='error').length;
+  document.getElementById('cnt-pend').textContent = state.filter(s=>s.uiStatus==='listo').length;
+}
+
+function log(msg,type='info'){
+  const el=document.getElementById('log');
+  const cls={ok:'log-ok',err:'log-err',info:'log-info',warn:'log-warn'}[type];
+  const ts=new Date().toLocaleTimeString('es-MX');
+  el.innerHTML+=`<div class="${cls}">[${ts}] ${msg}</div>`;
+  el.scrollTop=el.scrollHeight;
+}
+
+renderTable(); renderStats();
+log('✅ Credenciales pre-cargadas. Haz clic en PRUEBA para comenzar.','ok');
+</script>
+</body>
+</html>
