@@ -855,16 +855,13 @@ html,body{height:100%;background:var(--bg);color:var(--text);
         <label class="form-label">Producción estimada / reportada (pzas) <span class="req">*</span></label>
         <input type="number" class="form-input" id="f-prod-reportada" min="0" step="1" placeholder="0" style="font-family:'IBM Plex Mono',monospace;font-size:24px;text-align:center;" oninput="calcMetrics()">
       </div>
-      <div class="form-group">
-        <label class="form-label">Real empacada (pzas)</label>
-        <input type="number" class="form-input" id="f-real-empacada" min="0" step="1" placeholder="0" style="font-family:'IBM Plex Mono',monospace;font-size:24px;text-align:center;" oninput="calcMetrics()">
-      </div>
-      <div class="metrics-card">
-        <div class="metrics-row"><span style="font-size:13px;color:var(--text2);">Merma (pzas)</span><span class="metrics-val" id="m-merma">—</span></div>
-        <div class="metrics-row"><span style="font-size:13px;color:var(--text2);">% Merma</span><span class="metrics-val" id="m-pct-merma">—</span></div>
-        <div class="metrics-row" style="border-bottom:none;"><span style="font-size:13px;color:var(--text2);">Eficiencia</span><span class="metrics-val" id="m-efic">—</span></div>
-        <div class="efic-bar"><div class="efic-fill" id="efic-fill" style="width:0%;background:var(--green)"></div></div>
-      </div>
+      <!-- Real empacada y métricas: las llena el SUPERVISOR en la pantalla de revisión.
+           IDs preservados como hidden para no romper calcMetrics() ni collectFormData(). -->
+      <input type="hidden" id="f-real-empacada" value="">
+      <span id="m-merma" style="display:none;">—</span>
+      <span id="m-pct-merma" style="display:none;">—</span>
+      <span id="m-efic" style="display:none;">—</span>
+      <span id="efic-fill" style="display:none;"></span>
       <div class="form-group">
         <label class="form-label">Observaciones del turno</label>
         <textarea class="form-textarea" id="f-obs" placeholder="Incidentes, paros, notas..."></textarea>
@@ -1013,15 +1010,76 @@ html,body{height:100%;background:var(--bg);color:var(--text);
         </div>
       </div>
 
+      <!-- ── 📦 CIERRE TEAPA — completa el supervisor ── -->
+      <div class="rv-section" id="rv-cierre-section" style="margin-top:4px;border:2px solid #FFCD24;background:#FFFCEC;">
+        <div class="rv-section-head" style="background:#FFCD24;">
+          <div class="rv-section-title" style="color:#000;">📦 Cierre Teapa — completa el supervisor</div>
+          <div id="rv-cierre-status" style="font-size:11px;color:#5A6E90;font-weight:700;">—</div>
+        </div>
+        <div class="rv-section-body">
+          <div class="info-box" style="margin-bottom:14px;">
+            Captura las cantidades reales recibidas en Teapa después del traslado. La suma de Aprobada + Rechazo + Desperdicio debe igualar Real Empacada (±1 pza).
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Real empacada (pzas) <span class="req">*</span></label>
+            <input type="number" class="form-input" id="rv-real-empacada" min="0" step="1" placeholder="0"
+              style="font-family:'IBM Plex Mono',monospace;font-size:22px;text-align:center;"
+              oninput="calcCierreTeapa()">
+            <div class="form-hint">Total de piezas que llegaron empacadas a Teapa.</div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Piezas aprobadas (pzas) <span class="req">*</span></label>
+            <input type="number" class="form-input" id="rv-cant-aprobada" min="0" step="1" placeholder="0"
+              style="font-family:'IBM Plex Mono',monospace;font-size:22px;text-align:center;border-color:#1A7A4A;"
+              oninput="calcCierreTeapa()">
+            <div class="form-hint">Piezas que pasaron QA. Esta es la cantidad que se enviará al Assembly Build en NetSuite.</div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Piezas en rechazo (pzas) <span class="req">*</span></label>
+            <input type="number" class="form-input" id="rv-cant-rechazo" min="0" step="1" placeholder="0"
+              style="font-family:'IBM Plex Mono',monospace;font-size:22px;text-align:center;border-color:#93700A;"
+              oninput="calcCierreTeapa()">
+            <div class="form-hint">Piezas defectuosas pero recuperables / a reproceso.</div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Desperdicio (pzas) <span class="req">*</span></label>
+            <input type="number" class="form-input" id="rv-cant-desperdicio" min="0" step="1" placeholder="0"
+              style="font-family:'IBM Plex Mono',monospace;font-size:22px;text-align:center;border-color:#C0392B;"
+              oninput="calcCierreTeapa()">
+            <div class="form-hint">Piezas perdidas o destruidas (merma final).</div>
+          </div>
+
+          <!-- Indicador de cuadre -->
+          <div id="rv-cuadre-box" style="margin:16px 0 14px;padding:12px;border-radius:8px;background:#E4ECF7;border-left:4px solid #5A6E90;">
+            <div style="display:flex;justify-content:space-between;align-items:center;font-size:13px;">
+              <span><strong>Suma A+R+D:</strong> <span id="rv-suma-ard" style="font-family:'IBM Plex Mono',monospace;font-weight:700;">0</span> pzas</span>
+              <span><strong>Real empacada:</strong> <span id="rv-real-eco" style="font-family:'IBM Plex Mono',monospace;font-weight:700;">0</span> pzas</span>
+            </div>
+            <div id="rv-cuadre-msg" style="margin-top:6px;font-size:12px;font-weight:600;">Captura los 4 campos…</div>
+          </div>
+
+          <!-- Métricas calculadas en vivo -->
+          <div class="metrics-card" style="background:#fff;">
+            <div class="metrics-row"><span style="font-size:13px;color:var(--text2);">Eficiencia (Aprobada / Reportada)</span><span class="metrics-val" id="rv-m-efic">—</span></div>
+            <div class="metrics-row"><span style="font-size:13px;color:var(--text2);">Merma (Reportada − Aprobada)</span><span class="metrics-val" id="rv-m-merma">—</span></div>
+            <div class="metrics-row" style="border-bottom:none;"><span style="font-size:13px;color:var(--text2);">% Merma</span><span class="metrics-val" id="rv-m-pct-merma">—</span></div>
+            <div class="efic-bar"><div class="efic-fill" id="rv-efic-fill" style="width:0%;background:var(--green)"></div></div>
+          </div>
+        </div>
+      </div>
+
       <!-- ── ZONA DE APROBACIÓN ── -->
       <div class="rv-approve-zone">
-        <div class="rv-wo-label">ID Orden de Trabajo NetSuite (Work Order)</div>
+        <div class="rv-wo-label">ID Orden de Trabajo NetSuite (Work Order) <span class="req">*</span></div>
         <input type="text" class="form-input" id="rv-wo-id" placeholder="Ej. 141692"
           style="font-family:'IBM Plex Mono',monospace;font-size:18px;text-align:center;margin-bottom:4px;">
-        <div class="form-hint">Si no tienes el WO ahora, puedes aprobar sin él. Se puede agregar después.</div>
+        <div class="form-hint">El WO es obligatorio para aprobar. Debe ser un número de Work Order existente en NetSuite.</div>
         <div class="rv-actions">
-          <button class="btn btn-primary" onclick="doApprove(true)" id="rv-btn-approve">✓ Aprobar y subir a NetSuite</button>
-          <button class="btn btn-ghost" onclick="doApprove(false)">✓ Solo aprobar (sin subir)</button>
+          <button class="btn btn-primary" onclick="doApprove()" id="rv-btn-approve">✓ Aprobar y subir a NetSuite</button>
           <button class="btn btn-danger" onclick="doReject()">✗ Rechazar — solicitar corrección</button>
         </div>
       </div>
@@ -1297,7 +1355,7 @@ async function _syncRecordsToSb(recs){
       const row={
         folio:      rec.folio||(''+rec.id),
         payload:    rec,
-        http_status:rec.status==='approved'?200:0,
+        http_status:isApproved(rec.status)?200:0,
         record_id:  rec.netsuiteRecordId||null,
         error:      null
       };
@@ -1896,20 +1954,24 @@ function updateHome(){
   const todayR=recs.filter(r=>r.fecha===today);
   document.getElementById('kpi-piezas').textContent=todayR.reduce((s,r)=>s+(r.prodReportada||0),0).toLocaleString();
   document.getElementById('kpi-fecha').textContent=today;
-  document.getElementById('kpi-pendientes').textContent=recs.filter(r=>r.status==='pending').length;
+  document.getElementById('kpi-pendientes').textContent=recs.filter(r=>isPending(r.status)).length;
   document.getElementById('kpi-registros').textContent=todayR.length;
   const cut=new Date();cut.setDate(cut.getDate()-7);
-  const recent=recs.filter(r=>r.status==='approved'&&r.eficiencia>0&&new Date(r.fecha)>=cut);
+  const recent=recs.filter(r=>isApproved(r.status)&&r.eficiencia>0&&new Date(r.fecha)>=cut);
   document.getElementById('kpi-efic').textContent=recent.length?((recent.reduce((s,r)=>s+r.eficiencia,0)/recent.length).toFixed(1)+'%'):'—';
   document.getElementById('btn-supervisor').style.display=(u.rol==='supervisor'||u.rol==='director')?'':'none';
   const list=document.getElementById('recent-list');
   const last5=[...recs].reverse().slice(0,5);
-  list.innerHTML=last5.length?last5.map(r=>`
-    <div class="record-card">
-      <div class="record-badge badge-${r.status==='approved'?'approved':r.status==='rejected'?'rejected':'pending'}"></div>
+  list.innerHTML=last5.length?last5.map(r=>{
+    const lbl=statusLabel(r.status);
+    const badge=isApproved(r.status)?'approved':isRejected(r.status)?'rejected':'pending';
+    const stCls=isApproved(r.status)?'approved':'pending';
+    return `<div class="record-card">
+      <div class="record-badge badge-${badge}"></div>
       <div class="record-info"><div class="record-folio">${r.folio}</div><div class="record-detail">${r.articulo} · Turno ${r.turno} · ${r.fecha}</div></div>
-      <div class="record-status status-${r.status==='approved'?'approved':'pending'}">${r.status==='approved'?'Aprobado':r.status==='rejected'?'Rechazado':'Pendiente'}</div>
-    </div>`).join(''):'<div class="empty-state"><div class="empty-icon">📂</div><div class="empty-text">Sin registros todavía.</div></div>';
+      <div class="record-status status-${stCls}">${lbl}</div>
+    </div>`;
+  }).join(''):'<div class="empty-state"><div class="empty-icon">📂</div><div class="empty-text">Sin registros todavía.</div></div>';
 }
 
 // ═══════ FORM ═══════
@@ -2476,18 +2538,47 @@ function calcPiezasEstimadas(){
 }
 
 // ═══════ METRICS ═══════
+// ═══════ STATUS HELPERS — numérico NetSuite con compatibilidad legacy ═══════
+// Valores nuevos: '4' Pendiente · '5' Aprobado · '6' Rechazado
+// Legacy soportado: 'pending' · 'approved' · 'rejected'
+function isApproved(s){ return s==='5' || s==='approved'; }
+function isRejected(s){ return s==='6' || s==='rejected'; }
+function isPending(s){ return !isApproved(s) && !isRejected(s); }
+function statusToNS(s){
+  if(isApproved(s)) return '5';
+  if(isRejected(s)) return '6';
+  return '4';
+}
+function statusLabel(s){
+  if(isApproved(s)) return 'Aprobado';
+  if(isRejected(s)) return 'Rechazado';
+  return 'Pendiente';
+}
+
 function calcMetrics(){
-  const rep=parseFloat(document.getElementById('f-prod-reportada').value)||0;
-  const real=parseFloat(document.getElementById('f-real-empacada').value)||0;
+  // Esta función ahora es de compatibilidad. El operador ya no ve Real Empacada ni métricas.
+  // El cálculo en vivo lo hace el supervisor via calcCierreTeapa() en la pantalla de revisión.
+  const repEl=document.getElementById('f-prod-reportada');
+  const realEl=document.getElementById('f-real-empacada');
+  if(!repEl||!realEl) return;
+  const rep=parseFloat(repEl.value)||0;
+  const real=parseFloat(realEl.value)||0;
+  const mEl=document.getElementById('m-merma');
+  const pctEl=document.getElementById('m-pct-merma');
+  const efEl=document.getElementById('m-efic');
+  const fill=document.getElementById('efic-fill');
   if(rep>0&&real>0){
     const m=rep-real,pct=m/rep*100,efic=real/rep*100;
-    document.getElementById('m-merma').textContent=m+' pzas';
-    document.getElementById('m-pct-merma').textContent=pct.toFixed(1)+'%';
-    document.getElementById('m-efic').textContent=efic.toFixed(1)+'%';
-    const fill=document.getElementById('efic-fill');
-    fill.style.width=Math.min(efic,100)+'%';
-    fill.style.background=efic>=95?'var(--green)':efic>=85?'var(--yellow)':'var(--red)';
-  }else{['m-merma','m-pct-merma','m-efic'].forEach(id=>document.getElementById(id).textContent='—');document.getElementById('efic-fill').style.width='0%';}
+    if(mEl)   mEl.textContent  = m+' pzas';
+    if(pctEl) pctEl.textContent= pct.toFixed(1)+'%';
+    if(efEl)  efEl.textContent = efic.toFixed(1)+'%';
+    if(fill){fill.style.width=Math.min(efic,100)+'%';fill.style.background=efic>=95?'var(--green)':efic>=85?'var(--yellow)':'var(--red)';}
+  }else{
+    if(mEl)  mEl.textContent  ='—';
+    if(pctEl)pctEl.textContent='—';
+    if(efEl) efEl.textContent ='—';
+    if(fill) fill.style.width='0%';
+  }
 }
 
 // ═══════ RESUMEN ═══════
@@ -2497,10 +2588,7 @@ function collectFormData(){
   const artId=parseInt(document.getElementById('f-articulo').value);
   const artNombre=PRODUCTS.find(p=>p.id===artId)?.n||'';
   const rep=parseFloat(document.getElementById('f-prod-reportada').value)||0;
-  const real=parseFloat(document.getElementById('f-real-empacada').value)||0;
-  const merma=rep>0&&real>0?rep-real:null;
-  const pctMerma=merma!==null?merma/rep*100:null;
-  const eficiencia=rep>0&&real>0?real/rep*100:null;
+  // Real empacada / merma / eficiencia los llena el supervisor — quedan null aquí
   const vals=S.pesajes.map(p=>p.kg);
   const pesajePromedio=vals.length?vals.reduce((a,b)=>a+b,0)/vals.length:null;
   return{folio,fecha:document.getElementById('f-fecha').value,turno:S.form.turno||'M',linea,
@@ -2518,7 +2606,7 @@ function collectFormData(){
     aditivo:{tipo:document.getElementById('mp-aditivo-tipo').value,cc:parseFloat(document.getElementById('mp-aditivo-cc').value)||0},
     pigmento:{tipo:document.getElementById('mp-pigmento-tipo').value,kg:parseFloat(document.getElementById('mp-pigmento-kg').value)||0},
     bachadas:parseInt(document.getElementById('f-bachadas').value)||0,
-    prodReportada:rep,realEmpacada:real,merma,pctMerma,eficiencia,
+    prodReportada:rep,
     obs:document.getElementById('f-obs').value.trim()};
 }
 function buildResumen(){
@@ -2566,7 +2654,11 @@ function saveRecord(){
   const rec={...d,id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),
     dosiPhoto:S.dosiPhotoB64,dosiPhoto2:S.dosiPhotoB64_2||null,dosiPhotosExtra:[...S.dosiPhotosExtra],createdAt:new Date().toISOString(),piezasEstimadas:S.piezasEstimadas||null,pesoHumedo:S.pesoHumedo||null,
     totalesConsumo:S.totalesOCR||null,
-    status:'pending',netsuiteWO:null,approvedBy:null,approvedAt:null};
+    // Cierre Teapa: quedan null hasta que el supervisor los capture
+    realEmpacada:null, cantidadAprobada:null, cantidadRechazo:null, cantidadDesperdicio:null,
+    merma:null, pctMerma:null, eficiencia:null,
+    status:'4',                          // Pendiente (numérico NetSuite)
+    netsuiteWO:null, approvedBy:null, approvedAt:null};
   const recs=getRecords();recs.push(rec);
   try{
     saveRecords(recs);
@@ -2641,8 +2733,8 @@ function loadSupervisorScreen(){
   const u=S.superUser;
   document.getElementById('super-user-label').textContent=u?.nombre+' · '+u?.rol;
   const recs=getRecords();
-  const pending=recs.filter(r=>r.status==='pending');
-  const approved=recs.filter(r=>r.status==='approved').reverse().slice(0,10);
+  const pending=recs.filter(r=>isPending(r.status));
+  const approved=recs.filter(r=>isApproved(r.status)).reverse().slice(0,10);
   document.getElementById('super-badge').textContent=pending.length;
   const pList=document.getElementById('pending-list');
   pList.innerHTML=pending.length?pending.map(r=>`
@@ -2790,10 +2882,16 @@ function renderReviewScreen(rec){
   }else{mDiv.innerHTML='<div style="color:var(--text3);font-size:13px;grid-column:1/-1;">Sin datos de producción</div>';}
 
   // Tabla producción
+  const cierreRows = (rec.realEmpacada!=null) ? `
+    <tr><td class="rk">Real empacada</td><td class="rv">${rec.realEmpacada||0} pzas</td></tr>
+    <tr><td class="rk">Aprobadas</td><td class="rv" style="color:var(--green);font-weight:700;">${rec.cantidadAprobada||0} pzas</td></tr>
+    <tr><td class="rk">En rechazo</td><td class="rv" style="color:var(--yellow);font-weight:700;">${rec.cantidadRechazo||0} pzas</td></tr>
+    <tr><td class="rk">Desperdicio</td><td class="rv" style="color:var(--red);font-weight:700;">${rec.cantidadDesperdicio||0} pzas</td></tr>` : `
+    <tr><td class="rk">Cierre Teapa</td><td class="rv" style="color:var(--text3);font-style:italic;">Pendiente — supervisor</td></tr>`;
   document.getElementById('rv-prod-table').innerHTML=`
     <tr><td class="rk">Bachadas</td><td class="rv big">${rec.bachadas||'—'}</td></tr>
     <tr><td class="rk">Prod. reportada</td><td class="rv big">${rec.prodReportada||0} pzas</td></tr>
-    <tr><td class="rk">Real empacada</td><td class="rv">${rec.realEmpacada||0} pzas</td></tr>
+    ${cierreRows}
     <tr><td class="rk">Operador</td><td class="rv">${rec.operador}</td></tr>
     <tr><td class="rk">Capturado</td><td class="rv" style="font-size:11px;">${new Date(rec.createdAt).toLocaleString('es-MX')}</td></tr>`;
 
@@ -2829,13 +2927,88 @@ function renderReviewScreen(rec){
   // WO field
   document.getElementById('rv-wo-id').value=rec.netsuiteWO||'';
 
-  // Btn state si ya fue aprobado
-  const approved=rec.status==='approved';
-  document.getElementById('rv-btn-approve').disabled=approved;
-  document.getElementById('rv-btn-approve').textContent=approved?'✓ Ya aprobado':'✓ Aprobar y subir a NetSuite';
+  // ── Cierre Teapa: precargar inputs si ya hay valores y disparar cálculo
+  const realEmp = rec.realEmpacada!=null?rec.realEmpacada:'';
+  const cAp     = rec.cantidadAprobada!=null?rec.cantidadAprobada:'';
+  const cRe     = rec.cantidadRechazo!=null?rec.cantidadRechazo:'';
+  const cDe     = rec.cantidadDesperdicio!=null?rec.cantidadDesperdicio:'';
+  document.getElementById('rv-real-empacada').value     = realEmp;
+  document.getElementById('rv-cant-aprobada').value     = cAp;
+  document.getElementById('rv-cant-rechazo').value      = cRe;
+  document.getElementById('rv-cant-desperdicio').value  = cDe;
+
+  // Si el registro ya está aprobado/rechazado, deshabilitar inputs (solo lectura)
+  const isLocked = isApproved(rec.status) || isRejected(rec.status);
+  ['rv-real-empacada','rv-cant-aprobada','rv-cant-rechazo','rv-cant-desperdicio','rv-wo-id'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.readOnly = isLocked;
+  });
+  calcCierreTeapa();
+
+  // Btn state según status
+  const approved = isApproved(rec.status);
+  const rejected = isRejected(rec.status);
+  document.getElementById('rv-btn-approve').disabled = approved || rejected;
+  document.getElementById('rv-btn-approve').textContent = approved?'✓ Ya aprobado':rejected?'✗ Rechazado':'✓ Aprobar y subir a NetSuite';
   const chip=document.getElementById('rv-status-chip');
   if(approved){chip.style.background='rgba(34,197,94,.15)';chip.style.color='var(--green)';chip.textContent='APROBADO';}
+  else if(rejected){chip.style.background='rgba(192,57,43,.15)';chip.style.color='var(--red)';chip.textContent='RECHAZADO';}
   else{chip.style.background='rgba(234,179,8,.15)';chip.style.color='var(--yellow)';chip.textContent='PENDIENTE';}
+}
+
+// ═══════ CIERRE TEAPA — cálculo en vivo y validación de cuadre ═══════
+function calcCierreTeapa(){
+  const real = parseFloat(document.getElementById('rv-real-empacada').value)||0;
+  const cAp  = parseFloat(document.getElementById('rv-cant-aprobada').value)||0;
+  const cRe  = parseFloat(document.getElementById('rv-cant-rechazo').value)||0;
+  const cDe  = parseFloat(document.getElementById('rv-cant-desperdicio').value)||0;
+  const suma = cAp + cRe + cDe;
+
+  document.getElementById('rv-suma-ard').textContent = suma.toLocaleString();
+  document.getElementById('rv-real-eco').textContent = real.toLocaleString();
+
+  // Indicador de cuadre
+  const box = document.getElementById('rv-cuadre-box');
+  const msg = document.getElementById('rv-cuadre-msg');
+  const diff = suma - real;
+  const TOL = 1; // tolerancia ±1 pza
+  if(real<=0 && suma<=0){
+    box.style.borderLeftColor = '#5A6E90';
+    box.style.background = '#E4ECF7';
+    msg.style.color = '#5A6E90';
+    msg.textContent = 'Captura los 4 campos…';
+  } else if(Math.abs(diff) <= TOL){
+    box.style.borderLeftColor = 'var(--green)';
+    box.style.background = '#D6F0E2';
+    msg.style.color = 'var(--green)';
+    msg.textContent = '✓ Cuadre correcto (diferencia: '+diff+' pza)';
+  } else {
+    box.style.borderLeftColor = 'var(--red)';
+    box.style.background = '#FDEAEA';
+    msg.style.color = 'var(--red)';
+    const signo = diff>0?'+':'';
+    msg.textContent = '⚠ No cuadra · diferencia: '+signo+diff+' pza · ajusta para poder aprobar';
+  }
+
+  // Métricas en vivo: Eficiencia / Merma / % Merma usando Reportada vs Aprobada
+  const rec = getRecords().find(r=>r.id===S.reviewRecordId);
+  const rep = rec?.prodReportada||0;
+  const mEl   = document.getElementById('rv-m-merma');
+  const pctEl = document.getElementById('rv-m-pct-merma');
+  const efEl  = document.getElementById('rv-m-efic');
+  const fill  = document.getElementById('rv-efic-fill');
+  if(rep>0 && cAp>0){
+    const merma = rep - cAp;
+    const pct   = merma/rep*100;
+    const efic  = cAp/rep*100;
+    mEl.textContent   = merma+' pzas';
+    pctEl.textContent = pct.toFixed(1)+'%';
+    efEl.textContent  = efic.toFixed(1)+'%';
+    fill.style.width  = Math.min(efic,100)+'%';
+    fill.style.background = efic>=95?'var(--green)':efic>=85?'var(--yellow)':'var(--red)';
+  } else {
+    mEl.textContent='—'; pctEl.textContent='—'; efEl.textContent='—';
+    fill.style.width='0%';
+  }
 }
 
 function renderChecklist(rec){
@@ -2870,38 +3043,94 @@ function updCheckCount(){
   document.getElementById('rv-checks-count').textContent=done+' / '+CHECKLIST_ITEMS.length;
 }
 
-async function doApprove(withNetsuite){
+async function doApprove(){
   const recs=getRecords();
   const idx=recs.findIndex(r=>r.id===S.reviewRecordId);if(idx<0)return;
-  const woId=document.getElementById('rv-wo-id').value.trim();
-  recs[idx].status='approved';
-  recs[idx].approvedBy=S.superUser?.nombre;
-  recs[idx].approvedAt=new Date().toISOString();
-  recs[idx].netsuiteWO=woId||null;
-  recs[idx].checksCompleted=Object.values(S.checks).filter(Boolean).length;
-  if(withNetsuite){
-    showLoading('Subiendo a NetSuite...');
-    try{
-      const nsResult = await uploadToNetsuite(recs[idx]);
-      recs[idx].netsuiteStatus='uploaded';
-      recs[idx].netsuiteRecordId=nsResult.recordId||null;
-      recs[idx].netsuiteWO=nsResult.recordId||woId||null;
-      // Update Supabase record_id
-      if(nsResult.recordId&&recs[idx].folio){
-        sbPatch('produccion_logs?folio=eq.'+encodeURIComponent(recs[idx].folio),{record_id:nsResult.recordId,http_status:200}).catch(()=>{});
-      }
-      saveRecords(recs);hideLoading();
-      showToast('✅ Aprobado y subido a NetSuite · ID: '+(nsResult.recordId||'—'),'green');
-    }catch(e){recs[idx].netsuiteStatus='error';saveRecords(recs);hideLoading();showToast('Aprobado · Error NetSuite: '+e.message,'red');}
-  }else{saveRecords(recs);showToast('✓ Registro aprobado','green');}
-  // Refresh review screen
+
+  // ─── VALIDACIONES OBLIGATORIAS ──────────────────────────
+  const woRaw = document.getElementById('rv-wo-id').value.trim();
+  const woNum = parseInt(woRaw,10);
+  if(!woRaw || isNaN(woNum) || woNum<=0){
+    showToast('⚠️ Captura un WO numérico válido antes de aprobar','red');
+    document.getElementById('rv-wo-id').focus();
+    return;
+  }
+  const real = parseFloat(document.getElementById('rv-real-empacada').value)||0;
+  if(real<=0){
+    showToast('⚠️ Real Empacada debe ser mayor a 0','red');
+    document.getElementById('rv-real-empacada').focus();
+    return;
+  }
+  const cAp = parseFloat(document.getElementById('rv-cant-aprobada').value);
+  const cRe = parseFloat(document.getElementById('rv-cant-rechazo').value);
+  const cDe = parseFloat(document.getElementById('rv-cant-desperdicio').value);
+  if(isNaN(cAp) || cAp<0){
+    showToast('⚠️ Captura Piezas Aprobadas (≥ 0)','red');
+    document.getElementById('rv-cant-aprobada').focus(); return;
+  }
+  if(isNaN(cRe) || cRe<0){
+    showToast('⚠️ Captura Piezas en Rechazo (≥ 0)','red');
+    document.getElementById('rv-cant-rechazo').focus(); return;
+  }
+  if(isNaN(cDe) || cDe<0){
+    showToast('⚠️ Captura Desperdicio (≥ 0)','red');
+    document.getElementById('rv-cant-desperdicio').focus(); return;
+  }
+  const suma = cAp + cRe + cDe;
+  if(Math.abs(suma - real) > 1){
+    showToast('⚠️ Aprobada + Rechazo + Desperdicio debe igualar Real Empacada (±1). Diferencia: '+(suma-real)+' pza','red');
+    document.getElementById('rv-cant-aprobada').focus(); return;
+  }
+
+  // ─── PERSISTIR EN EL REGISTRO ───────────────────────────
+  // Recalcular merma/pctMerma/eficiencia ahora con la cantidad aprobada del supervisor
+  const rep = recs[idx].prodReportada||0;
+  const merma = rep>0?rep-cAp:null;
+  const pctMerma = (merma!=null && rep>0)?(merma/rep*100):null;
+  const eficiencia = (rep>0)?(cAp/rep*100):null;
+
+  recs[idx].status              = '5';            // Aprobado (numérico NetSuite)
+  recs[idx].approvedBy          = S.superUser?.nombre;
+  recs[idx].approvedAt          = new Date().toISOString();
+  recs[idx].netsuiteWO          = woNum;
+  recs[idx].realEmpacada        = real;
+  recs[idx].cantidadAprobada    = cAp;
+  recs[idx].cantidadRechazo     = cRe;
+  recs[idx].cantidadDesperdicio = cDe;
+  recs[idx].merma               = merma;
+  recs[idx].pctMerma            = pctMerma;
+  recs[idx].eficiencia          = eficiencia;
+  recs[idx].checksCompleted     = Object.values(S.checks).filter(Boolean).length;
+
+  // ─── SUBIR A NETSUITE (siempre) ─────────────────────────
+  showLoading('Subiendo a NetSuite...');
+  try{
+    const nsResult = await uploadToNetsuite(recs[idx]);
+    recs[idx].netsuiteStatus    = 'uploaded';
+    recs[idx].netsuiteRecordId  = nsResult.recordId||null;
+    if(nsResult.recordId && recs[idx].folio){
+      sbPatch('produccion_logs?folio=eq.'+encodeURIComponent(recs[idx].folio),{record_id:nsResult.recordId,http_status:200}).catch(()=>{});
+    }
+    saveRecords(recs);
+    hideLoading();
+    showToast('✅ Aprobado y subido a NetSuite · ID: '+(nsResult.recordId||'—'),'green');
+  }catch(e){
+    recs[idx].netsuiteStatus = 'error';
+    saveRecords(recs);
+    hideLoading();
+    showToast('Aprobado · Error NetSuite: '+e.message,'red');
+  }
+
+  // Refrescar pantalla
   const updRec=getRecords().find(r=>r.id===S.reviewRecordId);
-  if(updRec)renderReviewScreen(updRec);
+  if(updRec) renderReviewScreen(updRec);
   loadSupervisorScreen();updateHome();
 }
 function doReject(){
   const recs=getRecords();const idx=recs.findIndex(r=>r.id===S.reviewRecordId);if(idx<0)return;
-  recs[idx].status='rejected';recs[idx].approvedBy=S.superUser?.nombre;recs[idx].approvedAt=new Date().toISOString();
+  recs[idx].status='6';                   // Rechazado (numérico NetSuite)
+  recs[idx].approvedBy=S.superUser?.nombre;
+  recs[idx].approvedAt=new Date().toISOString();
   saveRecords(recs);loadSupervisorScreen();updateHome();
   showToast('Registro rechazado — el operador deberá corregir','red');
   showScreen('screen-supervisor');
@@ -2981,7 +3210,7 @@ function exportData(){
   const a=Object.assign(document.createElement('a'),{href:URL.createObjectURL(new Blob([json],{type:'application/json'})),download:`batab-registros-${new Date().toISOString().split('T')[0]}.json`});
   a.click();showToast('Exportado ✅','green');
 }
-function clearApproved(){saveRecords(getRecords().filter(r=>r.status!=='approved'));showToast('Registros aprobados eliminados','green');goSettings();}
+function clearApproved(){saveRecords(getRecords().filter(r=>!isApproved(r.status)));showToast('Registros aprobados eliminados','green');goSettings();}
 
 // ═══════ NETSUITE TBA CONFIG — Supabase ═══════
 let _nsCfg={ck:'',cs:'',ti:'',ts:''};
@@ -3097,21 +3326,27 @@ async function uploadToNetsuite(record){
 
   // Mapeo a campos del customrecord_batab_produccion
   const payload={
-    name:                             record.folio||'',
-    externalId:                       record.id||'',
-    custrecord_batab_folio:           record.folio||'',
-    custrecord_batab_linea:           record.linea||'',
-    custrecord_batab_lote:            record.lote||'',
-    custrecord_batab_turno:           record.turno||'',
-    custrecord_batab_articulo:        record.articulo||'',
-    custrecord_batab_fecha:           record.fecha||new Date().toISOString().split('T')[0],
-    custrecord_batab_operador:        record.operador||'',
-    custrecord_batab_prod_reportada:  parseInt(record.prodReportada)||0,
-    custrecord_batab_bachadas:        parseInt(record.totalesConsumo?.bachadas)||0,
-    custrecord_batab_status:          record.status||'approved',
-    custrecord_batab_aprobado_por:    record.approvedBy||'',
-    custrecord_batab_aprobado_at:     record.approvedAt||new Date().toISOString(),
-    custrecord_batab_json_payload:    JSON.stringify(clean)
+    name:                                 record.folio||'',
+    externalId:                           record.id||'',
+    custrecord_batab_folio:               record.folio||'',
+    custrecord_batab_linea:               record.linea||'',
+    custrecord_batab_lote:                record.lote||'',
+    custrecord_batab_turno:               record.turno||'',
+    custrecord_batab_articulo:            record.articulo||'',
+    custrecord_batab_fecha:               record.fecha||new Date().toISOString().split('T')[0],
+    custrecord_batab_operador:            record.operador||'',
+    custrecord_batab_prod_reportada:      parseInt(record.prodReportada)||0,
+    custrecord_batab_bachadas:            parseInt(record.totalesConsumo?.bachadas)||0,
+    // ── Cierre Teapa: cantidades capturadas por el supervisor ──
+    custrecord_batab_real_empacada:       parseInt(record.realEmpacada)||0,
+    custrecord_batab_cantidad_aprobada:   parseInt(record.cantidadAprobada)||0,
+    custrecord_batab_cantidad_rechazo:    parseInt(record.cantidadRechazo)||0,
+    custrecord_batab_cantidad_desperdicio:parseInt(record.cantidadDesperdicio)||0,
+    // ── Status numérico (4=Pendiente, 5=Aprobado, 6=Rechazado) — dispara v6.3 ──
+    custrecord_batab_status:              statusToNS(record.status),
+    custrecord_batab_aprobado_por:        record.approvedBy||'',
+    custrecord_batab_aprobado_at:         record.approvedAt||new Date().toISOString(),
+    custrecord_batab_json_payload:        JSON.stringify(clean)
   };
   // WO solo si es un número válido
   const woNum=parseInt(record.netsuiteWO);
