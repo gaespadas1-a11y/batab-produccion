@@ -4476,6 +4476,46 @@ async function startApp(){
   init();
 }
 startApp();
+
+// ═══════ PARCHE v3.7.2 — Fase 1 supervisor: ocultar Cierre Teapa ═══════
+(function(){
+  function applyFase1Patch(){
+    var cierre = document.getElementById('rv-cierre-section');
+    if(!cierre) return;
+    var rec = null;
+    try{
+      if(typeof S!=='undefined' && S.reviewRecordId && typeof getRecords==='function'){
+        rec = getRecords().find(function(r){return r.id===S.reviewRecordId;});
+      }
+    }catch(e){}
+    var isFase1 = !rec || rec.status==='4' || !rec.status;
+    if(isFase1){
+      cierre.style.display = 'none';
+      ['rv-real-empacada','rv-cant-aprobada','rv-cant-rechazo','rv-cant-desperdicio'].forEach(function(id){
+        var el = document.getElementById(id);
+        if(el && el.value!=='0'){ el.value='0'; try{el.dispatchEvent(new Event('input',{bubbles:true}));}catch(e){} }
+      });
+      if(!document.getElementById('fase1-info-banner')){
+        var banner = document.createElement('div');
+        banner.id = 'fase1-info-banner';
+        banner.style.cssText = 'background:#E8F5E9;color:#1B5E20;padding:14px 16px;border-radius:8px;margin:12px 4px;font-weight:600;text-align:center;border:2px solid #4CAF50;line-height:1.5;font-size:14px;';
+        banner.innerHTML = '✅ <b>FASE 1 — Validación inicial</b><br>Al aprobar se crea la Work Order en NetSuite.<br><br>📝 Cantidad aprobada / rechazo / desperdicio se capturan en <b>Fase 2</b>, después de G1 y empaque final.';
+        cierre.parentNode.insertBefore(banner, cierre);
+      }
+      var errToast = document.querySelector('.toast-red, [class*="error-banner"]');
+      if(errToast && errToast.textContent.indexOf('Aprobada + Rechazo')>=0) errToast.style.display='none';
+    } else {
+      cierre.style.display = '';
+      var b = document.getElementById('fase1-info-banner');
+      if(b) b.remove();
+    }
+  }
+  var obs = new MutationObserver(function(){ try{applyFase1Patch();}catch(e){} });
+  obs.observe(document.body, {childList:true, subtree:true});
+  if(document.readyState!=='loading') applyFase1Patch();
+  else document.addEventListener('DOMContentLoaded', applyFase1Patch);
+})();
+
 </script>
 </body>
 </html>
