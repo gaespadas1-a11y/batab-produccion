@@ -470,6 +470,92 @@ html,body{height:100%;background:var(--bg);color:var(--text);
 @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
 @keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
 .fade-in{animation:fadeIn .3s ease;}
+
+/* ═══════════════════════════════════════════
+   MÓDULO CALIDAD — Theme verde de diferenciación
+═══════════════════════════════════════════ */
+.qc-header{background:#1A7A4A;border-bottom:3px solid #FFCD24;}
+.qc-header .header-title,.qc-header .header-back{color:#FFFFFF;}
+.qc-header .header-sub{color:#A8E6C2;}
+.qc-header .header-action{background:#FFCD24;color:#093F89;}
+
+/* Tarjetas de bandeja G1/G2/Adhoc */
+.qc-gate-grid{display:grid;grid-template-columns:1fr;gap:14px;margin-bottom:24px;}
+@media(min-width:560px){.qc-gate-grid{grid-template-columns:1fr 1fr 1fr;}}
+.qc-gate-card{background:var(--bg2);border:2px solid var(--border);border-radius:var(--radius);
+  padding:24px 18px;cursor:pointer;transition:all .15s;text-align:left;
+  display:flex;flex-direction:column;gap:8px;box-shadow:0 2px 12px rgba(27,58,107,.08);}
+.qc-gate-card:hover,.qc-gate-card:active{border-color:#1A7A4A;background:#D6F0E2;transform:translateY(-2px);}
+.qc-gate-icon{font-size:36px;margin-bottom:4px;}
+.qc-gate-title{font-size:18px;font-weight:700;color:#093F89;}
+.qc-gate-desc{font-size:12px;color:var(--text3);line-height:1.4;}
+.qc-gate-count{display:flex;align-items:baseline;gap:6px;margin-top:8px;}
+.qc-gate-num{font-size:42px;font-weight:700;font-family:'IBM Plex Mono',monospace;color:#1A7A4A;line-height:1;}
+.qc-gate-lbl{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;}
+
+/* Cards de lote en lista */
+.qc-lote-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);
+  padding:14px;margin-bottom:10px;cursor:pointer;transition:all .15s;
+  display:flex;align-items:center;gap:12px;box-shadow:0 1px 4px rgba(27,58,107,.05);}
+.qc-lote-card:hover,.qc-lote-card:active{border-color:#1A7A4A;background:#F0FAF4;}
+.qc-lote-info{flex:1;min-width:0;}
+.qc-lote-id{font-family:'IBM Plex Mono',monospace;font-weight:700;font-size:14px;color:#093F89;}
+.qc-lote-art{font-size:12px;color:var(--text2);margin-top:2px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.qc-lote-meta{font-size:11px;color:var(--text3);margin-top:4px;}
+.qc-lote-arrow{color:#1A7A4A;font-size:24px;flex-shrink:0;}
+
+/* Plan de fotos 3x3 grid */
+.qc-plan-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:14px 0;}
+.qc-plan-cell{background:var(--bg3);border:2px solid var(--border);border-radius:8px;
+  padding:10px 6px;text-align:center;font-size:11px;}
+.qc-plan-cell.done{background:#D6F0E2;border-color:#1A7A4A;}
+.qc-plan-cell.current{background:#FFF9E0;border-color:#FFCD24;animation:pulse 1.5s ease-in-out infinite;}
+.qc-plan-icon{font-size:22px;display:block;margin-bottom:4px;}
+.qc-plan-pos{font-weight:700;font-size:10px;color:var(--text2);text-transform:uppercase;}
+.qc-plan-tipo{font-size:10px;color:var(--text3);margin-top:1px;}
+
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(255,205,36,.4);}50%{box-shadow:0 0 0 8px rgba(255,205,36,0);}}
+
+/* Captura: panel de valor extraído */
+.qc-vision-panel{background:var(--bg2);border:2px solid var(--border);border-radius:var(--radius);
+  padding:16px;margin:14px 0;}
+.qc-vision-panel.high{border-color:#1A7A4A;background:#F0FAF4;}
+.qc-vision-panel.med{border-color:#FFCD24;background:#FFF9E0;}
+.qc-vision-panel.low{border-color:#C0392B;background:#FDEAEA;}
+.qc-vision-label{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;}
+.qc-vision-value{display:flex;align-items:baseline;gap:6px;}
+.qc-vision-num{font-size:36px;font-weight:700;font-family:'IBM Plex Mono',monospace;color:#093F89;line-height:1;}
+.qc-vision-unit{font-size:14px;color:var(--text2);}
+.qc-vision-conf{margin-top:10px;font-size:12px;}
+.qc-vision-conf.high{color:#1A7A4A;} .qc-vision-conf.med{color:#93700A;} .qc-vision-conf.low{color:#C0392B;}
+.qc-vision-obs{font-size:11px;color:var(--text3);font-style:italic;margin-top:6px;}
+
+/* Probeta header en captura */
+.qc-cap-header{background:linear-gradient(135deg,#093F89 0%,#0752B0 100%);color:#FFFFFF;
+  border-radius:var(--radius);padding:14px 16px;margin-bottom:14px;}
+.qc-cap-step{font-size:11px;color:#FFCD24;text-transform:uppercase;letter-spacing:1px;font-weight:700;}
+.qc-cap-titulo{font-size:18px;font-weight:700;margin-top:4px;}
+.qc-cap-codigo{font-size:11px;font-family:'IBM Plex Mono',monospace;color:#A8C6F0;margin-top:2px;}
+
+/* Resumen 9 valores */
+.qc-res-grid{display:grid;grid-template-columns:1fr;gap:10px;margin-bottom:18px;}
+.qc-res-probeta{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;}
+.qc-res-pos{font-size:12px;font-weight:700;color:#093F89;text-transform:uppercase;margin-bottom:8px;}
+.qc-res-row{display:flex;justify-content:space-between;padding:4px 0;font-size:13px;}
+.qc-res-row .rk{color:var(--text2);}
+.qc-res-row .rv{font-family:'IBM Plex Mono',monospace;font-weight:700;}
+
+/* Veredicto box */
+.qc-veredicto-box{padding:24px;border-radius:var(--radius);text-align:center;margin-bottom:18px;}
+.qc-veredicto-box.pasa{background:#D6F0E2;border:3px solid #1A7A4A;}
+.qc-veredicto-box.no_pasa{background:#FDEAEA;border:3px solid #C0392B;}
+.qc-veredicto-icon{font-size:64px;margin-bottom:10px;}
+.qc-veredicto-titulo{font-size:24px;font-weight:700;}
+.qc-veredicto-box.pasa .qc-veredicto-titulo{color:#1A7A4A;}
+.qc-veredicto-box.no_pasa .qc-veredicto-titulo{color:#C0392B;}
+.qc-veredicto-motivo{font-size:13px;color:var(--text2);margin-top:8px;line-height:1.5;}
+
 </style>
 </head>
 <body>
@@ -488,14 +574,28 @@ html,body{height:100%;background:var(--bg);color:var(--text);
 </div>
 
 <!-- ═══════ LOGIN ═══════ -->
+<!-- ═══════ LOGIN: CÓDIGO + PIN 6 DÍGITOS ═══════ -->
 <div class="screen" id="screen-login">
-  <div style="text-align:center;padding:0 24px;">
+  <div style="text-align:center;padding:0 24px;width:100%;max-width:420px;margin:0 auto;">
     <div class="login-logo">🏭</div>
     <div class="login-brand">BAT<span>AB</span></div>
     <div class="login-tagline">Control de Producción · Solo personal autorizado</div>
+
+    <div style="margin:20px 0 8px;text-align:left;">
+      <label class="form-label" style="font-size:12px;color:var(--text3);letter-spacing:1px;">CÓDIGO PERSONAL</label>
+    </div>
+    <input type="text" id="login-codigo" class="form-input" maxlength="10"
+           placeholder="Ej: FCM"
+           autocomplete="off" autocapitalize="characters" spellcheck="false"
+           style="text-transform:uppercase;font-size:20px;font-weight:600;letter-spacing:3px;text-align:center;">
+
+    <div style="margin:18px 0 6px;text-align:left;">
+      <label class="form-label" style="font-size:12px;color:var(--text3);letter-spacing:1px;">PIN (6 DÍGITOS)</label>
+    </div>
     <div class="pin-display" id="pin-display">
       <div class="pin-dot" id="d0"></div><div class="pin-dot" id="d1"></div>
       <div class="pin-dot" id="d2"></div><div class="pin-dot" id="d3"></div>
+      <div class="pin-dot" id="d4"></div><div class="pin-dot" id="d5"></div>
     </div>
     <div class="pin-grid">
       <button class="pin-btn" onclick="pinPress('1')">1</button>
@@ -512,6 +612,105 @@ html,body{height:100%;background:var(--bg);color:var(--text);
       <button class="pin-btn" onclick="pinBack()">⌫</button>
     </div>
     <div class="pin-error-msg" id="pin-error"></div>
+  </div>
+</div>
+
+<!-- ═══════ LOGIN CON ROSTRO ═══════ -->
+<div class="screen" id="screen-login-rostro">
+  <div style="text-align:center;padding:24px;width:100%;max-width:420px;margin:0 auto;">
+    <div style="font-size:72px;margin-bottom:8px;">📷</div>
+    <div class="login-brand" style="font-size:24px;">BAT<span>AB</span></div>
+    <h2 style="margin:24px 0 8px;font-size:22px;">Mira la cámara para entrar</h2>
+    <p style="color:var(--text3);font-size:14px;margin-bottom:32px;" id="login-rostro-info">—</p>
+    <button class="btn btn-primary btn-full" onclick="iniciarLoginRostro()" style="font-size:16px;margin-bottom:24px;padding:14px;">
+      📷 Validar rostro
+    </button>
+    <div class="pin-error-msg" id="login-rostro-error" style="text-align:center;"></div>
+    <hr style="margin:32px 0;border:none;border-top:1px solid var(--border);">
+    <button class="btn btn-secondary btn-full" onclick="cambiarAModoPin()" style="font-size:14px;">
+      Entrar con código y PIN
+    </button>
+    <p style="font-size:12px;color:var(--text3);margin-top:24px;line-height:1.6;">
+      ¿Cambiaste de dispositivo o no es tuyo?<br>
+      <a href="#" onclick="event.preventDefault();olvidarDispositivo();" style="color:var(--accent);font-weight:600;">Olvidar este dispositivo</a>
+    </p>
+  </div>
+</div>
+
+<!-- ═══════ CAMBIAR PIN (forzado primer login) ═══════ -->
+<div class="screen" id="screen-cambiar-pin">
+  <div style="text-align:center;padding:0 24px;width:100%;max-width:420px;margin:0 auto;">
+    <div style="font-size:64px;margin-bottom:8px;">🔐</div>
+    <h2 style="margin:8px 0;font-size:22px;">Crea tu PIN nuevo</h2>
+    <p style="color:var(--text3);font-size:14px;margin-bottom:24px;line-height:1.5;">
+      Tu PIN actual es temporal. Crea uno propio de 6 dígitos que solo tú conozcas.
+    </p>
+    <div style="text-align:left;margin-bottom:6px;">
+      <label class="form-label" id="cp-label" style="font-size:12px;color:var(--text3);letter-spacing:1px;">PIN NUEVO (6 DÍGITOS)</label>
+    </div>
+    <div class="pin-display" id="cp-pin-display">
+      <div class="pin-dot" id="cp0"></div><div class="pin-dot" id="cp1"></div>
+      <div class="pin-dot" id="cp2"></div><div class="pin-dot" id="cp3"></div>
+      <div class="pin-dot" id="cp4"></div><div class="pin-dot" id="cp5"></div>
+    </div>
+    <div class="pin-grid">
+      <button class="pin-btn" onclick="cpPinPress('1')">1</button>
+      <button class="pin-btn" onclick="cpPinPress('2')">2</button>
+      <button class="pin-btn" onclick="cpPinPress('3')">3</button>
+      <button class="pin-btn" onclick="cpPinPress('4')">4</button>
+      <button class="pin-btn" onclick="cpPinPress('5')">5</button>
+      <button class="pin-btn" onclick="cpPinPress('6')">6</button>
+      <button class="pin-btn" onclick="cpPinPress('7')">7</button>
+      <button class="pin-btn" onclick="cpPinPress('8')">8</button>
+      <button class="pin-btn" onclick="cpPinPress('9')">9</button>
+      <button class="pin-btn" onclick="cpPinClear()">✕</button>
+      <button class="pin-btn" onclick="cpPinPress('0')">0</button>
+      <button class="pin-btn" onclick="cpPinBack()">⌫</button>
+    </div>
+    <div id="cp-step" style="font-size:12px;color:var(--text3);margin-top:8px;">Paso 1 de 2</div>
+    <div class="pin-error-msg" id="cp-error" style="text-align:center;"></div>
+  </div>
+</div>
+
+<!-- ═══════ OFERTA DE ENROLAMIENTO FACIAL ═══════ -->
+<div class="screen" id="screen-oferta-rostro">
+  <div style="text-align:center;padding:24px;width:100%;max-width:420px;margin:0 auto;">
+    <div style="font-size:80px;margin-bottom:16px;">📷</div>
+    <h2 style="margin-bottom:12px;font-size:24px;">¿No escribir PIN nunca más?</h2>
+    <p style="color:var(--text3);font-size:15px;margin-bottom:32px;line-height:1.6;">
+      Registra tu rostro en este dispositivo. La próxima vez que entres a la app, solo tienes que mirar la cámara.
+    </p>
+    <button class="btn btn-primary btn-full" onclick="iniciarEnrolamiento()" style="margin-bottom:12px;font-size:16px;padding:14px;">
+      📷 Sí, registrar rostro
+    </button>
+    <button class="btn btn-secondary btn-full" onclick="posponerEnrolamiento()" style="font-size:14px;">
+      Después, gracias
+    </button>
+    <p style="font-size:12px;color:var(--text3);margin-top:24px;line-height:1.6;">
+      🔒 Tu rostro nunca sale de este dispositivo. Es 100% privado.<br>
+      Lo gestiona el sistema operativo de tu equipo.
+    </p>
+  </div>
+</div>
+
+<!-- ═══════ ADMIN OPERADORES (solo director) ═══════ -->
+<div class="screen" id="screen-admin-operadores">
+  <div class="header"><div class="header-inner">
+    <button class="header-back" onclick="showScreen('screen-settings')">←</button>
+    <div class="header-title">Gestión de operadores</div>
+  </div></div>
+  <div class="content content-with-nav">
+    <div class="wrap">
+      <div class="info-box" style="margin-bottom:16px;">
+        🔐 Como director puedes ver dispositivos enrolados, resetear PINs y desactivar operadores.
+      </div>
+      <div id="admin-operadores-list">
+        <div class="empty-state">
+          <div class="empty-icon">⏳</div>
+          <div class="empty-text">Cargando operadores...</div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -533,7 +732,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);
         <div class="kpi-card"><div class="kpi-label">Eficiencia prom.</div><div class="kpi-value" id="kpi-efic">—</div><div class="kpi-sub">últimos 7 días</div></div>
       </div>
       <div class="menu-grid">
-        <button class="menu-btn primary" onclick="goForm()"><span class="menu-icon">📋</span><span class="menu-label">Nueva captura</span><span class="menu-desc">Registrar producción del turno</span></button>
+        <button class="menu-btn primary" id="btn-nueva-captura" onclick="goForm()"><span class="menu-icon">📋</span><span class="menu-label">Nueva captura</span><span class="menu-desc">Registrar producción del turno</span></button>
         <button class="menu-btn" id="btn-supervisor" onclick="goSupervisor()" style="display:none;"><span class="menu-icon">✓</span><span class="menu-label">Supervisor</span><span class="menu-desc">Aprobar y subir a NetSuite</span></button>
       </div>
       <div class="recent-section">
@@ -742,16 +941,13 @@ html,body{height:100%;background:var(--bg);color:var(--text);
         <label class="form-label">Producción estimada / reportada (pzas) <span class="req">*</span></label>
         <input type="number" class="form-input" id="f-prod-reportada" min="0" step="1" placeholder="0" style="font-family:'IBM Plex Mono',monospace;font-size:24px;text-align:center;" oninput="calcMetrics()">
       </div>
-      <div class="form-group">
-        <label class="form-label">Real empacada (pzas)</label>
-        <input type="number" class="form-input" id="f-real-empacada" min="0" step="1" placeholder="0" style="font-family:'IBM Plex Mono',monospace;font-size:24px;text-align:center;" oninput="calcMetrics()">
-      </div>
-      <div class="metrics-card">
-        <div class="metrics-row"><span style="font-size:13px;color:var(--text2);">Merma (pzas)</span><span class="metrics-val" id="m-merma">—</span></div>
-        <div class="metrics-row"><span style="font-size:13px;color:var(--text2);">% Merma</span><span class="metrics-val" id="m-pct-merma">—</span></div>
-        <div class="metrics-row" style="border-bottom:none;"><span style="font-size:13px;color:var(--text2);">Eficiencia</span><span class="metrics-val" id="m-efic">—</span></div>
-        <div class="efic-bar"><div class="efic-fill" id="efic-fill" style="width:0%;background:var(--green)"></div></div>
-      </div>
+      <!-- Real empacada y métricas: las llena el SUPERVISOR en la pantalla de revisión.
+           IDs preservados como hidden para no romper calcMetrics() ni collectFormData(). -->
+      <input type="hidden" id="f-real-empacada" value="">
+      <span id="m-merma" style="display:none;">—</span>
+      <span id="m-pct-merma" style="display:none;">—</span>
+      <span id="m-efic" style="display:none;">—</span>
+      <span id="efic-fill" style="display:none;"></span>
       <div class="form-group">
         <label class="form-label">Observaciones del turno</label>
         <textarea class="form-textarea" id="f-obs" placeholder="Incidentes, paros, notas..."></textarea>
@@ -782,7 +978,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);
     <div class="success-sub">Captura guardada y pendiente de aprobación del supervisor.</div>
     <div class="success-actions">
       <button class="btn btn-primary btn-full" onclick="goForm()">+ Nueva captura</button>
-      <button class="btn btn-secondary btn-full" onclick="showScreen('screen-home');updateHome()">Ir al inicio</button>
+      <button class="btn btn-secondary btn-full" onclick="terminarRegistro()">Ir al inicio</button>
     </div>
   </div>
 </div>
@@ -900,15 +1096,75 @@ html,body{height:100%;background:var(--bg);color:var(--text);
         </div>
       </div>
 
+      <!-- ── 📦 CIERRE TEAPA — completa el supervisor ── -->
+      <div class="rv-section" id="rv-cierre-section" style="margin-top:4px;border:2px solid #FFCD24;background:#FFFCEC;">
+        <div class="rv-section-head" style="background:#FFCD24;">
+          <div class="rv-section-title" style="color:#000;">📦 Cierre Teapa — completa el supervisor</div>
+          <div id="rv-cierre-status" style="font-size:11px;color:#5A6E90;font-weight:700;">—</div>
+        </div>
+        <div class="rv-section-body">
+          <div class="info-box" style="margin-bottom:14px;">
+            Captura las cantidades reales recibidas en Teapa después del traslado. La suma de Aprobada + Rechazo + Desperdicio debe igualar Real Empacada (±1 pza).
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Real empacada (pzas) <span class="req">*</span></label>
+            <input type="number" class="form-input" id="rv-real-empacada" min="0" step="1" placeholder="0"
+              style="font-family:'IBM Plex Mono',monospace;font-size:22px;text-align:center;"
+              oninput="calcCierreTeapa()">
+            <div class="form-hint">Total de piezas que llegaron empacadas a Teapa.</div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Piezas aprobadas (pzas) <span class="req">*</span></label>
+            <input type="number" class="form-input" id="rv-cant-aprobada" min="0" step="1" placeholder="0"
+              style="font-family:'IBM Plex Mono',monospace;font-size:22px;text-align:center;border-color:#1A7A4A;"
+              oninput="calcCierreTeapa()">
+            <div class="form-hint">Piezas que pasaron QA. Esta es la cantidad que se enviará al Assembly Build en NetSuite.</div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Piezas en rechazo (pzas) <span class="req">*</span></label>
+            <input type="number" class="form-input" id="rv-cant-rechazo" min="0" step="1" placeholder="0"
+              style="font-family:'IBM Plex Mono',monospace;font-size:22px;text-align:center;border-color:#93700A;"
+              oninput="calcCierreTeapa()">
+            <div class="form-hint">Piezas defectuosas pero recuperables / a reproceso.</div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Desperdicio (pzas) <span class="req">*</span></label>
+            <input type="number" class="form-input" id="rv-cant-desperdicio" min="0" step="1" placeholder="0"
+              style="font-family:'IBM Plex Mono',monospace;font-size:22px;text-align:center;border-color:#C0392B;"
+              oninput="calcCierreTeapa()">
+            <div class="form-hint">Piezas perdidas o destruidas (merma final).</div>
+          </div>
+
+          <!-- Indicador de cuadre -->
+          <div id="rv-cuadre-box" style="margin:16px 0 14px;padding:12px;border-radius:8px;background:#E4ECF7;border-left:4px solid #5A6E90;">
+            <div style="display:flex;justify-content:space-between;align-items:center;font-size:13px;">
+              <span><strong>Suma A+R+D:</strong> <span id="rv-suma-ard" style="font-family:'IBM Plex Mono',monospace;font-weight:700;">0</span> pzas</span>
+              <span><strong>Real empacada:</strong> <span id="rv-real-eco" style="font-family:'IBM Plex Mono',monospace;font-weight:700;">0</span> pzas</span>
+            </div>
+            <div id="rv-cuadre-msg" style="margin-top:6px;font-size:12px;font-weight:600;">Captura los 4 campos…</div>
+          </div>
+
+          <!-- Métricas calculadas en vivo -->
+          <div class="metrics-card" style="background:#fff;">
+            <div class="metrics-row"><span style="font-size:13px;color:var(--text2);">Eficiencia (Aprobada / Reportada)</span><span class="metrics-val" id="rv-m-efic">—</span></div>
+            <div class="metrics-row"><span style="font-size:13px;color:var(--text2);">Merma (Reportada − Aprobada)</span><span class="metrics-val" id="rv-m-merma">—</span></div>
+            <div class="metrics-row" style="border-bottom:none;"><span style="font-size:13px;color:var(--text2);">% Merma</span><span class="metrics-val" id="rv-m-pct-merma">—</span></div>
+            <div class="efic-bar"><div class="efic-fill" id="rv-efic-fill" style="width:0%;background:var(--green)"></div></div>
+          </div>
+        </div>
+      </div>
+
       <!-- ── ZONA DE APROBACIÓN ── -->
       <div class="rv-approve-zone">
-        <div class="rv-wo-label">ID Orden de Trabajo NetSuite (Work Order)</div>
-        <input type="text" class="form-input" id="rv-wo-id" placeholder="Ej. 141692"
-          style="font-family:'IBM Plex Mono',monospace;font-size:18px;text-align:center;margin-bottom:4px;">
-        <div class="form-hint">Si no tienes el WO ahora, puedes aprobar sin él. Se puede agregar después.</div>
+        <div class="rv-wo-label">Orden de Trabajo NetSuite</div>
+        <input type="hidden" id="rv-wo-id" value="">
+        <div class="form-hint" id="rv-wo-info" style="background:#E8F5E9;color:#1B5E20;padding:8px 12px;border-radius:6px;font-weight:600;text-align:center;margin-bottom:4px;">⚙️ NetSuite generará la WO automáticamente al aprobar</div>
         <div class="rv-actions">
-          <button class="btn btn-primary" onclick="doApprove(true)" id="rv-btn-approve">✓ Aprobar y subir a NetSuite</button>
-          <button class="btn btn-ghost" onclick="doApprove(false)">✓ Solo aprobar (sin subir)</button>
+          <button class="btn btn-primary" onclick="doApprove()" id="rv-btn-approve">✓ Aprobar y subir a NetSuite</button>
           <button class="btn btn-danger" onclick="doReject()">✗ Rechazar — solicitar corrección</button>
         </div>
       </div>
@@ -974,17 +1230,43 @@ html,body{height:100%;background:var(--bg);color:var(--text);
         <div class="settings-row"><div><div class="settings-label">Exportar registros</div><div class="settings-desc">JSON de todos los registros</div></div><button class="settings-btn" onclick="exportData()">⬇️ JSON</button></div>
         <div class="settings-row"><div><div class="settings-label">Limpiar aprobados</div><div class="settings-desc">Libera espacio (no elimina pendientes)</div></div><button class="settings-btn" style="color:var(--red);" onclick="clearApproved()">🗑️</button></div>
       </div>
+
+      <!-- Sección admin operadores (solo director) -->
+      <div id="settings-admin-section" style="display:none;">
+        <div class="section-title" style="margin-bottom:12px;">Administración</div>
+        <div class="settings-section">
+          <div class="settings-row">
+            <div>
+              <div class="settings-label">Gestionar operadores</div>
+              <div class="settings-desc">Ver dispositivos, resetear PINs, activar/desactivar</div>
+            </div>
+            <button class="settings-btn" onclick="abrirAdminOperadores()">🔧 Abrir</button>
+          </div>
+          <div class="settings-row">
+            <div>
+              <div class="settings-label">Cerrar sesión y olvidar dispositivo</div>
+              <div class="settings-desc">Borra credencial WebAuthn de este equipo</div>
+            </div>
+            <button class="settings-btn" style="color:var(--red);" onclick="logoutCompleto()">🚪 Salir</button>
+          </div>
+        </div>
+      </div>
+
       <div class="info-box">🔐 La API key nunca sale de este dispositivo. No se sube a GitHub.</div>
     </div>
   </div>
 </div>
 
-<!-- SUPER PIN OVERLAY -->
+<!-- SUPER PIN OVERLAY (validación supervisor/director con código + PIN) -->
 <div class="super-pin-overlay" id="super-pin-overlay">
   <div class="super-pin-card">
     <div class="super-pin-title">🔐 Acceso supervisor</div>
-    <div class="super-pin-sub">Ingresa tu PIN de supervisor o director</div>
-    <div class="pin-display"><div class="pin-dot" id="sd0"></div><div class="pin-dot" id="sd1"></div><div class="pin-dot" id="sd2"></div><div class="pin-dot" id="sd3"></div></div>
+    <div class="super-pin-sub">Ingresa tu código y PIN de supervisor o director</div>
+    <input type="text" id="super-codigo" class="form-input" maxlength="10"
+           placeholder="Código (Ej: JRC)"
+           autocomplete="off" autocapitalize="characters" spellcheck="false"
+           style="text-transform:uppercase;font-size:18px;font-weight:600;letter-spacing:2px;text-align:center;margin:12px 0 4px;">
+    <div class="pin-display"><div class="pin-dot" id="sd0"></div><div class="pin-dot" id="sd1"></div><div class="pin-dot" id="sd2"></div><div class="pin-dot" id="sd3"></div><div class="pin-dot" id="sd4"></div><div class="pin-dot" id="sd5"></div></div>
     <div class="pin-grid" style="margin:0 auto 0;">
       <button class="pin-btn" onclick="superPinPress('1')">1</button><button class="pin-btn" onclick="superPinPress('2')">2</button><button class="pin-btn" onclick="superPinPress('3')">3</button>
       <button class="pin-btn" onclick="superPinPress('4')">4</button><button class="pin-btn" onclick="superPinPress('5')">5</button><button class="pin-btn" onclick="superPinPress('6')">6</button>
@@ -1097,24 +1379,281 @@ html,body{height:100%;background:var(--bg);color:var(--text);
   </div>
 </div>
 
+
+<!-- ═══════════════════════════════════════════
+     MÓDULO CALIDAD — 6 pantallas
+═══════════════════════════════════════════ -->
+
+<!-- ── 1. BANDEJAS ── -->
+<div class="screen" id="screen-qc-bandejas">
+  <div class="header qc-header"><div class="header-inner">
+    <button class="header-back" onclick="qcGoHome()">←</button>
+    <div style="flex:1;">
+      <div class="header-title">🔬 Control de Calidad</div>
+      <div class="header-sub" id="qc-user-label">—</div>
+    </div>
+  </div></div>
+  <div class="content content-with-nav">
+    <div class="wrap">
+      <div class="info-box" style="margin-bottom:20px;">
+        🎯 Selecciona el gate. Cada bandeja muestra los lotes que esperan ensaye de calidad.
+      </div>
+      <div class="qc-gate-grid">
+        <div class="qc-gate-card" onclick="qcGoLista('G1')">
+          <div class="qc-gate-icon">📦</div>
+          <div class="qc-gate-title">G1 — Empaque</div>
+          <div class="qc-gate-desc">Lotes recién cerrados, listos para QC inicial (16-36h de edad)</div>
+          <div class="qc-gate-count">
+            <span class="qc-gate-num" id="qc-cnt-g1">—</span>
+            <span class="qc-gate-lbl">pendientes</span>
+          </div>
+        </div>
+        <div class="qc-gate-card" onclick="qcGoLista('G2')">
+          <div class="qc-gate-icon">🚚</div>
+          <div class="qc-gate-title">G2 — Traslado Teapa</div>
+          <div class="qc-gate-desc">Lotes con G1 OK esperando QC final a 28+ días</div>
+          <div class="qc-gate-count">
+            <span class="qc-gate-num" id="qc-cnt-g2">—</span>
+            <span class="qc-gate-lbl">pendientes</span>
+          </div>
+        </div>
+        <div class="qc-gate-card" onclick="qcGoLista('ADHOC')">
+          <div class="qc-gate-icon">🔍</div>
+          <div class="qc-gate-title">Ad-hoc</div>
+          <div class="qc-gate-desc">Ensayes especiales o por solicitud puntual</div>
+          <div class="qc-gate-count">
+            <span class="qc-gate-num" id="qc-cnt-adhoc">—</span>
+            <span class="qc-gate-lbl">disponibles</span>
+          </div>
+        </div>
+      </div>
+      <button class="btn btn-secondary btn-full" onclick="qcCargarBandejas()" style="margin-top:12px;">🔄 Refrescar contadores</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── 2. LISTA DE LOTES ── -->
+<div class="screen" id="screen-qc-lista">
+  <div class="header qc-header"><div class="header-inner">
+    <button class="header-back" onclick="showScreen('screen-qc-bandejas')">←</button>
+    <div style="flex:1;">
+      <div class="header-title" id="qc-lista-titulo">Lotes pendientes</div>
+      <div class="header-sub" id="qc-lista-sub">—</div>
+    </div>
+  </div></div>
+  <div class="content content-with-nav">
+    <div class="wrap">
+      <div id="qc-lista-loading" class="empty-state" style="display:none;">
+        <div class="spinner" style="margin:0 auto 12px;"></div>
+        <div class="empty-text">Cargando lotes desde NetSuite...</div>
+      </div>
+      <div id="qc-lista-content"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── 3. INICIO DE ENSAYE ── -->
+<div class="screen" id="screen-qc-iniciar">
+  <div class="header qc-header"><div class="header-inner">
+    <button class="header-back" onclick="qcVolverLista()">←</button>
+    <div style="flex:1;">
+      <div class="header-title">Iniciar ensaye</div>
+      <div class="header-sub" id="qc-iniciar-sub">—</div>
+    </div>
+  </div></div>
+  <div class="content content-with-nav">
+    <div class="wrap">
+      <div class="rv-section">
+        <div class="rv-section-head"><div class="rv-section-title">📋 Lote a evaluar</div></div>
+        <div class="rv-section-body">
+          <table class="rv-table" id="qc-iniciar-info"></table>
+        </div>
+      </div>
+
+      <div class="rv-section" id="qc-regla-section">
+        <div class="rv-section-head">
+          <div class="rv-section-title">📐 Regla QC aplicable</div>
+          <div id="qc-regla-status" style="font-size:11px;color:rgba(255,255,255,.7);">—</div>
+        </div>
+        <div class="rv-section-body" id="qc-regla-body"></div>
+      </div>
+
+      <div class="rv-section">
+        <div class="rv-section-head">
+          <div class="rv-section-title">📷 Plan: 9 fotos</div>
+          <div style="font-size:11px;color:rgba(255,255,255,.7);">3 probetas × 3 fotos</div>
+        </div>
+        <div class="rv-section-body">
+          <div class="info-box" style="margin-bottom:14px;">
+            Vas a tomar 9 fotos: para cada probeta (izquierda, centro, derecha) capturarás el peso húmedo, peso seco y resistencia en prensa. Claude Vision leerá los displays automáticamente.
+          </div>
+          <div class="qc-plan-grid" id="qc-plan-grid"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="bottom-bar">
+    <button class="btn btn-secondary" onclick="qcVolverLista()">Cancelar</button>
+    <button class="btn btn-primary" onclick="qcIniciarEnsaye()" id="qc-btn-iniciar">▶ Comenzar ensaye</button>
+  </div>
+</div>
+
+<!-- ── 4. CAPTURA ── -->
+<div class="screen" id="screen-qc-captura">
+  <div class="header qc-header"><div class="header-inner">
+    <button class="header-back" onclick="qcCancelarCaptura()">✕</button>
+    <div style="flex:1;">
+      <div class="header-title" id="qc-cap-headtitle">Foto 1 / 9</div>
+      <div class="header-sub" id="qc-cap-headsub">—</div>
+    </div>
+  </div></div>
+
+  <div class="step-progress" style="overflow-x:auto;">
+    <div id="qc-step-progress"></div>
+  </div>
+
+  <div class="content" style="padding-bottom:90px;">
+    <div class="wrap">
+      <div class="qc-cap-header">
+        <div class="qc-cap-step" id="qc-cap-step">FOTO 1 DE 9</div>
+        <div class="qc-cap-titulo" id="qc-cap-titulo">Probeta izquierda — Peso húmedo</div>
+        <div class="qc-cap-codigo" id="qc-cap-codigo">—</div>
+      </div>
+
+      <div class="info-box" id="qc-cap-instruccion" style="margin-bottom:14px;">—</div>
+
+      <div class="form-group">
+        <label class="form-label">Captura</label>
+        <div class="photo-area" id="qc-photo-area" onclick="qcAbrirCamara()">
+          <div class="photo-icon">📷</div>
+          <div class="photo-label">Tomar foto del display</div>
+          <div class="photo-hint" id="qc-cap-hint">—</div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:6px;">
+          <button class="btn btn-secondary" style="flex:1;font-size:12px;padding:8px;" onclick="qcAbrirCamara()">📷 Cámara</button>
+          <button class="btn btn-secondary" style="flex:1;font-size:12px;padding:8px;" onclick="qcAbrirGaleria()">🖼️ Galería</button>
+        </div>
+        <input type="file" id="qc-photo-input" accept="image/*" capture="environment" style="display:none" onchange="qcOnFotoSeleccionada(event)">
+        <input type="file" id="qc-photo-input-gal" accept="image/*" style="display:none" onchange="qcOnFotoSeleccionada(event)">
+      </div>
+
+      <div id="qc-vision-section" style="display:none;">
+        <div class="qc-vision-panel" id="qc-vision-panel">
+          <div class="qc-vision-label">Valor leído por Claude Vision</div>
+          <div class="qc-vision-value">
+            <span class="qc-vision-num" id="qc-vision-num">—</span>
+            <span class="qc-vision-unit" id="qc-vision-unit">—</span>
+          </div>
+          <div class="qc-vision-conf" id="qc-vision-conf">—</div>
+          <div class="qc-vision-obs" id="qc-vision-obs"></div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Valor final <span class="req">*</span></label>
+          <input type="number" class="form-input" id="qc-valor-input" step="any" min="0"
+            style="font-family:'IBM Plex Mono',monospace;font-size:24px;text-align:center;"
+            oninput="qcMarcarOverride()">
+          <div class="form-hint" id="qc-valor-hint">Si Claude Vision leyó mal, corrige aquí. La aplicación marcará override.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bottom-bar">
+    <button class="btn btn-secondary" onclick="qcRetomarFoto()" id="qc-btn-retomar" style="display:none;">↻ Re-tomar</button>
+    <button class="btn btn-primary" onclick="qcConfirmarFoto()" id="qc-btn-confirmar" disabled>Confirmar y siguiente →</button>
+  </div>
+</div>
+
+<!-- ── 5. RESUMEN PRE-GUARDADO ── -->
+<div class="screen" id="screen-qc-resumen">
+  <div class="header qc-header"><div class="header-inner">
+    <button class="header-back" onclick="qcVolverCaptura()">←</button>
+    <div style="flex:1;">
+      <div class="header-title">Revisión final</div>
+      <div class="header-sub" id="qc-resumen-sub">—</div>
+    </div>
+  </div></div>
+  <div class="content" style="padding-bottom:90px;">
+    <div class="wrap">
+      <div class="info-box" style="margin-bottom:18px;">
+        ✅ Las 9 fotos fueron capturadas. Revisa los valores antes de finalizar. Si algo está mal, vuelve y re-captura.
+      </div>
+
+      <div class="qc-res-grid" id="qc-resumen-probetas"></div>
+
+      <div class="rv-section">
+        <div class="rv-section-head"><div class="rv-section-title">📊 Cálculos preliminares</div></div>
+        <div class="rv-section-body">
+          <div class="rv-metrics" id="qc-resumen-metrics"></div>
+          <table class="rv-table" id="qc-resumen-table"></table>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="bottom-bar">
+    <button class="btn btn-secondary" onclick="qcVolverCaptura()">← Re-capturar</button>
+    <button class="btn btn-primary" onclick="qcFinalizarEnsaye()" id="qc-btn-finalizar">✓ Finalizar ensaye</button>
+  </div>
+</div>
+
+<!-- ── 6. RESULTADO FINAL ── -->
+<div class="screen" id="screen-qc-resultado">
+  <div class="header qc-header"><div class="header-inner">
+    <button class="header-back" onclick="qcGoHome()">←</button>
+    <div style="flex:1;">
+      <div class="header-title">Resultado del ensaye</div>
+      <div class="header-sub" id="qc-resultado-sub">—</div>
+    </div>
+  </div></div>
+  <div class="content content-with-nav">
+    <div class="wrap">
+      <div class="qc-veredicto-box" id="qc-veredicto-box">
+        <div class="qc-veredicto-icon" id="qc-veredicto-icon">⏳</div>
+        <div class="qc-veredicto-titulo" id="qc-veredicto-titulo">Procesando...</div>
+        <div class="qc-veredicto-motivo" id="qc-veredicto-motivo">—</div>
+      </div>
+
+      <div class="rv-section">
+        <div class="rv-section-head"><div class="rv-section-title">📊 Resultados</div></div>
+        <div class="rv-section-body">
+          <div class="rv-metrics" id="qc-resultado-metrics"></div>
+        </div>
+      </div>
+
+      <div class="rv-section">
+        <div class="rv-section-head">
+          <div class="rv-section-title">🔗 Sincronización NetSuite</div>
+          <div id="qc-ns-status-chip" style="font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;background:#FFF9E0;color:#93700A;">PENDIENTE</div>
+        </div>
+        <div class="rv-section-body" id="qc-ns-body">
+          <div class="empty-state">
+            <div class="empty-icon">⏳</div>
+            <div class="empty-text">Listo para sincronizar a NetSuite</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="bottom-bar">
+    <button class="btn btn-secondary" onclick="qcGoHome()">Cerrar</button>
+    <button class="btn btn-primary" onclick="qcSincronizarNetSuite()" id="qc-btn-sync">📤 Sincronizar a NetSuite</button>
+  </div>
+</div>
+
 <!-- BOTTOM NAV -->
 <nav class="bottom-nav" id="bottom-nav" style="display:none;">
   <button class="nav-item active" id="nav-home" onclick="navTo('screen-home','nav-home');updateHome()"><span class="nav-icon">🏠</span><span>Inicio</span></button>
-  <button class="nav-item" id="nav-new" onclick="goForm()"><span class="nav-icon">📋</span><span>Captura</span></button>
-  <button class="nav-item" id="nav-super" onclick="goSupervisor()"><span class="nav-icon">✓</span><span>Supervisor</span></button>
+  <button class="nav-item" id="nav-new" onclick="goForm()"><span class="nav-icon">📋</span><span>Producción</span></button>
+  <button class="nav-item" id="nav-qc" onclick="qcEntrar()" style="display:none;"><span class="nav-icon">🔬</span><span>Calidad</span></button>
+  <button class="nav-item" id="nav-super" onclick="goSupervisor()" style="display:none;"><span class="nav-icon">✓</span><span>Supervisor</span></button>
   <button class="nav-item" id="nav-settings" onclick="goSettings();navTo('screen-settings','nav-settings')"><span class="nav-icon">⚙️</span><span>Ajustes</span></button>
 </nav>
 
 <script>
 // ═══════ CONSTANTS ═══════
-const USERS = {
-  '0314':{id:'G01',nombre:'Gerardo Espadas',rol:'director'},
-  '5001':{id:'S01',nombre:'Jesús Miguel',rol:'supervisor'},
-  '1001':{id:'O01',nombre:'Felipe',rol:'operador'},
-  '1002':{id:'O02',nombre:'Jose',rol:'operador'},
-  '1003':{id:'O03',nombre:'Eduardo',rol:'operador'},
-  '1004':{id:'O04',nombre:'Yamil',rol:'operador'},
-};
+// USERS hardcodeado eliminado en v2 — ahora se valida contra Supabase via RPC
+// Ver: validar_operador_pin, cambiar_pin, registrar_dispositivo, validar_dispositivo
 const PRODUCTS=[
   {id:101,n:'BLOCK AVANCE - BH10',cat:'AVANCE',color:false},{id:102,n:'BLOCK AVANCE - BH12',cat:'AVANCE',color:false},{id:103,n:'BLOCK AVANCE - BH15',cat:'AVANCE',color:false},{id:104,n:'BLOCK AVANCE - BH20',cat:'AVANCE',color:false},{id:105,n:'BLOCK AVANCE - BT10',cat:'AVANCE',color:false},{id:106,n:'BLOCK AVANCE - BT12',cat:'AVANCE',color:false},
   {id:201,n:'BLOCK EMBLEMA - BH10',cat:'EMBLEMA',color:false},{id:202,n:'BLOCK EMBLEMA - BH12',cat:'EMBLEMA',color:false},{id:203,n:'BLOCK EMBLEMA - BH15',cat:'EMBLEMA',color:false},{id:204,n:'BLOCK EMBLEMA - BH20',cat:'EMBLEMA',color:false},{id:205,n:'BLOCK EMBLEMA - BT10',cat:'EMBLEMA',color:false},{id:206,n:'BLOCK EMBLEMA - BT12',cat:'EMBLEMA',color:false},
@@ -1164,12 +1703,12 @@ async function _syncRecordsToSb(recs){
       const row={
         folio:      rec.folio||(''+rec.id),
         payload:    rec,
-        http_status:rec.status==='approved'?200:0,
+        http_status:isApproved(rec.status)?200:0,
         record_id:  rec.netsuiteRecordId||null,
         error:      null
       };
       // Upsert: insert o actualiza si ya existe el folio
-      await fetch(SB_URL+'/rest/v1/produccion_logs',{
+      await fetch(SB_URL+'/rest/v1/produccion_logs?on_conflict=folio',{
         method:'POST',
         headers:{...sbH,'Prefer':'resolution=merge-duplicates,return=minimal'},
         body:JSON.stringify(row)
@@ -1210,9 +1749,26 @@ const incCounter=l=>{const n=getCounter(l)+1;localStorage.setItem('batab_ctr_'+l
 // ═══════ INIT ═══════
 function init(){
   populateArticuloSelect();
+  // Comprobar si hay sesión activa válida
   const s=JSON.parse(sessionStorage.getItem('batab_session')||'null');
-  if(s){S.currentUser=s;showScreen('screen-home');updateHome();}
-  else showScreen('screen-login');
+  if(s && sesionVigente(s)){
+    S.currentUser=s;
+    showScreen('screen-home');
+    updateHome();
+  } else {
+    // Si no hay sesión: mostrar login con rostro si hay credencial enrolada,
+    // si no, mostrar login con código + PIN
+    sessionStorage.removeItem('batab_session');
+    const cred=localStorage.getItem('batab_credential_id');
+    const credCodigo=localStorage.getItem('batab_credential_codigo');
+    if(cred && credCodigo && webAuthnDisponible()){
+      document.getElementById('login-rostro-info').textContent='Operador: '+credCodigo;
+      showScreen('screen-login-rostro');
+    } else {
+      showScreen('screen-login');
+      setTimeout(()=>{document.getElementById('login-codigo')?.focus();},150);
+    }
+  }
   document.getElementById('f-fecha').valueAsDate=new Date();
 }
 function populateArticuloSelect(){
@@ -1229,7 +1785,7 @@ function populateArticuloSelect(){
 function showScreen(id){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
-  const noNav=['screen-login','screen-form','screen-success'];
+  const noNav=['screen-login','screen-login-rostro','screen-cambiar-pin','screen-oferta-rostro','screen-form','screen-success','screen-qc-iniciar','screen-qc-captura','screen-qc-resumen','screen-qc-resultado'];
   document.getElementById('bottom-nav').style.display=noNav.includes(id)?'none':'flex';
 }
 function navTo(screenId,navId){
@@ -1237,19 +1793,503 @@ function navTo(screenId,navId){
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   document.getElementById(navId)?.classList.add('active');
 }
-function logout(){sessionStorage.removeItem('batab_session');S.currentUser=null;showScreen('screen-login');resetPin();}
+function logout(){
+  sessionStorage.removeItem('batab_session');
+  S.currentUser=null;
+  resetPin();
+  // No borramos batab_credential_id en logout normal — el operador puede volver con rostro
+  init();
+}
 
-// ═══════ PIN ═══════
+// ═══════ HELPER: VIGENCIA DE SESIÓN ═══════
+function sesionVigente(sesion){
+  if(!sesion) return false;
+  if(!sesion.expiraEn) return true; // operador con registro abierto = sin expira
+  return new Date(sesion.expiraEn) > new Date();
+}
+function calcularExpiraSesion(rol){
+  if(rol==='operador') return null; // operador: dura mientras abre/cierra registros
+  // supervisor, calidad, director: 1 hora
+  return new Date(Date.now()+60*60*1000).toISOString();
+}
+
+// ═══════ RPC HELPERS (llamadas a funciones SQL en Supabase) ═══════
+async function sbRpc(funcName, params){
+  const r=await fetch(SB_URL+'/rest/v1/rpc/'+funcName,{
+    method:'POST',
+    headers:{...sbH,'Prefer':'return=representation'},
+    body:JSON.stringify(params||{})
+  });
+  if(!r.ok){
+    const txt=await r.text();
+    throw new Error('RPC '+funcName+': '+txt);
+  }
+  return r.json();
+}
+
+// ═══════ PIN: LOGIN (6 dígitos) ═══════
 let pinBuf='';
-function pinPress(d){if(pinBuf.length>=4)return;pinBuf+=d;updPin('d',pinBuf,false);if(pinBuf.length===4)setTimeout(checkPin,80);}
+function pinPress(d){
+  if(pinBuf.length>=6) return;
+  pinBuf+=d;
+  updPin('d',pinBuf,false);
+  if(pinBuf.length===6) setTimeout(checkPin,80);
+}
 function pinBack(){if(pinBuf.length>0){pinBuf=pinBuf.slice(0,-1);updPin('d',pinBuf,false);}}
 function pinClear(){pinBuf='';updPin('d','',false);}
-function resetPin(){pinBuf='';updPin('d','',false);document.getElementById('pin-error').textContent='';}
-function updPin(px,buf,err){for(let i=0;i<4;i++){const d=document.getElementById(px+i);d.classList.toggle('filled',i<buf.length);d.classList.toggle('error',err);}}
-function checkPin(){
-  const u=USERS[pinBuf];
-  if(u){S.currentUser=u;sessionStorage.setItem('batab_session',JSON.stringify(u));showScreen('screen-home');updateHome();setTimeout(resetPin,200);}
-  else{updPin('d','????',true);document.getElementById('pin-error').textContent='PIN incorrecto';setTimeout(()=>{pinBuf='';updPin('d','',false);document.getElementById('pin-error').textContent='';},1200);}
+function resetPin(){pinBuf='';updPin('d','',false);const e=document.getElementById('pin-error');if(e)e.textContent='';}
+function updPin(px,buf,err){
+  for(let i=0;i<6;i++){
+    const d=document.getElementById(px+i);
+    if(!d) continue;
+    d.classList.toggle('filled',i<buf.length);
+    d.classList.toggle('error',err);
+  }
+}
+
+async function checkPin(){
+  const codigo=(document.getElementById('login-codigo')?.value||'').trim().toUpperCase();
+  const pin=pinBuf;
+  const errEl=document.getElementById('pin-error');
+  if(!codigo){
+    errEl.textContent='Ingresa tu código personal';
+    setTimeout(()=>{pinBuf='';updPin('d','',false);errEl.textContent='';},1500);
+    return;
+  }
+  errEl.textContent='Validando...';
+  try{
+    const rows=await sbRpc('validar_operador_pin',{p_codigo:codigo,p_pin:pin});
+    const row=Array.isArray(rows)?rows[0]:rows;
+    if(!row || !row.exito){
+      updPin('d','??????',true);
+      errEl.textContent=(row&&row.mensaje)||'Código o PIN incorrecto';
+      setTimeout(()=>{pinBuf='';updPin('d','',false);errEl.textContent='';},1500);
+      return;
+    }
+    // Login OK
+    const operador={
+      id:row.operador_id,
+      codigo:row.codigo,
+      nombre:row.nombre,
+      rol:row.rol,
+      email:row.email,
+      requiere_cambio_pin:row.requiere_cambio_pin,
+      expiraEn:calcularExpiraSesion(row.rol)
+    };
+    S.currentUser=operador;
+    if(row.requiere_cambio_pin){
+      // Forzar cambio de PIN
+      _pinActualTemp=pin; // retener temporalmente para llamar cambiar_pin
+      iniciarFlujoCambiarPin();
+    } else {
+      // Sesión normal
+      sessionStorage.setItem('batab_session',JSON.stringify(operador));
+      // ¿Ofrecer enrolamiento? (si no hay credencial local Y la oferta no está pospuesta)
+      if(debeOfrecerEnrolamiento(operador)){
+        showScreen('screen-oferta-rostro');
+      } else {
+        showScreen('screen-home');updateHome();
+      }
+      setTimeout(resetPin,200);
+    }
+  }catch(e){
+    console.error(e);
+    errEl.textContent='Error de conexión. Intenta de nuevo.';
+    setTimeout(()=>{pinBuf='';updPin('d','',false);errEl.textContent='';},2000);
+  }
+}
+
+// ═══════ CAMBIAR PIN: FLUJO ═══════
+let _pinActualTemp='';
+let _cpStep=1; // 1=PIN nuevo, 2=Confirmar
+let _cpBuf1='';
+let _cpBuf2='';
+let cpPinBuf='';
+
+function iniciarFlujoCambiarPin(){
+  _cpStep=1;_cpBuf1='';_cpBuf2='';cpPinBuf='';
+  document.getElementById('cp-label').textContent='PIN NUEVO (6 DÍGITOS)';
+  document.getElementById('cp-step').textContent='Paso 1 de 2 · Crea tu PIN';
+  document.getElementById('cp-error').textContent='';
+  updPin('cp','',false);
+  showScreen('screen-cambiar-pin');
+}
+function cpPinPress(d){
+  if(cpPinBuf.length>=6) return;
+  cpPinBuf+=d;
+  updPin('cp',cpPinBuf,false);
+  if(cpPinBuf.length===6) setTimeout(cpPinComplete,80);
+}
+function cpPinBack(){if(cpPinBuf.length>0){cpPinBuf=cpPinBuf.slice(0,-1);updPin('cp',cpPinBuf,false);}}
+function cpPinClear(){cpPinBuf='';updPin('cp',cpPinBuf,false);}
+
+async function cpPinComplete(){
+  const errEl=document.getElementById('cp-error');
+  if(_cpStep===1){
+    _cpBuf1=cpPinBuf;
+    cpPinBuf='';
+    updPin('cp','',false);
+    _cpStep=2;
+    document.getElementById('cp-label').textContent='CONFIRMA TU PIN';
+    document.getElementById('cp-step').textContent='Paso 2 de 2 · Repite el PIN';
+    return;
+  }
+  // Paso 2: confirmar
+  _cpBuf2=cpPinBuf;
+  if(_cpBuf1!==_cpBuf2){
+    updPin('cp','??????',true);
+    errEl.textContent='Los PINs no coinciden. Intenta de nuevo.';
+    setTimeout(()=>{
+      cpPinBuf='';_cpBuf1='';_cpBuf2='';_cpStep=1;
+      updPin('cp','',false);
+      document.getElementById('cp-label').textContent='PIN NUEVO (6 DÍGITOS)';
+      document.getElementById('cp-step').textContent='Paso 1 de 2 · Crea tu PIN';
+      errEl.textContent='';
+    },1800);
+    return;
+  }
+  // Llamar RPC cambiar_pin
+  errEl.textContent='Guardando...';
+  try{
+    const rows=await sbRpc('cambiar_pin',{
+      p_codigo:S.currentUser.codigo,
+      p_pin_actual:_pinActualTemp,
+      p_pin_nuevo:_cpBuf1
+    });
+    const row=Array.isArray(rows)?rows[0]:rows;
+    if(!row || !row.exito){
+      errEl.textContent=(row&&row.mensaje)||'Error al guardar PIN';
+      setTimeout(()=>{
+        cpPinBuf='';_cpBuf1='';_cpBuf2='';_cpStep=1;
+        updPin('cp','',false);
+        document.getElementById('cp-label').textContent='PIN NUEVO (6 DÍGITOS)';
+        document.getElementById('cp-step').textContent='Paso 1 de 2 · Crea tu PIN';
+        errEl.textContent='';
+      },2000);
+      return;
+    }
+    // PIN guardado: limpiar buffer temporal y avanzar
+    _pinActualTemp='';
+    S.currentUser.requiere_cambio_pin=false;
+    sessionStorage.setItem('batab_session',JSON.stringify(S.currentUser));
+    cpPinBuf='';_cpBuf1='';_cpBuf2='';
+    // Ofrecer enrolamiento
+    if(debeOfrecerEnrolamiento(S.currentUser)){
+      showScreen('screen-oferta-rostro');
+    } else {
+      showScreen('screen-home');updateHome();
+    }
+  }catch(e){
+    console.error(e);
+    errEl.textContent='Error de conexión.';
+    setTimeout(()=>{errEl.textContent='';},2000);
+  }
+}
+
+// ═══════ WEBAUTHN: ENROLAMIENTO Y VALIDACIÓN ROSTRO ═══════
+function webAuthnDisponible(){
+  return !!(window.PublicKeyCredential && navigator.credentials && navigator.credentials.create);
+}
+
+// base64url helpers
+function b64uToBuf(b64u){
+  const b64=b64u.replace(/-/g,'+').replace(/_/g,'/').padEnd(b64u.length+(4-b64u.length%4)%4,'=');
+  const bin=atob(b64);
+  const buf=new Uint8Array(bin.length);
+  for(let i=0;i<bin.length;i++) buf[i]=bin.charCodeAt(i);
+  return buf.buffer;
+}
+function bufToB64u(buf){
+  const bytes=new Uint8Array(buf);
+  let bin='';
+  for(let i=0;i<bytes.length;i++) bin+=String.fromCharCode(bytes[i]);
+  return btoa(bin).replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,'');
+}
+function aleatorio(n){
+  const b=new Uint8Array(n);
+  crypto.getRandomValues(b);
+  return b.buffer;
+}
+
+function debeOfrecerEnrolamiento(operador){
+  if(!webAuthnDisponible()) return false;
+  // Si ya hay credencial local para ESTE operador, no ofrecer
+  const cred=localStorage.getItem('batab_credential_id');
+  const credCodigo=localStorage.getItem('batab_credential_codigo');
+  if(cred && credCodigo===operador.codigo) return false;
+  // Si hay otra credencial (otro operador) en este dispositivo: no ofrecer compartido,
+  // pero permitir que admin lo gestione manualmente
+  if(cred && credCodigo!==operador.codigo) return false;
+  // ¿La oferta está pospuesta?
+  const pospuesto=localStorage.getItem('batab_oferta_pospuesta_'+operador.codigo);
+  if(pospuesto && new Date(pospuesto)>new Date()) return false;
+  return true;
+}
+
+async function iniciarEnrolamiento(){
+  if(!webAuthnDisponible()){
+    alert('Este dispositivo no soporta reconocimiento facial. Continúa con PIN.');
+    showScreen('screen-home');updateHome();
+    return;
+  }
+  const operador=S.currentUser;
+  try{
+    const challenge=aleatorio(32);
+    const userId=new TextEncoder().encode(operador.id).buffer;
+    const opts={
+      publicKey:{
+        challenge:challenge,
+        rp:{name:'BATAB Producción',id:location.hostname},
+        user:{
+          id:userId,
+          name:operador.codigo,
+          displayName:operador.nombre
+        },
+        pubKeyCredParams:[
+          {type:'public-key',alg:-7},   // ES256
+          {type:'public-key',alg:-257}  // RS256
+        ],
+        authenticatorSelection:{
+          authenticatorAttachment:'platform', // cámara/sensor del dispositivo
+          userVerification:'required',
+          residentKey:'preferred'
+        },
+        timeout:60000,
+        attestation:'none'
+      }
+    };
+    const cred=await navigator.credentials.create(opts);
+    if(!cred){throw new Error('No se obtuvo credencial');}
+    const credIdB64u=bufToB64u(cred.rawId);
+    // Extraer public key del attestationObject (simplificado: guardamos el clientDataJSON)
+    const publicKeyB64u=bufToB64u(cred.response.clientDataJSON);
+    const tipoDispositivo=detectarTipoDispositivo();
+    const nombreDispositivo=detectarNombreDispositivo();
+    // Registrar en Supabase
+    const rows=await sbRpc('registrar_dispositivo',{
+      p_operador_id:operador.id,
+      p_credential_id:credIdB64u,
+      p_public_key:publicKeyB64u,
+      p_dispositivo_nombre:nombreDispositivo,
+      p_dispositivo_tipo:tipoDispositivo,
+      p_user_agent:navigator.userAgent.substring(0,500)
+    });
+    const row=Array.isArray(rows)?rows[0]:rows;
+    if(!row || !row.exito){
+      alert('Error al registrar dispositivo: '+(row?.mensaje||'desconocido'));
+      showScreen('screen-home');updateHome();
+      return;
+    }
+    // Guardar credencial localmente
+    localStorage.setItem('batab_credential_id',credIdB64u);
+    localStorage.setItem('batab_credential_codigo',operador.codigo);
+    alert('✅ Listo, '+operador.nombre.split(' ')[0]+'. La próxima vez solo mira la cámara.');
+    showScreen('screen-home');updateHome();
+  }catch(e){
+    console.error('Enrolamiento falló:',e);
+    if(e.name==='NotAllowedError'){
+      alert('Enrolamiento cancelado. Puedes intentar después desde Ajustes.');
+    } else {
+      alert('No se pudo registrar tu rostro: '+(e.message||'error desconocido')+'\n\nPuedes seguir usando el PIN.');
+    }
+    showScreen('screen-home');updateHome();
+  }
+}
+
+function posponerEnrolamiento(){
+  if(S.currentUser){
+    const en30=new Date(Date.now()+30*24*60*60*1000).toISOString();
+    localStorage.setItem('batab_oferta_pospuesta_'+S.currentUser.codigo,en30);
+  }
+  showScreen('screen-home');updateHome();
+}
+
+async function iniciarLoginRostro(){
+  const errEl=document.getElementById('login-rostro-error');
+  errEl.textContent='';
+  if(!webAuthnDisponible()){
+    errEl.textContent='Este dispositivo no soporta rostro. Usa PIN.';
+    return;
+  }
+  const credIdB64u=localStorage.getItem('batab_credential_id');
+  if(!credIdB64u){
+    cambiarAModoPin();
+    return;
+  }
+  try{
+    const challenge=aleatorio(32);
+    const opts={
+      publicKey:{
+        challenge:challenge,
+        rpId:location.hostname,
+        allowCredentials:[{
+          type:'public-key',
+          id:b64uToBuf(credIdB64u),
+          transports:['internal']
+        }],
+        userVerification:'required',
+        timeout:60000
+      }
+    };
+    const cred=await navigator.credentials.get(opts);
+    if(!cred){throw new Error('Validación cancelada');}
+    const usadoCredId=bufToB64u(cred.rawId);
+    // Validar contra Supabase
+    const rows=await sbRpc('validar_dispositivo',{
+      p_credential_id:usadoCredId,
+      p_nuevo_counter:0
+    });
+    const row=Array.isArray(rows)?rows[0]:rows;
+    if(!row || !row.exito){
+      errEl.textContent=row?.mensaje||'Dispositivo no válido';
+      return;
+    }
+    const operador={
+      id:row.operador_id,
+      codigo:row.codigo,
+      nombre:row.nombre,
+      rol:row.rol,
+      email:row.email,
+      requiere_cambio_pin:false,
+      expiraEn:calcularExpiraSesion(row.rol)
+    };
+    S.currentUser=operador;
+    sessionStorage.setItem('batab_session',JSON.stringify(operador));
+    showScreen('screen-home');updateHome();
+  }catch(e){
+    console.error('Login rostro falló:',e);
+    if(e.name==='NotAllowedError'){
+      errEl.textContent='Validación cancelada.';
+    } else {
+      errEl.textContent='No se reconoció el rostro. Intenta de nuevo o usa PIN.';
+    }
+  }
+}
+
+function cambiarAModoPin(){
+  showScreen('screen-login');
+  setTimeout(()=>{document.getElementById('login-codigo')?.focus();},150);
+}
+function olvidarDispositivo(){
+  if(!confirm('¿Olvidar este dispositivo? Tendrás que volver a registrar tu rostro la próxima vez.')) return;
+  localStorage.removeItem('batab_credential_id');
+  localStorage.removeItem('batab_credential_codigo');
+  cambiarAModoPin();
+}
+
+function detectarTipoDispositivo(){
+  const ua=navigator.userAgent.toLowerCase();
+  if(/tablet|ipad/.test(ua)) return 'tablet';
+  if(/mobile|android|iphone/.test(ua)) return 'celular';
+  if(/windows|macintosh|linux/.test(ua)) return 'pc';
+  return 'otro';
+}
+function detectarNombreDispositivo(){
+  const ua=navigator.userAgent;
+  let nombre='Dispositivo';
+  if(/iPhone/.test(ua)) nombre='iPhone';
+  else if(/iPad/.test(ua)) nombre='iPad';
+  else if(/Android/.test(ua)){
+    const m=ua.match(/\(([^)]+)\)/);
+    nombre='Android'+(m?' · '+m[1].split(';').slice(-1)[0].trim().substring(0,20):'');
+  }
+  else if(/Windows/.test(ua)) nombre='PC Windows';
+  else if(/Macintosh/.test(ua)) nombre='Mac';
+  else if(/Linux/.test(ua)) nombre='Linux';
+  if(S.currentUser) nombre+=' de '+S.currentUser.nombre.split(' ')[0];
+  return nombre.substring(0,80);
+}
+
+// ═══════ ADMIN OPERADORES (solo director) ═══════
+async function abrirAdminOperadores(){
+  if(!S.currentUser || S.currentUser.rol!=='director'){
+    alert('Solo el director puede acceder a esta sección.');
+    return;
+  }
+  showScreen('screen-admin-operadores');
+  await cargarListaOperadores();
+}
+async function cargarListaOperadores(){
+  const cont=document.getElementById('admin-operadores-list');
+  cont.innerHTML='<div class="empty-state"><div class="empty-icon">⏳</div><div class="empty-text">Cargando...</div></div>';
+  try{
+    const ops=await sbGet('operadores?select=id,codigo,nombre,rol,activo,last_login,requiere_cambio_pin&order=rol.asc,codigo.asc');
+    const disps=await sbGet('operadores_dispositivos?select=id,operador_id,dispositivo_nombre,dispositivo_tipo,creado_en,ultimo_uso,activo&order=creado_en.desc');
+    const dispsByOp={};
+    disps.forEach(d=>{
+      if(!dispsByOp[d.operador_id]) dispsByOp[d.operador_id]=[];
+      dispsByOp[d.operador_id].push(d);
+    });
+    let html='';
+    ops.forEach(op=>{
+      const ds=dispsByOp[op.id]||[];
+      const rolBadge={director:'🎩',supervisor:'👷',calidad:'🔬',operador:'⚙️'}[op.rol]||'';
+      html+=`
+      <div class="settings-section" style="margin-bottom:16px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <div>
+            <div style="font-weight:600;font-size:15px;">${rolBadge} ${op.nombre}</div>
+            <div style="font-size:12px;color:var(--text3);">${op.codigo} · ${op.rol}${op.activo?'':' · DESACTIVADO'}</div>
+          </div>
+          <div style="display:flex;gap:6px;">
+            <button class="settings-btn" style="font-size:12px;padding:6px 10px;" onclick="resetearPin('${op.id}','${op.codigo}','${op.nombre.replace(/'/g,"\\'")}')">🔄 Reset PIN</button>
+            <button class="settings-btn" style="font-size:12px;padding:6px 10px;color:var(--red);" onclick="toggleOperadorActivo('${op.id}',${op.activo})">${op.activo?'⏸ Desactivar':'▶ Activar'}</button>
+          </div>
+        </div>
+        <div style="font-size:12px;color:var(--text3);margin:8px 0 6px;">Dispositivos enrolados:</div>`;
+      if(ds.length===0){
+        html+='<div style="font-size:12px;color:var(--text3);padding:6px 0;">— Ninguno —</div>';
+      } else {
+        ds.forEach(d=>{
+          const ico={celular:'📱',pc:'💻',tablet:'📱',otro:'🔧'}[d.dispositivo_tipo]||'🔧';
+          const fecha=d.ultimo_uso?new Date(d.ultimo_uso).toLocaleDateString('es-MX'):'sin uso';
+          html+=`
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 8px;background:var(--bg3);border-radius:6px;margin-bottom:4px;">
+            <div style="font-size:13px;">${ico} ${d.dispositivo_nombre}<span style="color:var(--text3);font-size:11px;"> · ${fecha}</span>${d.activo?'':' <span style="color:var(--red);font-size:11px;">[INACTIVO]</span>'}</div>
+            <button class="settings-btn" style="font-size:11px;padding:4px 8px;color:var(--red);" onclick="quitarDispositivo('${d.id}','${d.dispositivo_nombre.replace(/'/g,"\\'")}')">Quitar</button>
+          </div>`;
+        });
+      }
+      if(op.requiere_cambio_pin){
+        html+='<div style="font-size:11px;color:var(--yellow);margin-top:6px;">⚠️ PIN temporal pendiente de cambio</div>';
+      }
+      html+='</div>';
+    });
+    cont.innerHTML=html;
+  }catch(e){
+    console.error(e);
+    cont.innerHTML='<div class="empty-state"><div class="empty-icon">⚠️</div><div class="empty-text">Error al cargar: '+e.message+'</div></div>';
+  }
+}
+async function quitarDispositivo(id,nombre){
+  if(!confirm('¿Quitar el dispositivo "'+nombre+'"?\n\nEl operador tendrá que volver a registrar su rostro.')) return;
+  try{
+    await fetch(SB_URL+'/rest/v1/operadores_dispositivos?id=eq.'+id,{
+      method:'DELETE',headers:{...sbH,'Prefer':'return=minimal'}
+    });
+    await cargarListaOperadores();
+  }catch(e){alert('Error: '+e.message);}
+}
+async function resetearPin(id,codigo,nombre){
+  if(!confirm('¿Resetear PIN de '+nombre+' a 000000?\n\nLa próxima vez que entre, deberá crear un PIN nuevo.')) return;
+  try{
+    // Re-hashear con pgcrypto vía SQL directo no es posible desde REST.
+    // Usamos UPDATE estándar con un hash bcrypt precalculado del PIN '000000'.
+    // En lugar de eso, ejecutamos via RPC personalizada... pero como no la creamos,
+    // hacemos un workaround: marcar requiere_cambio_pin=true y dejar al user actualizar.
+    // ALTERNATIVA: pedir al admin que ejecute manualmente el SQL. Por ahora marcamos el flag.
+    await sbPatch('operadores?id=eq.'+id,{requiere_cambio_pin:true});
+    alert('✅ Marcado para cambio obligatorio.\n\nIMPORTANTE: para que el PIN actual quede en 000000, ejecuta este SQL en Supabase:\n\nUPDATE operadores SET pin_hash = crypt(\'000000\', gen_salt(\'bf\',10)) WHERE codigo = \''+codigo+'\';');
+    await cargarListaOperadores();
+  }catch(e){alert('Error: '+e.message);}
+}
+async function toggleOperadorActivo(id,activoActual){
+  const nuevo=!activoActual;
+  if(!confirm(nuevo?'¿Reactivar operador?':'¿Desactivar operador?\nNo podrá entrar a la app.')) return;
+  try{
+    await sbPatch('operadores?id=eq.'+id,{activo:nuevo});
+    await cargarListaOperadores();
+  }catch(e){alert('Error: '+e.message);}
 }
 
 // ═══════ HOME ═══════
@@ -1262,20 +2302,26 @@ function updateHome(){
   const todayR=recs.filter(r=>r.fecha===today);
   document.getElementById('kpi-piezas').textContent=todayR.reduce((s,r)=>s+(r.prodReportada||0),0).toLocaleString();
   document.getElementById('kpi-fecha').textContent=today;
-  document.getElementById('kpi-pendientes').textContent=recs.filter(r=>r.status==='pending').length;
+  document.getElementById('kpi-pendientes').textContent=recs.filter(r=>isPending(r.status)).length;
   document.getElementById('kpi-registros').textContent=todayR.length;
   const cut=new Date();cut.setDate(cut.getDate()-7);
-  const recent=recs.filter(r=>r.status==='approved'&&r.eficiencia>0&&new Date(r.fecha)>=cut);
+  const recent=recs.filter(r=>isApproved(r.status)&&r.eficiencia>0&&new Date(r.fecha)>=cut);
   document.getElementById('kpi-efic').textContent=recent.length?((recent.reduce((s,r)=>s+r.eficiencia,0)/recent.length).toFixed(1)+'%'):'—';
   document.getElementById('btn-supervisor').style.display=(u.rol==='supervisor'||u.rol==='director')?'':'none';
+  document.getElementById('btn-nueva-captura').style.display=(u.rol==='operador'||u.rol==='supervisor'||u.rol==='director')?'':'none';
   const list=document.getElementById('recent-list');
   const last5=[...recs].reverse().slice(0,5);
-  list.innerHTML=last5.length?last5.map(r=>`
-    <div class="record-card">
-      <div class="record-badge badge-${r.status==='approved'?'approved':r.status==='rejected'?'rejected':'pending'}"></div>
+  list.innerHTML=last5.length?last5.map(r=>{
+    const lbl=statusLabel(r.status);
+    const badge=isApproved(r.status)?'approved':isRejected(r.status)?'rejected':'pending';
+    const stCls=isApproved(r.status)?'approved':'pending';
+    return `<div class="record-card">
+      <div class="record-badge badge-${badge}"></div>
       <div class="record-info"><div class="record-folio">${r.folio}</div><div class="record-detail">${r.articulo} · Turno ${r.turno} · ${r.fecha}</div></div>
-      <div class="record-status status-${r.status==='approved'?'approved':'pending'}">${r.status==='approved'?'Aprobado':r.status==='rejected'?'Rechazado':'Pendiente'}</div>
-    </div>`).join(''):'<div class="empty-state"><div class="empty-icon">📂</div><div class="empty-text">Sin registros todavía.</div></div>';
+      <div class="record-status status-${stCls}">${lbl}</div>
+    </div>`;
+  }).join(''):'<div class="empty-state"><div class="empty-icon">📂</div><div class="empty-text">Sin registros todavía.</div></div>';
+  qcUpdateNavVisibility();
 }
 
 // ═══════ FORM ═══════
@@ -1331,6 +2377,18 @@ function validateStep(s){
     if(!document.getElementById('f-linea').value){showToast('Selecciona la línea','red');return false;}
     if(!document.getElementById('f-articulo').value){showToast('Selecciona el artículo','red');return false;}
     if(!document.getElementById('f-lote').value.trim()){showToast('Ingresa el número de lote','red');return false;}
+    // Normalizar folio v10 (forzar inclusión de turno M/V/N)
+    const loteOrig = document.getElementById('f-lote').value.trim();
+    const loteNorm = normalizarFolioV10(loteOrig, S.form.turno||'M');
+    if(loteNorm !== loteOrig){
+      document.getElementById('f-lote').value = loteNorm;
+      showToast('Folio corregido: '+loteOrig+' → '+loteNorm, 'green');
+    }
+    if(!/^[0-9A-Z]{2}\d{2}[A-L][MVN]\d{2}$/.test(loteNorm)){
+      showToast('⚠️ El folio debe tener formato LLAAMTDD (ej. 1B26EM09)','red');
+      document.getElementById('f-lote').focus();
+      return false;
+    }
   }
   if(s===4){
     if(!document.getElementById('f-bachadas').value){showToast('Ingresa número de bachadas','red');return false;}
@@ -1649,13 +2707,13 @@ TOTALES: La fila TOTAL al final de cada bloque de 10 bachadas y la fila de TOTAL
 // ═══════ TOTALES ACUMULADOS OCR — editables ═══════
 // Rangos esperados para validación (min, max) del total del turno
 const RANGOS_TURNO = {
-  cemento: [3000,  15000],
-  tolva1:  [5000,  50000],
-  tolva2:  [5000,  150000],
-  tolva3:  [5000,  150000],
-  agua:    [3000,  20000],
-  aditivo:  [5,     200],
-  pigmento: [0.1,   500],  // opcional — solo blocks de color
+  cemento: [100,   15000],   // flex mín: cubre corridas de prueba (5-10 piezas)
+  tolva1:  [100,   50000],   // flex mín: corridas chicas
+  tolva2:  [100,   150000],
+  tolva3:  [100,   150000],
+  agua:    [50,    20000],   // flex mín: corrida prueba ~600 L
+  aditivo:  [0.5,    200],   // flex mín: pruebas usan 1-2 kg
+  pigmento: [0.1,    500],   // opcional — solo blocks de color
 };
 const TOTALES_CAMPOS = [
   { key:'cemento', label:'Cemento',  inputId:'tot-cemento', selectId:'mp-cemento-tipo', unidad:'kg' },
@@ -1842,18 +2900,47 @@ function calcPiezasEstimadas(){
 }
 
 // ═══════ METRICS ═══════
+// ═══════ STATUS HELPERS — numérico NetSuite con compatibilidad legacy ═══════
+// Valores nuevos: '4' Pendiente · '5' Aprobado · '6' Rechazado
+// Legacy soportado: 'pending' · 'approved' · 'rejected'
+function isApproved(s){ return s==='5' || s==='approved'; }
+function isRejected(s){ return s==='6' || s==='rejected'; }
+function isPending(s){ return !isApproved(s) && !isRejected(s); }
+function statusToNS(s){
+  if(isApproved(s)) return '5';
+  if(isRejected(s)) return '6';
+  return '4';
+}
+function statusLabel(s){
+  if(isApproved(s)) return 'Aprobado';
+  if(isRejected(s)) return 'Rechazado';
+  return 'Pendiente';
+}
+
 function calcMetrics(){
-  const rep=parseFloat(document.getElementById('f-prod-reportada').value)||0;
-  const real=parseFloat(document.getElementById('f-real-empacada').value)||0;
+  // Esta función ahora es de compatibilidad. El operador ya no ve Real Empacada ni métricas.
+  // El cálculo en vivo lo hace el supervisor via calcCierreTeapa() en la pantalla de revisión.
+  const repEl=document.getElementById('f-prod-reportada');
+  const realEl=document.getElementById('f-real-empacada');
+  if(!repEl||!realEl) return;
+  const rep=parseFloat(repEl.value)||0;
+  const real=parseFloat(realEl.value)||0;
+  const mEl=document.getElementById('m-merma');
+  const pctEl=document.getElementById('m-pct-merma');
+  const efEl=document.getElementById('m-efic');
+  const fill=document.getElementById('efic-fill');
   if(rep>0&&real>0){
     const m=rep-real,pct=m/rep*100,efic=real/rep*100;
-    document.getElementById('m-merma').textContent=m+' pzas';
-    document.getElementById('m-pct-merma').textContent=pct.toFixed(1)+'%';
-    document.getElementById('m-efic').textContent=efic.toFixed(1)+'%';
-    const fill=document.getElementById('efic-fill');
-    fill.style.width=Math.min(efic,100)+'%';
-    fill.style.background=efic>=95?'var(--green)':efic>=85?'var(--yellow)':'var(--red)';
-  }else{['m-merma','m-pct-merma','m-efic'].forEach(id=>document.getElementById(id).textContent='—');document.getElementById('efic-fill').style.width='0%';}
+    if(mEl)   mEl.textContent  = m+' pzas';
+    if(pctEl) pctEl.textContent= pct.toFixed(1)+'%';
+    if(efEl)  efEl.textContent = efic.toFixed(1)+'%';
+    if(fill){fill.style.width=Math.min(efic,100)+'%';fill.style.background=efic>=95?'var(--green)':efic>=85?'var(--yellow)':'var(--red)';}
+  }else{
+    if(mEl)  mEl.textContent  ='—';
+    if(pctEl)pctEl.textContent='—';
+    if(efEl) efEl.textContent ='—';
+    if(fill) fill.style.width='0%';
+  }
 }
 
 // ═══════ RESUMEN ═══════
@@ -1863,14 +2950,11 @@ function collectFormData(){
   const artId=parseInt(document.getElementById('f-articulo').value);
   const artNombre=PRODUCTS.find(p=>p.id===artId)?.n||'';
   const rep=parseFloat(document.getElementById('f-prod-reportada').value)||0;
-  const real=parseFloat(document.getElementById('f-real-empacada').value)||0;
-  const merma=rep>0&&real>0?rep-real:null;
-  const pctMerma=merma!==null?merma/rep*100:null;
-  const eficiencia=rep>0&&real>0?real/rep*100:null;
+  // Real empacada / merma / eficiencia los llena el supervisor — quedan null aquí
   const vals=S.pesajes.map(p=>p.kg);
   const pesajePromedio=vals.length?vals.reduce((a,b)=>a+b,0)/vals.length:null;
   return{folio,fecha:document.getElementById('f-fecha').value,turno:S.form.turno||'M',linea,
-    articuloId:artId,articulo:artNombre,lote:document.getElementById('f-lote').value.trim(),
+    articuloId:artId,articulo:artNombre,lote:normalizarFolioV10(document.getElementById('f-lote').value.trim(), S.form.turno||'M'),
     operador:S.currentUser?.nombre||'—',operadorId:S.currentUser?.id||'—',
     moduloFinura:parseFloat(document.getElementById('f-mf').value)||null,
     humedad:parseFloat(document.getElementById('f-humedad').value)||null,
@@ -1884,7 +2968,7 @@ function collectFormData(){
     aditivo:{tipo:document.getElementById('mp-aditivo-tipo').value,cc:parseFloat(document.getElementById('mp-aditivo-cc').value)||0},
     pigmento:{tipo:document.getElementById('mp-pigmento-tipo').value,kg:parseFloat(document.getElementById('mp-pigmento-kg').value)||0},
     bachadas:parseInt(document.getElementById('f-bachadas').value)||0,
-    prodReportada:rep,realEmpacada:real,merma,pctMerma,eficiencia,
+    prodReportada:rep,
     obs:document.getElementById('f-obs').value.trim()};
 }
 function buildResumen(){
@@ -1932,7 +3016,11 @@ function saveRecord(){
   const rec={...d,id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),
     dosiPhoto:S.dosiPhotoB64,dosiPhoto2:S.dosiPhotoB64_2||null,dosiPhotosExtra:[...S.dosiPhotosExtra],createdAt:new Date().toISOString(),piezasEstimadas:S.piezasEstimadas||null,pesoHumedo:S.pesoHumedo||null,
     totalesConsumo:S.totalesOCR||null,
-    status:'pending',netsuiteWO:null,approvedBy:null,approvedAt:null};
+    // Cierre Teapa: quedan null hasta que el supervisor los capture
+    realEmpacada:null, cantidadAprobada:null, cantidadRechazo:null, cantidadDesperdicio:null,
+    merma:null, pctMerma:null, eficiencia:null,
+    status:'4',                          // Pendiente (numérico NetSuite)
+    netsuiteWO:null, approvedBy:null, approvedAt:null};
   const recs=getRecords();recs.push(rec);
   try{
     saveRecords(recs);
@@ -1965,20 +3053,50 @@ function goSupervisor(){
 }
 function showSuperPin(){superPinBuf='';updPin('sd','',false);document.getElementById('super-pin-error').textContent='';document.getElementById('super-pin-overlay').classList.add('active');}
 function closeSuperPin(){document.getElementById('super-pin-overlay').classList.remove('active');}
-function superPinPress(d){if(superPinBuf.length>=4)return;superPinBuf+=d;updPin('sd',superPinBuf,false);if(superPinBuf.length===4)setTimeout(checkSuperPin,80);}
+function superPinPress(d){if(superPinBuf.length>=6)return;superPinBuf+=d;updPin('sd',superPinBuf,false);if(superPinBuf.length===6)setTimeout(checkSuperPin,80);}
 function superPinBack(){if(superPinBuf.length>0){superPinBuf=superPinBuf.slice(0,-1);updPin('sd',superPinBuf,false);}}
 function superPinClear(){superPinBuf='';updPin('sd','',false);}
-function checkSuperPin(){
-  const u=USERS[superPinBuf];
-  if(u&&(u.rol==='supervisor'||u.rol==='director')){S.superUser=u;document.getElementById('super-pin-overlay').classList.remove('active');loadSupervisorScreen();navTo('screen-supervisor','nav-super');}
-  else{updPin('sd','????',true);document.getElementById('super-pin-error').textContent='PIN no autorizado';setTimeout(()=>{superPinBuf='';updPin('sd','',false);document.getElementById('super-pin-error').textContent='';},1200);}
+async function checkSuperPin(){
+  const codigo=(document.getElementById('super-codigo')?.value||'').trim().toUpperCase();
+  const errEl=document.getElementById('super-pin-error');
+  if(!codigo){
+    errEl.textContent='Ingresa tu código';
+    setTimeout(()=>{superPinBuf='';updPin('sd','',false);errEl.textContent='';},1500);
+    return;
+  }
+  errEl.textContent='Validando...';
+  try{
+    const rows=await sbRpc('validar_operador_pin',{p_codigo:codigo,p_pin:superPinBuf});
+    const row=Array.isArray(rows)?rows[0]:rows;
+    if(!row || !row.exito){
+      updPin('sd','??????',true);
+      errEl.textContent=(row&&row.mensaje)||'Código o PIN incorrecto';
+      setTimeout(()=>{superPinBuf='';updPin('sd','',false);errEl.textContent='';},1500);
+      return;
+    }
+    if(row.rol!=='supervisor' && row.rol!=='director'){
+      errEl.textContent='Acceso denegado: solo supervisor o director';
+      setTimeout(()=>{superPinBuf='';updPin('sd','',false);errEl.textContent='';},1800);
+      return;
+    }
+    S.superUser={id:row.operador_id,codigo:row.codigo,nombre:row.nombre,rol:row.rol,email:row.email};
+    document.getElementById('super-pin-overlay').classList.remove('active');
+    superPinBuf='';updPin('sd','',false);
+    document.getElementById('super-codigo').value='';
+    loadSupervisorScreen();
+    navTo('screen-supervisor','nav-super');
+  }catch(e){
+    console.error(e);
+    errEl.textContent='Error de conexión';
+    setTimeout(()=>{errEl.textContent='';},2000);
+  }
 }
 function loadSupervisorScreen(){
   const u=S.superUser;
   document.getElementById('super-user-label').textContent=u?.nombre+' · '+u?.rol;
   const recs=getRecords();
-  const pending=recs.filter(r=>r.status==='pending');
-  const approved=recs.filter(r=>r.status==='approved').reverse().slice(0,10);
+  const pending=recs.filter(r=>isPending(r.status));
+  const approved=recs.filter(r=>isApproved(r.status)).reverse().slice(0,10);
   document.getElementById('super-badge').textContent=pending.length;
   const pList=document.getElementById('pending-list');
   pList.innerHTML=pending.length?pending.map(r=>`
@@ -2126,10 +3244,16 @@ function renderReviewScreen(rec){
   }else{mDiv.innerHTML='<div style="color:var(--text3);font-size:13px;grid-column:1/-1;">Sin datos de producción</div>';}
 
   // Tabla producción
+  const cierreRows = (rec.realEmpacada!=null) ? `
+    <tr><td class="rk">Real empacada</td><td class="rv">${rec.realEmpacada||0} pzas</td></tr>
+    <tr><td class="rk">Aprobadas</td><td class="rv" style="color:var(--green);font-weight:700;">${rec.cantidadAprobada||0} pzas</td></tr>
+    <tr><td class="rk">En rechazo</td><td class="rv" style="color:var(--yellow);font-weight:700;">${rec.cantidadRechazo||0} pzas</td></tr>
+    <tr><td class="rk">Desperdicio</td><td class="rv" style="color:var(--red);font-weight:700;">${rec.cantidadDesperdicio||0} pzas</td></tr>` : `
+    <tr><td class="rk">Cierre Teapa</td><td class="rv" style="color:var(--text3);font-style:italic;">Pendiente — supervisor</td></tr>`;
   document.getElementById('rv-prod-table').innerHTML=`
     <tr><td class="rk">Bachadas</td><td class="rv big">${rec.bachadas||'—'}</td></tr>
     <tr><td class="rk">Prod. reportada</td><td class="rv big">${rec.prodReportada||0} pzas</td></tr>
-    <tr><td class="rk">Real empacada</td><td class="rv">${rec.realEmpacada||0} pzas</td></tr>
+    ${cierreRows}
     <tr><td class="rk">Operador</td><td class="rv">${rec.operador}</td></tr>
     <tr><td class="rk">Capturado</td><td class="rv" style="font-size:11px;">${new Date(rec.createdAt).toLocaleString('es-MX')}</td></tr>`;
 
@@ -2165,13 +3289,88 @@ function renderReviewScreen(rec){
   // WO field
   document.getElementById('rv-wo-id').value=rec.netsuiteWO||'';
 
-  // Btn state si ya fue aprobado
-  const approved=rec.status==='approved';
-  document.getElementById('rv-btn-approve').disabled=approved;
-  document.getElementById('rv-btn-approve').textContent=approved?'✓ Ya aprobado':'✓ Aprobar y subir a NetSuite';
+  // ── Cierre Teapa: precargar inputs si ya hay valores y disparar cálculo
+  const realEmp = rec.realEmpacada!=null?rec.realEmpacada:'';
+  const cAp     = rec.cantidadAprobada!=null?rec.cantidadAprobada:'';
+  const cRe     = rec.cantidadRechazo!=null?rec.cantidadRechazo:'';
+  const cDe     = rec.cantidadDesperdicio!=null?rec.cantidadDesperdicio:'';
+  document.getElementById('rv-real-empacada').value     = realEmp;
+  document.getElementById('rv-cant-aprobada').value     = cAp;
+  document.getElementById('rv-cant-rechazo').value      = cRe;
+  document.getElementById('rv-cant-desperdicio').value  = cDe;
+
+  // Si el registro ya está aprobado/rechazado, deshabilitar inputs (solo lectura)
+  const isLocked = isApproved(rec.status) || isRejected(rec.status);
+  ['rv-real-empacada','rv-cant-aprobada','rv-cant-rechazo','rv-cant-desperdicio','rv-wo-id'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.readOnly = isLocked;
+  });
+  calcCierreTeapa();
+
+  // Btn state según status
+  const approved = isApproved(rec.status);
+  const rejected = isRejected(rec.status);
+  document.getElementById('rv-btn-approve').disabled = approved || rejected;
+  document.getElementById('rv-btn-approve').textContent = approved?'✓ Ya aprobado':rejected?'✗ Rechazado':'✓ Aprobar y subir a NetSuite';
   const chip=document.getElementById('rv-status-chip');
   if(approved){chip.style.background='rgba(34,197,94,.15)';chip.style.color='var(--green)';chip.textContent='APROBADO';}
+  else if(rejected){chip.style.background='rgba(192,57,43,.15)';chip.style.color='var(--red)';chip.textContent='RECHAZADO';}
   else{chip.style.background='rgba(234,179,8,.15)';chip.style.color='var(--yellow)';chip.textContent='PENDIENTE';}
+}
+
+// ═══════ CIERRE TEAPA — cálculo en vivo y validación de cuadre ═══════
+function calcCierreTeapa(){
+  const real = parseFloat(document.getElementById('rv-real-empacada').value)||0;
+  const cAp  = parseFloat(document.getElementById('rv-cant-aprobada').value)||0;
+  const cRe  = parseFloat(document.getElementById('rv-cant-rechazo').value)||0;
+  const cDe  = parseFloat(document.getElementById('rv-cant-desperdicio').value)||0;
+  const suma = cAp + cRe + cDe;
+
+  document.getElementById('rv-suma-ard').textContent = suma.toLocaleString();
+  document.getElementById('rv-real-eco').textContent = real.toLocaleString();
+
+  // Indicador de cuadre
+  const box = document.getElementById('rv-cuadre-box');
+  const msg = document.getElementById('rv-cuadre-msg');
+  const diff = suma - real;
+  const TOL = 1; // tolerancia ±1 pza
+  if(real<=0 && suma<=0){
+    box.style.borderLeftColor = '#5A6E90';
+    box.style.background = '#E4ECF7';
+    msg.style.color = '#5A6E90';
+    msg.textContent = 'Captura los 4 campos…';
+  } else if(Math.abs(diff) <= TOL){
+    box.style.borderLeftColor = 'var(--green)';
+    box.style.background = '#D6F0E2';
+    msg.style.color = 'var(--green)';
+    msg.textContent = '✓ Cuadre correcto (diferencia: '+diff+' pza)';
+  } else {
+    box.style.borderLeftColor = 'var(--red)';
+    box.style.background = '#FDEAEA';
+    msg.style.color = 'var(--red)';
+    const signo = diff>0?'+':'';
+    msg.textContent = '⚠ No cuadra · diferencia: '+signo+diff+' pza · ajusta para poder aprobar';
+  }
+
+  // Métricas en vivo: Eficiencia / Merma / % Merma usando Reportada vs Aprobada
+  const rec = getRecords().find(r=>r.id===S.reviewRecordId);
+  const rep = rec?.prodReportada||0;
+  const mEl   = document.getElementById('rv-m-merma');
+  const pctEl = document.getElementById('rv-m-pct-merma');
+  const efEl  = document.getElementById('rv-m-efic');
+  const fill  = document.getElementById('rv-efic-fill');
+  if(rep>0 && cAp>0){
+    const merma = rep - cAp;
+    const pct   = merma/rep*100;
+    const efic  = cAp/rep*100;
+    mEl.textContent   = merma+' pzas';
+    pctEl.textContent = pct.toFixed(1)+'%';
+    efEl.textContent  = efic.toFixed(1)+'%';
+    fill.style.width  = Math.min(efic,100)+'%';
+    fill.style.background = efic>=95?'var(--green)':efic>=85?'var(--yellow)':'var(--red)';
+  } else {
+    mEl.textContent='—'; pctEl.textContent='—'; efEl.textContent='—';
+    fill.style.width='0%';
+  }
 }
 
 function renderChecklist(rec){
@@ -2206,38 +3405,78 @@ function updCheckCount(){
   document.getElementById('rv-checks-count').textContent=done+' / '+CHECKLIST_ITEMS.length;
 }
 
-async function doApprove(withNetsuite){
+async function doApprove(){
   const recs=getRecords();
   const idx=recs.findIndex(r=>r.id===S.reviewRecordId);if(idx<0)return;
-  const woId=document.getElementById('rv-wo-id').value.trim();
-  recs[idx].status='approved';
-  recs[idx].approvedBy=S.superUser?.nombre;
-  recs[idx].approvedAt=new Date().toISOString();
-  recs[idx].netsuiteWO=woId||null;
-  recs[idx].checksCompleted=Object.values(S.checks).filter(Boolean).length;
-  if(withNetsuite){
-    showLoading('Subiendo a NetSuite...');
-    try{
-      const nsResult = await uploadToNetsuite(recs[idx]);
-      recs[idx].netsuiteStatus='uploaded';
-      recs[idx].netsuiteRecordId=nsResult.recordId||null;
-      recs[idx].netsuiteWO=nsResult.recordId||woId||null;
-      // Update Supabase record_id
-      if(nsResult.recordId&&recs[idx].folio){
-        sbPatch('produccion_logs?folio=eq.'+encodeURIComponent(recs[idx].folio),{record_id:nsResult.recordId,http_status:200}).catch(()=>{});
-      }
-      saveRecords(recs);hideLoading();
-      showToast('✅ Aprobado y subido a NetSuite · ID: '+(nsResult.recordId||'—'),'green');
-    }catch(e){recs[idx].netsuiteStatus='error';saveRecords(recs);hideLoading();showToast('Aprobado · Error NetSuite: '+e.message,'red');}
-  }else{saveRecords(recs);showToast('✓ Registro aprobado','green');}
-  // Refresh review screen
+  const rec = recs[idx];
+
+  // ─── FASE 1: cierre Teapa OPCIONAL (se llena post-G1 en Fase 2) ──
+  const real = parseFloat(document.getElementById('rv-real-empacada').value)||0;
+  const cAp  = parseFloat(document.getElementById('rv-cant-aprobada').value)||0;
+  const cRe  = parseFloat(document.getElementById('rv-cant-rechazo').value)||0;
+  const cDe  = parseFloat(document.getElementById('rv-cant-desperdicio').value)||0;
+  if(real > 0){
+    const suma = cAp + cRe + cDe;
+    if(Math.abs(suma - real) > 1){
+      showToast('⚠️ Aprobada + Rechazo + Desperdicio debe igualar Real Empacada (±1). Dif: '+(suma-real),'red');
+      document.getElementById('rv-cant-aprobada').focus(); return;
+    }
+  }
+  if(!rec.folio){
+    showToast('⚠️ Registro sin folio — no se puede aprobar','red');
+    return;
+  }
+
+  // ─── LLAMADA ATÓMICA AL BACKEND (crea WO + CR 1417 + actualiza Supabase) ──
+  showLoading('Aprobando y generando WO en NetSuite...');
+  try{
+    const resp = await fetch('https://szrcmvlgxxpmvgrfmxak.supabase.co/functions/v1/app-api/supervisor/aprobar-fase1',{
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'apikey':'sb_publishable_VOhn9Z2Ev8gYK3nFKr44Sw_VngbAX4N',
+        'Authorization':'Bearer sb_publishable_VOhn9Z2Ev8gYK3nFKr44Sw_VngbAX4N'
+      },
+      body:JSON.stringify({folio: rec.folio, aprobado_por: S.superUser?.nombre || 'Supervisor'})
+    });
+    const json = await resp.json();
+    if(!resp.ok || !json.ok){ throw new Error(json.error_message || ('HTTP '+resp.status)); }
+    const rep = rec.prodReportada||0;
+    rec.status              = '5';
+    rec.approvedBy          = S.superUser?.nombre;
+    rec.approvedAt          = new Date().toISOString();
+    rec.netsuiteWO          = json.wo_id || null;
+    rec.netsuiteRecordId    = json.cr1417_id || null;
+    rec.netsuiteStatus      = 'uploaded';
+    rec.realEmpacada        = real;
+    rec.cantidadAprobada    = cAp;
+    rec.cantidadRechazo     = cRe;
+    rec.cantidadDesperdicio = cDe;
+    rec.merma               = rep>0 ? rep-cAp : null;
+    rec.pctMerma            = (rep>0 && cAp>=0) ? ((rep-cAp)/rep*100) : null;
+    rec.eficiencia          = (rep>0) ? (cAp/rep*100) : null;
+    rec.checksCompleted     = Object.values(S.checks).filter(Boolean).length;
+    saveRecords(recs);
+    hideLoading();
+    const msg = json.idempotente
+      ? '✅ Ya estaba aprobado · CR 1417: '+json.cr1417_id+(json.wo_id?' · WO: '+json.wo_id:'')
+      : '✅ Aprobado · WO '+json.wo_id+' · CR 1417: '+json.cr1417_id;
+    showToast(msg,'green');
+  }catch(e){
+    hideLoading();
+    showToast('❌ Error al aprobar: '+e.message,'red');
+    return;
+  }
+
   const updRec=getRecords().find(r=>r.id===S.reviewRecordId);
-  if(updRec)renderReviewScreen(updRec);
+  if(updRec) renderReviewScreen(updRec);
   loadSupervisorScreen();updateHome();
 }
 function doReject(){
   const recs=getRecords();const idx=recs.findIndex(r=>r.id===S.reviewRecordId);if(idx<0)return;
-  recs[idx].status='rejected';recs[idx].approvedBy=S.superUser?.nombre;recs[idx].approvedAt=new Date().toISOString();
+  recs[idx].status='6';                   // Rechazado (numérico NetSuite)
+  recs[idx].approvedBy=S.superUser?.nombre;
+  recs[idx].approvedAt=new Date().toISOString();
   saveRecords(recs);loadSupervisorScreen();updateHome();
   showToast('Registro rechazado — el operador deberá corregir','red');
   showScreen('screen-supervisor');
@@ -2256,6 +3495,34 @@ function goSettings(){
   if(cfg.ck){['ns-ck-input','ns-cs-input','ns-ti-input','ns-ts-input'].forEach(id=>{document.getElementById(id).value='•'.repeat(20);});}
   const nsStatus=document.getElementById('ns-config-status');
   if(nsStatus) nsStatus.innerHTML=cfg.ck?'<span style="color:var(--green);">✅ Credenciales configuradas</span>':'<span style="color:var(--red);">⚠️ Sin credenciales TBA</span>';
+  // Mostrar sección admin solo si es director
+  const adminSection=document.getElementById('settings-admin-section');
+  if(adminSection) adminSection.style.display=(S.currentUser&&S.currentUser.rol==='director')?'block':'none';
+}
+function logoutCompleto(){
+  if(!confirm('¿Cerrar sesión y olvidar este dispositivo?\n\nTendrás que volver a registrar tu rostro la próxima vez.')) return;
+  localStorage.removeItem('batab_credential_id');
+  localStorage.removeItem('batab_credential_codigo');
+  sessionStorage.removeItem('batab_session');
+  S.currentUser=null;
+  resetPin();
+  init();
+}
+
+// Cuando el operador termina su registro y toca "Ir al inicio":
+// - Si es operador: cierra su sesión (la sesión sólo dura mientras hay registro abierto)
+// - Si es supervisor/calidad/director: vuelve al home, su sesión sigue viva
+function terminarRegistro(){
+  const rol=S.currentUser?.rol;
+  if(rol==='operador'){
+    // Cerrar sesión del operador, dejar credencial WebAuthn intacta
+    sessionStorage.removeItem('batab_session');
+    S.currentUser=null;
+    resetPin();
+    init();
+  } else {
+    showScreen('screen-home');updateHome();
+  }
 }
 async function saveOcrKey(){
   const v=document.getElementById('ocr-key-input').value.trim();
@@ -2289,7 +3556,7 @@ function exportData(){
   const a=Object.assign(document.createElement('a'),{href:URL.createObjectURL(new Blob([json],{type:'application/json'})),download:`batab-registros-${new Date().toISOString().split('T')[0]}.json`});
   a.click();showToast('Exportado ✅','green');
 }
-function clearApproved(){saveRecords(getRecords().filter(r=>r.status!=='approved'));showToast('Registros aprobados eliminados','green');goSettings();}
+function clearApproved(){saveRecords(getRecords().filter(r=>!isApproved(r.status)));showToast('Registros aprobados eliminados','green');goSettings();}
 
 // ═══════ NETSUITE TBA CONFIG — Supabase ═══════
 let _nsCfg={ck:'',cs:'',ti:'',ts:''};
@@ -2405,25 +3672,39 @@ async function uploadToNetsuite(record){
 
   // Mapeo a campos del customrecord_batab_produccion
   const payload={
-    name:                             record.folio||'',
-    externalId:                       record.id||'',
-    custrecord_batab_folio:           record.folio||'',
-    custrecord_batab_linea:           record.linea||'',
-    custrecord_batab_lote:            record.lote||'',
-    custrecord_batab_turno:           record.turno||'',
-    custrecord_batab_articulo:        record.articulo||'',
-    custrecord_batab_fecha:           record.fecha||new Date().toISOString().split('T')[0],
-    custrecord_batab_operador:        record.operador||'',
-    custrecord_batab_prod_reportada:  parseInt(record.prodReportada)||0,
-    custrecord_batab_bachadas:        parseInt(record.totalesConsumo?.bachadas)||0,
-    custrecord_batab_status:          record.status||'approved',
-    custrecord_batab_aprobado_por:    record.approvedBy||'',
-    custrecord_batab_aprobado_at:     record.approvedAt||new Date().toISOString(),
-    custrecord_batab_json_payload:    JSON.stringify(clean)
+    name:                                 record.folio||'',
+    externalId:                           record.id||'',
+    custrecord_batab_folio:               record.folio||'',
+    custrecord_batab_linea:               record.linea||'',
+    custrecord_batab_lote:                record.lote||'',
+    custrecord_batab_turno:               record.turno||'',
+    custrecord_batab_articulo:            record.articulo||'',
+    custrecord_batab_fecha:               record.fecha||new Date().toISOString().split('T')[0],
+    custrecord_batab_operador:            record.operador||'',
+    custrecord_batab_prod_reportada:      parseInt(record.prodReportada)||0,
+    custrecord_batab_bachadas:            parseInt(record.totalesConsumo?.bachadas)||0,
+    // ── Cierre Teapa: cantidades capturadas por el supervisor ──
+    custrecord_batab_real_empacada:       parseInt(record.realEmpacada)||0,
+    custrecord_batab_cantidad_aprobada:   parseInt(record.cantidadAprobada)||0,
+    custrecord_batab_cantidad_rechazo:    parseInt(record.cantidadRechazo)||0,
+    custrecord_batab_cantidad_desperdicio:parseInt(record.cantidadDesperdicio)||0,
+    // ── Status numérico (4=Pendiente, 5=Aprobado, 6=Rechazado) — dispara v6.3 ──
+    custrecord_batab_status:              statusToNS(record.status),
+    custrecord_batab_aprobado_por:        record.approvedBy||'',
+    custrecord_batab_aprobado_at:         record.approvedAt||new Date().toISOString(),
+    custrecord_batab_json_payload:        JSON.stringify(clean)
   };
   // WO solo si es un número válido
   const woNum=parseInt(record.netsuiteWO);
   if(!isNaN(woNum)&&woNum>0) payload.custrecord_batab_workorder=woNum;
+
+  // Sobre que espera la Edge Function netsuite-proxy: {method, endpoint, payload}
+  // La Edge Function arma la URL completa: NS_BASE + endpoint y firma OAuth.
+  const envelope={
+    method:   'POST',
+    endpoint: '/services/rest/record/v1/customrecord_batab_produccion',
+    payload:  payload
+  };
 
   // Llama a la Edge Function de Supabase (sin CORS, sin OAuth en el browser)
   const res=await fetch(NS_REST_URL,{
@@ -2433,7 +3714,7 @@ async function uploadToNetsuite(record){
       'apikey':'sb_publishable_VOhn9Z2Ev8gYK3nFKr44Sw_VngbAX4N',
       'Authorization':'Bearer sb_publishable_VOhn9Z2Ev8gYK3nFKr44Sw_VngbAX4N'
     },
-    body:JSON.stringify(payload)
+    body:JSON.stringify(envelope)
   });
 
   // Edge Function devuelve JSON con {success, recordId} o {error}
@@ -2501,6 +3782,693 @@ function showLoading(msg){document.getElementById('loading-msg').textContent=msg
 function hideLoading(){document.getElementById('loading').classList.remove('active');}
 let toastT;
 function showToast(msg,type=''){const t=document.getElementById('toast');t.textContent=msg;t.className='toast show '+type;clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),2800);}
+
+
+// ════════════════════════════════════════════════════════════
+// MÓDULO CALIDAD — Edge function app-api v0.4.1
+// Backend: https://szrcmvlgxxpmvgrfmxak.supabase.co/functions/v1/app-api
+// ════════════════════════════════════════════════════════════
+const QC_API_URL = 'https://szrcmvlgxxpmvgrfmxak.supabase.co/functions/v1/app-api';
+
+// Helper: normalizar folio v10 forzando inclusión del turno (M/V/N)
+// Convención BATAB: LLAAMTDD = línea(2) + año(2) + mes(1=A-L) + turno(1=M/V/N) + día(2)
+// Ejemplo correcto: 1B26EM09 = Bessersa 1B · 2026 · mayo · matutino · día 9
+function normalizarFolioV10(loteRaw, turnoRaw) {
+  if (!loteRaw) return loteRaw;
+  const lote = String(loteRaw).toUpperCase().trim();
+  const turno = String(turnoRaw || 'M').toUpperCase().trim();
+  // Validar que turno sea M/V/N
+  const turnoLetra = ['M','V','N'].includes(turno) ? turno : 'M';
+  // Patrón correcto ya: LLAAMTDD (8 chars, posición 6 = M/V/N)
+  if (/^[0-9A-Z]{2}\d{2}[A-L][MVN]\d{2}$/.test(lote)) {
+    return lote;  // Ya está bien
+  }
+  // Patrón sin turno: LLAAMDD (7 chars, falta el turno)
+  if (/^[0-9A-Z]{2}\d{2}[A-L]\d{2}$/.test(lote)) {
+    // Insertar la letra del turno en la posición 5 (entre mes y día)
+    return lote.slice(0,5) + turnoLetra + lote.slice(5);
+  }
+  // Patrón con turno mal (cualquier letra que no sea M/V/N en pos 5)
+  if (/^[0-9A-Z]{2}\d{2}[A-L][A-Z]\d{2}$/.test(lote)) {
+    // Reemplazar la letra incorrecta por la correcta
+    return lote.slice(0,5) + turnoLetra + lote.slice(6);
+  }
+  // Patrón no reconocido — devolver tal cual y dejar que el operador corrija
+  console.warn('[normalizarFolioV10] Patrón no reconocido:', lote);
+  return lote;
+}
+
+// Helper defensivo para evitar 'Cannot set properties of null'
+function _setText(id, txt) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = txt;
+}
+function _setHTML(id, html) {
+  const el = document.getElementById(id);
+  if (el) el.innerHTML = html;
+}
+function _setStyle(id, prop, val) {
+  const el = document.getElementById(id);
+  if (el) el.style[prop] = val;
+}
+function _setVal(id, val) {
+  const el = document.getElementById(id);
+  if (el) el.value = val;
+}
+function _setClass(id, cls) {
+  const el = document.getElementById(id);
+  if (el) el.className = cls;
+}
+function _setProp(id, prop, val) {
+  const el = document.getElementById(id);
+  if (el) el[prop] = val;
+}
+
+const QC_PLAN = [
+  {idx:0, posicion:'izquierda', tipo:'humedo', icono:'💧', titulo:'Peso húmedo',  lbl:'P1·Húm'},
+  {idx:1, posicion:'izquierda', tipo:'seco',   icono:'🌡️', titulo:'Peso seco',    lbl:'P1·Seco'},
+  {idx:2, posicion:'izquierda', tipo:'prensa', icono:'⚙️', titulo:'Resistencia',  lbl:'P1·Prensa'},
+  {idx:3, posicion:'centro',    tipo:'humedo', icono:'💧', titulo:'Peso húmedo',  lbl:'P2·Húm'},
+  {idx:4, posicion:'centro',    tipo:'seco',   icono:'🌡️', titulo:'Peso seco',    lbl:'P2·Seco'},
+  {idx:5, posicion:'centro',    tipo:'prensa', icono:'⚙️', titulo:'Resistencia',  lbl:'P2·Prensa'},
+  {idx:6, posicion:'derecha',   tipo:'humedo', icono:'💧', titulo:'Peso húmedo',  lbl:'P3·Húm'},
+  {idx:7, posicion:'derecha',   tipo:'seco',   icono:'🌡️', titulo:'Peso seco',    lbl:'P3·Seco'},
+  {idx:8, posicion:'derecha',   tipo:'prensa', icono:'⚙️', titulo:'Resistencia',  lbl:'P3·Prensa'},
+];
+
+const QC_INSTRUCCIONES = {
+  humedo: '⚖️ Coloca la probeta SATURADA DE AGUA en la báscula. Asegúrate que el display muestre kg estables.',
+  seco:   '🌡️ Coloca la probeta SECADA AL HORNO en la báscula. Espera a que estabilice antes de fotografiar.',
+  prensa: '⚙️ Después de aplicar carga hasta romper la probeta, fotografía el valor PEAK del Gauge Buster.',
+};
+
+const QC_HINTS = {
+  humedo: 'Display de báscula · valor en kg o g',
+  seco:   'Display de báscula · después del horno (110°C)',
+  prensa: 'Display de prensa hidráulica · valor PEAK en kg/cm² o psi',
+};
+
+const QC_UNIDADES = {humedo:'g', seco:'g', prensa:'kg/cm²'};
+
+let qcS = {
+  gate:           null,
+  lote:           null,
+  regla:          null,
+  ensayeId:       null,
+  probetas:       [],
+  fotoActual:     0,
+  fotos:          {},
+  resultadoFinal: null,
+  ensayeNumero:   null,
+};
+
+// ════════════════════════════════════════════════════════════
+// Visibilidad por rol
+// ════════════════════════════════════════════════════════════
+function qcUpdateNavVisibility() {
+  const u = S.currentUser;
+  if (!u) return;
+  const rol = u.rol;
+  const verQC  = ['calidad','supervisor','director'].includes(rol);
+  const verProd= ['operador','supervisor','director'].includes(rol);
+  const verSup = ['supervisor','director'].includes(rol);
+
+  const navQC   = document.getElementById('nav-qc');
+  const navProd = document.getElementById('nav-new');
+  const navSup  = document.getElementById('nav-super');
+  if (navQC)   navQC.style.display   = verQC   ? '' : 'none';
+  if (navProd) navProd.style.display = verProd ? '' : 'none';
+  if (navSup)  navSup.style.display  = verSup  ? '' : 'none';
+}
+
+// ════════════════════════════════════════════════════════════
+// HTTP helper
+// ════════════════════════════════════════════════════════════
+async function qcFetch(path, opts = {}) {
+  const url = QC_API_URL + path;
+  const fetchOpts = {
+    method: opts.method || 'GET',
+    headers: { 'Content-Type': 'application/json' },
+  };
+  if (opts.body) fetchOpts.body = JSON.stringify(opts.body);
+  const res = await fetch(url, fetchOpts);
+  const txt = await res.text();
+  let data; try { data = JSON.parse(txt); } catch { throw new Error('Respuesta no JSON: ' + txt.substring(0,200)); }
+  if (!res.ok || data.ok === false) {
+    const msg = data.error_message || data.error_code || ('HTTP ' + res.status);
+    throw new Error(msg);
+  }
+  return data;
+}
+
+// ════════════════════════════════════════════════════════════
+// PANTALLA 1: Bandejas
+// ════════════════════════════════════════════════════════════
+function qcEntrar() {
+  qcS = { gate:null, lote:null, regla:null, ensayeId:null, probetas:[],
+          fotoActual:0, fotos:{}, resultadoFinal:null, ensayeNumero:null };
+  document.getElementById('qc-user-label').textContent =
+    (S.currentUser?.nombre || '—') + ' · ' + (S.currentUser?.rol || '—');
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('nav-qc')?.classList.add('active');
+  showScreen('screen-qc-bandejas');
+  qcCargarBandejas();
+}
+
+function qcGoHome() {
+  showScreen('screen-home');
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('nav-home')?.classList.add('active');
+  updateHome();
+}
+
+async function qcCargarBandejas() {
+  ['qc-cnt-g1','qc-cnt-g2','qc-cnt-adhoc'].forEach(id => {
+    document.getElementById(id).textContent = '...';
+  });
+  const fetchSafe = async (gate) => {
+    try { const d = await qcFetch('/qc/lotes-pendientes?gate=' + gate); return d.total || 0; }
+    catch { return '—'; }
+  };
+  const [g1, g2, adhoc] = await Promise.all([
+    fetchSafe('G1'), fetchSafe('G2'), fetchSafe('ADHOC')
+  ]);
+  document.getElementById('qc-cnt-g1').textContent    = g1;
+  document.getElementById('qc-cnt-g2').textContent    = g2;
+  document.getElementById('qc-cnt-adhoc').textContent = adhoc;
+}
+
+// ════════════════════════════════════════════════════════════
+// PANTALLA 2: Lista de lotes
+// ════════════════════════════════════════════════════════════
+async function qcGoLista(gate) {
+  qcS.gate = gate;
+  const titulos = {
+    G1:   'G1 — Empaque',
+    G2:   'G2 — Traslado Teapa',
+    ADHOC:'Ad-hoc — Solicitud puntual',
+  };
+  document.getElementById('qc-lista-titulo').textContent = titulos[gate];
+  document.getElementById('qc-lista-sub').textContent = 'Cargando...';
+  document.getElementById('qc-lista-loading').style.display = '';
+  document.getElementById('qc-lista-content').innerHTML = '';
+  showScreen('screen-qc-lista');
+
+  try {
+    const d = await qcFetch('/qc/lotes-pendientes?gate=' + gate);
+    document.getElementById('qc-lista-loading').style.display = 'none';
+    document.getElementById('qc-lista-sub').textContent = `${d.total} lote${d.total===1?'':'s'} disponible${d.total===1?'':'s'}`;
+    const cont = document.getElementById('qc-lista-content');
+    if (!d.lotes || d.lotes.length === 0) {
+      cont.innerHTML = `<div class="empty-state">
+        <div class="empty-icon">🎉</div>
+        <div class="empty-text">No hay lotes pendientes en ${titulos[gate]}.</div>
+      </div>`;
+      return;
+    }
+    cont.innerHTML = d.lotes.map((lote, i) => {
+      const dim = lote.articulo?.dimensiones || {};
+      const dimText = (dim.ancho_cm && dim.alto_cm && dim.largo_cm)
+        ? `${dim.ancho_cm}×${dim.alto_cm}×${dim.largo_cm} cm` : 'Sin dimensiones';
+      const fechaStr = lote.fecha_vaciado
+        ? new Date(lote.fecha_vaciado).toLocaleDateString('es-MX', {day:'2-digit',month:'short',year:'numeric'})
+        : '—';
+      return `<div class="qc-lote-card" onclick="qcAbrirIniciar(${i})">
+        <div class="qc-lote-info">
+          <div class="qc-lote-id">${lote.lote_v10 || '—'}</div>
+          <div class="qc-lote-art">${lote.articulo?.nombre || '—'}</div>
+          <div class="qc-lote-meta">📐 ${dimText} · 📅 ${fechaStr} · Estado ${lote.status}</div>
+        </div>
+        <div class="qc-lote-arrow">›</div>
+      </div>`;
+    }).join('');
+    qcS._lotesCache = d.lotes;
+  } catch (e) {
+    document.getElementById('qc-lista-loading').style.display = 'none';
+    document.getElementById('qc-lista-content').innerHTML = `<div class="empty-state">
+      <div class="empty-icon">⚠️</div>
+      <div class="empty-text">Error: ${e.message}</div>
+    </div>`;
+    showToast('Error al cargar lotes: ' + e.message, 'red');
+  }
+}
+
+// ════════════════════════════════════════════════════════════
+// PANTALLA 3: Iniciar ensaye
+// ════════════════════════════════════════════════════════════
+async function qcAbrirIniciar(loteIdx) {
+  const lote = qcS._lotesCache?.[loteIdx];
+  if (!lote) { showToast('Lote no encontrado', 'red'); return; }
+  qcS.lote = lote;
+
+  document.getElementById('qc-iniciar-sub').textContent = lote.lote_v10 + ' · Gate ' + qcS.gate;
+
+  const dim = lote.articulo?.dimensiones || {};
+  document.getElementById('qc-iniciar-info').innerHTML = `
+    <tr><td class="rk">Lote</td><td class="rv">${lote.lote_v10 || '—'}</td></tr>
+    <tr><td class="rk">Artículo</td><td class="rv" style="font-size:11px;">${lote.articulo?.nombre || '—'}</td></tr>
+    <tr><td class="rk">Código</td><td class="rv">${lote.articulo?.codigo || '—'}</td></tr>
+    <tr><td class="rk">Dimensiones</td><td class="rv">${dim.ancho_cm}×${dim.alto_cm}×${dim.largo_cm} cm</td></tr>
+    <tr><td class="rk">Gate</td><td class="rv">${qcS.gate}</td></tr>
+    <tr><td class="rk">CR 1417 ID</td><td class="rv">${lote.id}</td></tr>`;
+
+  document.getElementById('qc-plan-grid').innerHTML = QC_PLAN.map(p => `
+    <div class="qc-plan-cell">
+      <span class="qc-plan-icon">${p.icono}</span>
+      <div class="qc-plan-pos">${p.posicion}</div>
+      <div class="qc-plan-tipo">${p.titulo}</div>
+    </div>`).join('');
+
+  document.getElementById('qc-regla-status').textContent = '⏳ Buscando regla...';
+  document.getElementById('qc-regla-body').innerHTML = '<div class="empty-state"><div class="spinner" style="margin:0 auto 8px;"></div></div>';
+
+  try {
+    const d = await qcFetch('/qc/regla-aplicable?articulo=' + lote.articulo.id);
+    if (!d.regla_encontrada) {
+      qcS.regla = null;
+      document.getElementById('qc-regla-status').innerHTML = '<span style="color:#FFCD24;">⚠️ Sin regla</span>';
+      document.getElementById('qc-regla-body').innerHTML = `<div class="warn-box">
+        ⚠️ Este artículo no tiene regla QC configurada. Puedes hacer el ensaye, pero el veredicto será siempre "pasa" hasta que el director defina los umbrales.
+      </div>`;
+    } else {
+      qcS.regla = d.regla;
+      const r = d.regla;
+      const u = r.umbrales;
+      document.getElementById('qc-regla-status').innerHTML = '<span style="color:#A8E6C2;">✅ Regla activa</span>';
+      const umbralAplicable = qcS.gate === 'G1' ? u.g1_kgcm2 : qcS.gate === 'G2' ? u.g2_kgcm2 : null;
+      document.getElementById('qc-regla-body').innerHTML = `
+        <table class="rv-table">
+          <tr><td class="rk">Regla</td><td class="rv">${r.nombre}</td></tr>
+          <tr><td class="rk">Norma</td><td class="rv">${r.norma?.nombre || '—'}</td></tr>
+          <tr><td class="rk">Umbral G1</td><td class="rv">${u.g1_kgcm2 || '—'} kg/cm²</td></tr>
+          <tr><td class="rk">Umbral G2</td><td class="rv">${u.g2_kgcm2 || '—'} kg/cm²</td></tr>
+          <tr><td class="rk">f'm objetivo</td><td class="rv">${u.fm_objetivo_kgcm2 || '—'} kg/cm²</td></tr>
+          <tr><td class="rk">Min individual</td><td class="rv">${u.min_individual_kgcm2 || '—'} kg/cm²</td></tr>
+          <tr><td class="rk">Absorción máx</td><td class="rv">${u.absorcion_max_pct || '—'}%</td></tr>
+          ${umbralAplicable ? `<tr><td class="rk"><strong>Aplicable a este ensaye</strong></td><td class="rv" style="color:#1A7A4A;font-size:18px;">${umbralAplicable} kg/cm²</td></tr>` : ''}
+        </table>`;
+    }
+  } catch (e) {
+    document.getElementById('qc-regla-status').innerHTML = '<span style="color:#C0392B;">⚠️ Error</span>';
+    document.getElementById('qc-regla-body').innerHTML = `<div class="warn-box">Error al cargar regla: ${e.message}</div>`;
+  }
+
+  showScreen('screen-qc-iniciar');
+}
+
+function qcVolverLista() {
+  qcGoLista(qcS.gate);
+}
+
+async function qcIniciarEnsaye() {
+  if (!qcS.lote) { showToast('Lote no seleccionado', 'red'); return; }
+  const u = S.currentUser;
+  if (!u) { showToast('Sesión expirada', 'red'); return; }
+
+  const btn = document.getElementById('qc-btn-iniciar');
+  btn.disabled = true;
+  showLoading('Creando ensaye...');
+
+  try {
+    const body = {
+      lote_id:        qcS.lote.id,
+      lote_v10:       qcS.lote.lote_v10,
+      articulo_id:    qcS.lote.articulo.id,
+      articulo_nombre:qcS.lote.articulo.nombre,
+      gate:           qcS.gate.toLowerCase() === 'adhoc' ? 'adhoc' : qcS.gate,
+      operador_id:    u.id,
+      operador_codigo:u.codigo,
+      operador_rol:   u.rol,
+    };
+    const d = await qcFetch('/qc/ensaye/iniciar', { method:'POST', body });
+    qcS.ensayeId = d.ensaye_id;
+    qcS.probetas = d.probetas;
+    qcS.ensayeNumero = d.probetas?.[0]?.codigo?.replace(/-\d+$/, '') || null;
+    qcS.fotoActual = 0;
+    qcS.fotos = {};
+    hideLoading();
+    showToast('Ensaye iniciado · ' + (d.probetas?.[0]?.codigo || ''), 'green');
+    qcAbrirCaptura();
+  } catch (e) {
+    hideLoading();
+    btn.disabled = false;
+    showToast('Error al iniciar: ' + e.message, 'red');
+  }
+}
+
+// ════════════════════════════════════════════════════════════
+// PANTALLA 4: Captura
+// ════════════════════════════════════════════════════════════
+function qcAbrirCaptura() {
+  qcRenderCaptura();
+  showScreen('screen-qc-captura');
+}
+
+function qcRenderCaptura() {
+  const idx = qcS.fotoActual;
+  const plan = QC_PLAN[idx];
+  const probeta = qcS.probetas.find(p => p.posicion === plan.posicion);
+  const yaTomada = !!qcS.fotos[idx];
+
+  _setText('qc-cap-headtitle', `Foto ${idx+1} / 9`);
+  _setText('qc-cap-headsub', qcS.lote?.lote_v10 || '—');
+  _setText('qc-cap-step', `FOTO ${idx+1} DE 9`);
+  _setText('qc-cap-titulo', `Probeta ${plan.posicion} — ${plan.titulo}`);
+  _setText('qc-cap-codigo', probeta?.codigo || '—');
+  _setText('qc-cap-instruccion', QC_INSTRUCCIONES[plan.tipo]);
+  _setText('qc-cap-hint', QC_HINTS[plan.tipo]);
+
+  document.getElementById('qc-step-progress').innerHTML = `
+    <div style="display:flex;align-items:center;gap:4px;flex-wrap:nowrap;padding:4px 0;">
+      ${QC_PLAN.map((p, i) => {
+        const done = !!qcS.fotos[i];
+        const cur  = i === idx;
+        const cls  = done ? 'done' : cur ? 'active' : '';
+        return `<div class="step-dot ${cls}" style="font-size:9px;width:30px;height:30px;flex-shrink:0;" title="${p.lbl}">${done ? '✓' : i+1}</div>${i<8 ? '<div class="step-line ' + (done?'done':'') + '" style="min-width:6px;"></div>' : ''}`;
+      }).join('')}
+    </div>`;
+
+  const pa = document.getElementById('qc-photo-area');
+  if (yaTomada) {
+    const f = qcS.fotos[idx];
+    pa.className = 'photo-area has-photo';
+    pa.innerHTML = `<img src="${f.b64 || f.urlFoto}" style="max-height:240px;cursor:pointer;" onclick="openLightbox('${f.b64 || f.urlFoto}','Foto ${idx+1}')">`;
+    document.getElementById('qc-vision-section').style.display = '';
+    qcRenderVisionResult(f);
+    document.getElementById('qc-valor-input').value = f.valor || '';
+    document.getElementById('qc-btn-confirmar').disabled = !f.valor;
+    document.getElementById('qc-btn-retomar').style.display = '';
+  } else {
+    pa.className = 'photo-area';
+    pa.innerHTML = `
+      <div class="photo-icon">📷</div>
+      <div class="photo-label">Tomar foto del display</div>
+      <div class="photo-hint">${QC_HINTS[plan.tipo]}</div>`;
+    document.getElementById('qc-vision-section').style.display = 'none';
+    document.getElementById('qc-btn-confirmar').disabled = true;
+    document.getElementById('qc-btn-retomar').style.display = 'none';
+  }
+}
+
+function qcRenderVisionResult(fotoData) {
+  const v = fotoData.vision || {};
+  const conf = v.confianza_pct || 0;
+  const claseConf = conf >= 85 ? 'high' : conf >= 60 ? 'med' : 'low';
+  _setClass('qc-vision-panel', 'qc-vision-panel ' + claseConf);
+  _setText('qc-vision-num', fotoData.valor || '—');
+  _setText('qc-vision-unit', QC_UNIDADES[QC_PLAN[qcS.fotoActual].tipo]);
+  const confEl = document.getElementById('qc-vision-conf');
+  if (confEl) {
+    confEl.className = 'qc-vision-conf ' + claseConf;
+    confEl.textContent = `Confianza ${conf}% · ${conf>=85?'Alta':conf>=60?'Media':'Baja'} · Vio: "${v.valor_visto || '—'}"`;
+  }
+  _setText('qc-vision-obs', v.observacion || '');
+}
+
+function qcAbrirCamara()  { document.getElementById('qc-photo-input').click(); }
+function qcAbrirGaleria() { document.getElementById('qc-photo-input-gal').click(); }
+
+async function qcOnFotoSeleccionada(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  e.target.value = '';
+
+  const idx = qcS.fotoActual;
+  const plan = QC_PLAN[idx];
+  const probeta = qcS.probetas.find(p => p.posicion === plan.posicion);
+
+  showLoading('Subiendo foto y leyendo display...');
+  try {
+    const b64 = await compressImage(file, 900);
+
+    const d = await qcFetch('/qc/foto/subir', {
+      method: 'POST',
+      body: {
+        ensaye_id:   qcS.ensayeId,
+        probeta_id:  probeta.id,
+        tipo_foto:   plan.tipo,
+        foto_base64: b64,
+      },
+    });
+
+    const v = d.vision_resultado || {};
+    let valor = null;
+    if (plan.tipo === 'humedo' || plan.tipo === 'seco') valor = v.valor_g;
+    else if (plan.tipo === 'prensa') valor = v.valor_kgcm2;
+
+    qcS.fotos[idx] = {
+      b64,
+      urlFoto:   d.url_foto,
+      valor,
+      override:  false,
+      confianza: v.confianza_pct,
+      vision:    v,
+    };
+    hideLoading();
+    qcRenderCaptura();
+    if (valor) showToast(`Vision leyó: ${valor} ${QC_UNIDADES[plan.tipo]}`, 'green');
+    else showToast('Vision no pudo leer · captura el valor manualmente', '');
+  } catch (err) {
+    hideLoading();
+    showToast('Error: ' + err.message, 'red');
+  }
+}
+
+function qcMarcarOverride() {
+  const idx = qcS.fotoActual;
+  if (!qcS.fotos[idx]) return;
+  const nuevoValor = parseFloat(document.getElementById('qc-valor-input').value);
+  if (isNaN(nuevoValor) || nuevoValor <= 0) {
+    document.getElementById('qc-btn-confirmar').disabled = true;
+    return;
+  }
+  qcS.fotos[idx].valor = nuevoValor;
+  qcS.fotos[idx].override = (qcS.fotos[idx].vision?.valor_g !== nuevoValor && qcS.fotos[idx].vision?.valor_kgcm2 !== nuevoValor);
+  document.getElementById('qc-btn-confirmar').disabled = false;
+}
+
+function qcRetomarFoto() {
+  const idx = qcS.fotoActual;
+  delete qcS.fotos[idx];
+  qcRenderCaptura();
+}
+
+async function qcConfirmarFoto() {
+  const idx = qcS.fotoActual;
+  const foto = qcS.fotos[idx];
+  if (!foto) { showToast('Toma la foto primero', 'red'); return; }
+  const valorFinal = parseFloat(document.getElementById('qc-valor-input').value);
+  if (isNaN(valorFinal) || valorFinal <= 0) {
+    showToast('Ingresa un valor válido', 'red'); return;
+  }
+  const plan = QC_PLAN[idx];
+  const probeta = qcS.probetas.find(p => p.posicion === plan.posicion);
+
+  showLoading('Confirmando valor...');
+  try {
+    await qcFetch('/qc/foto/confirmar', {
+      method: 'POST',
+      body: {
+        probeta_id:       probeta.id,
+        tipo_foto:        plan.tipo,
+        url_foto:         foto.urlFoto,
+        valor_final:      valorFinal,
+        confianza_vision: foto.confianza,
+        fue_override:     foto.override,
+      },
+    });
+    foto.valor = valorFinal;
+    foto.confirmado = true;
+    hideLoading();
+
+    if (qcS.fotoActual < 8) {
+      qcS.fotoActual++;
+      qcRenderCaptura();
+    } else {
+      qcMostrarResumen();
+    }
+  } catch (e) {
+    hideLoading();
+    showToast('Error: ' + e.message, 'red');
+  }
+}
+
+function qcCancelarCaptura() {
+  if (Object.keys(qcS.fotos).length > 0) {
+    if (!confirm('¿Cancelar el ensaye? Las fotos capturadas se perderán.\n\n(El ensaye queda en Supabase pero sin completar)')) return;
+  }
+  qcVolverLista();
+}
+
+function qcVolverCaptura() {
+  qcS.fotoActual = 8;
+  qcRenderCaptura();
+  showScreen('screen-qc-captura');
+}
+
+// ════════════════════════════════════════════════════════════
+// PANTALLA 5: Resumen pre-guardado
+// ════════════════════════════════════════════════════════════
+function qcMostrarResumen() {
+  document.getElementById('qc-resumen-sub').textContent = qcS.lote?.lote_v10 || '—';
+
+  const grid = document.getElementById('qc-resumen-probetas');
+  grid.innerHTML = ['izquierda','centro','derecha'].map(pos => {
+    const probeta = qcS.probetas.find(p => p.posicion === pos);
+    const fotoH = qcS.fotos[QC_PLAN.findIndex(p => p.posicion === pos && p.tipo === 'humedo')];
+    const fotoS = qcS.fotos[QC_PLAN.findIndex(p => p.posicion === pos && p.tipo === 'seco')];
+    const fotoP = qcS.fotos[QC_PLAN.findIndex(p => p.posicion === pos && p.tipo === 'prensa')];
+    return `<div class="qc-res-probeta">
+      <div class="qc-res-pos">📦 Probeta ${pos} · ${probeta?.codigo || '—'}</div>
+      <div class="qc-res-row"><span class="rk">💧 Peso húmedo</span><span class="rv">${fotoH?.valor?.toLocaleString() || '—'} g</span></div>
+      <div class="qc-res-row"><span class="rk">🌡️ Peso seco</span><span class="rv">${fotoS?.valor?.toLocaleString() || '—'} g</span></div>
+      <div class="qc-res-row"><span class="rk">⚙️ Resistencia</span><span class="rv">${fotoP?.valor || '—'} kg/cm²</span></div>
+    </div>`;
+  }).join('');
+
+  const resistencias = [0,1,2].map(i => qcS.fotos[QC_PLAN.findIndex(p => p.posicion === ['izquierda','centro','derecha'][i] && p.tipo === 'prensa')]?.valor).filter(v => v > 0);
+  const pesosH = [0,1,2].map(i => qcS.fotos[QC_PLAN.findIndex(p => p.posicion === ['izquierda','centro','derecha'][i] && p.tipo === 'humedo')]?.valor).filter(v => v > 0);
+  const pesosS = [0,1,2].map(i => qcS.fotos[QC_PLAN.findIndex(p => p.posicion === ['izquierda','centro','derecha'][i] && p.tipo === 'seco')]?.valor).filter(v => v > 0);
+
+  if (resistencias.length === 3 && pesosH.length === 3 && pesosS.length === 3) {
+    const promedio = resistencias.reduce((a,b) => a+b, 0) / 3;
+    const minimo = Math.min(...resistencias);
+    const desvSq = resistencias.map(r => (r-promedio)**2).reduce((a,b) => a+b, 0) / 3;
+    const desviacion = Math.sqrt(desvSq);
+    const absorciones = pesosH.map((h,i) => ((h - pesosS[i]) / pesosS[i]) * 100);
+    const absProm = absorciones.reduce((a,b) => a+b, 0) / 3;
+
+    const umbral = qcS.gate === 'G1' ? qcS.regla?.umbrales?.g1_kgcm2 : qcS.gate === 'G2' ? qcS.regla?.umbrales?.g2_kgcm2 : null;
+    const cumple = !umbral || (minimo >= umbral && promedio >= umbral);
+    const claseEf = cumple ? 'ok' : 'bad';
+
+    document.getElementById('qc-resumen-metrics').innerHTML = `
+      <div class="rv-metric ${claseEf}"><div class="rv-mval">${promedio.toFixed(1)}</div><div class="rv-mlbl">Promedio kg/cm²</div></div>
+      <div class="rv-metric ${claseEf}"><div class="rv-mval">${minimo.toFixed(1)}</div><div class="rv-mlbl">Mín individual</div></div>
+      <div class="rv-metric ${absProm > (qcS.regla?.umbrales?.absorcion_max_pct || 14) ? 'bad' : 'ok'}"><div class="rv-mval">${absProm.toFixed(1)}%</div><div class="rv-mlbl">Absorción</div></div>`;
+
+    document.getElementById('qc-resumen-table').innerHTML = `
+      <tr><td class="rk">Desviación estándar</td><td class="rv">${desviacion.toFixed(2)} kg/cm²</td></tr>
+      <tr><td class="rk">Umbral aplicable</td><td class="rv">${umbral ? umbral + ' kg/cm²' : 'sin regla'}</td></tr>
+      <tr><td class="rk">Veredicto preliminar</td><td class="rv" style="color:${cumple?'#1A7A4A':'#C0392B'};font-size:16px;">${cumple ? '✅ PASA' : '❌ NO PASA'}</td></tr>`;
+  } else {
+    document.getElementById('qc-resumen-metrics').innerHTML = '<div style="color:var(--text3);font-size:13px;grid-column:1/-1;">Datos incompletos</div>';
+    document.getElementById('qc-resumen-table').innerHTML = '';
+  }
+
+  showScreen('screen-qc-resumen');
+}
+
+async function qcFinalizarEnsaye() {
+  if (!qcS.ensayeId) { showToast('Ensaye no encontrado', 'red'); return; }
+  const btn = document.getElementById('qc-btn-finalizar');
+  btn.disabled = true;
+  showLoading('Calculando veredicto...');
+
+  try {
+    const d = await qcFetch('/qc/ensaye/finalizar', {
+      method: 'POST',
+      body: { ensaye_id: qcS.ensayeId },
+    });
+    qcS.resultadoFinal = d;
+    hideLoading();
+    qcMostrarResultado();
+  } catch (e) {
+    hideLoading();
+    btn.disabled = false;
+    showToast('Error al finalizar: ' + e.message, 'red');
+  }
+}
+
+// ════════════════════════════════════════════════════════════
+// PANTALLA 6: Resultado + sync NetSuite
+// ════════════════════════════════════════════════════════════
+function qcMostrarResultado() {
+  const r = qcS.resultadoFinal;
+  if (!r) return;
+
+  document.getElementById('qc-resultado-sub').textContent = qcS.lote?.lote_v10 || '—';
+
+  const box = document.getElementById('qc-veredicto-box');
+  const ic = document.getElementById('qc-veredicto-icon');
+  const ti = document.getElementById('qc-veredicto-titulo');
+  const mo = document.getElementById('qc-veredicto-motivo');
+
+  if (r.veredicto === 'pasa') {
+    box.className = 'qc-veredicto-box pasa';
+    ic.textContent = '✅';
+    ti.textContent = 'PASA';
+  } else if (r.veredicto === 'no_pasa') {
+    box.className = 'qc-veredicto-box no_pasa';
+    ic.textContent = '❌';
+    ti.textContent = 'NO PASA';
+  } else {
+    box.className = 'qc-veredicto-box';
+    ic.textContent = '⏳';
+    ti.textContent = 'Pendiente';
+  }
+  mo.textContent = r.veredicto_motivo || '—';
+
+  const c = r.calculos || {};
+  document.getElementById('qc-resultado-metrics').innerHTML = `
+    <div class="rv-metric ${r.veredicto==='pasa'?'ok':'bad'}"><div class="rv-mval">${c.promedio_resistencia?.toFixed(1) || '—'}</div><div class="rv-mlbl">Promedio kg/cm²</div></div>
+    <div class="rv-metric ${r.veredicto==='pasa'?'ok':'bad'}"><div class="rv-mval">${c.minimo_individual?.toFixed(1) || '—'}</div><div class="rv-mlbl">Mín individual</div></div>
+    <div class="rv-metric ok"><div class="rv-mval">${c.absorcion_promedio_pct?.toFixed(1) || '—'}%</div><div class="rv-mlbl">Absorción</div></div>`;
+
+  showScreen('screen-qc-resultado');
+}
+
+async function qcSincronizarNetSuite() {
+  if (!qcS.ensayeId) { showToast('Ensaye no encontrado', 'red'); return; }
+  const btn = document.getElementById('qc-btn-sync');
+  btn.disabled = true;
+  showLoading('Subiendo a NetSuite...');
+
+  try {
+    const d = await qcFetch('/qc/ensaye/sync-netsuite', {
+      method: 'POST',
+      body: { ensaye_id: qcS.ensayeId },
+    });
+    hideLoading();
+
+    const chip = document.getElementById('qc-ns-status-chip');
+    chip.style.background = '#D6F0E2';
+    chip.style.color = '#1A7A4A';
+    chip.textContent = 'ENVIADO';
+
+    document.getElementById('qc-ns-body').innerHTML = `
+      <div class="info-box" style="background:#D6F0E2;border-color:#1A7A4A;color:#1A7A4A;">
+        ✅ Registro creado en NetSuite
+      </div>
+      <table class="rv-table" style="margin-top:10px;">
+        <tr><td class="rk">CR 933 (padre)</td><td class="rv">ID ${d.netsuite?.cr933_id || '—'}</td></tr>
+        <tr><td class="rk">Nombre</td><td class="rv" style="font-size:11px;">${d.netsuite?.cr933_name || '—'}</td></tr>
+        <tr><td class="rk">CR 934 (3 probetas)</td><td class="rv">${(d.netsuite?.cr934_ids || []).join(', ') || '—'}</td></tr>
+        <tr><td class="rk">Lote 1417 vinculado</td><td class="rv">${d.netsuite?.lote_1417_id || '—'}</td></tr>
+      </table>`;
+
+    btn.textContent = '✓ Ya enviado';
+    btn.disabled = true;
+    showToast('Subido a NetSuite ✅', 'green');
+  } catch (e) {
+    hideLoading();
+    btn.disabled = false;
+
+    const chip = document.getElementById('qc-ns-status-chip');
+    chip.style.background = '#FDEAEA';
+    chip.style.color = '#C0392B';
+    chip.textContent = 'ERROR';
+
+    document.getElementById('qc-ns-body').innerHTML = `
+      <div class="warn-box" style="background:#FDEAEA;border-color:#C0392B;color:#C0392B;">
+        ❌ Error al sincronizar: ${e.message}
+      </div>
+      <div class="form-hint" style="margin-top:8px;">
+        El ensaye está guardado en Supabase con estado "error". Puedes reintentar tocando el botón de nuevo.
+      </div>`;
+    showToast('Error NetSuite: ' + e.message, 'red');
+  }
+}
 
 // ═══════ START ═══════
 async function startApp(){
