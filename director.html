@@ -51,6 +51,7 @@
   .alert-success { background: #d1fae5; color: #065f46; }
   .alert-error { background: #fee2e2; color: #991b1b; }
   .result-detail { font-family: 'Courier New', monospace; font-size: 11px; background: #f9fafb; padding: 12px; border-radius: 6px; margin-top: 8px; max-height: 200px; overflow-y: auto; white-space: pre-wrap; word-break: break-all; }
+  .version-tag { text-align: center; font-size: 11px; color: #9ca3af; margin-top: 20px; padding: 8px; }
 </style>
 </head>
 <body>
@@ -65,6 +66,7 @@
   <button data-filter="falta-build">Falta Build</button>
 </div>
 <div id="contenido"><div class="loading"><div class="spinner"></div><div style="margin-top: 12px;">Cargando lotes pendientes...</div></div></div>
+<div class="version-tag">v3.8.1 - Cierre completo con Transfer Order automatico</div>
 <div class="modal-overlay" id="modal-confirm"><div class="modal"><h2>Confirmar cierre del lote</h2><div id="modal-body"></div></div></div>
 <div class="modal-overlay" id="modal-resultado"><div class="modal"><h2 id="resultado-title">Resultado</h2><div id="resultado-body"></div><div class="actions"><button class="btn-secondary" onclick="document.getElementById('modal-resultado').classList.remove('show'); cargarLotes();">Cerrar</button></div></div></div>
 <script>
@@ -126,15 +128,16 @@ async function confirmarCierre(crId){
   if(l.desp>0)h+='<div class="summary-line"><span>Adj desperdicio:</span><span>-'+l.desp+' pzs (1474)</span></div>';
   if(hp>0&&pM>0)h+='<div class="summary-line"><span>Adj humedad polvo:</span><span>+'+ap+' m3</span></div>';
   if(hp>0&&sM>0)h+='<div class="summary-line"><span>Adj humedad sello:</span><span>+'+as+' m3</span></div>';
+  if(l.aprob>0)h+='<div class="summary-line"><span style="color:#0a3d62;font-weight:600">Transfer Order:</span><span style="color:#0a3d62;font-weight:600">'+l.aprob+' pzs MP &rarr; Teapa</span></div>';
   h+='<div class="summary-line"><span><b>CR 1417:</b></span><span>status -> 7</span></div>';
-  h+='<div class="actions" style="margin-top:20px;"><button class="btn-primary" id="btn-ejecutar" onclick="ejecutarCierre('+crId+','+l.build_id+','+loteId+',\''+l.lote+'\','+l.rech+','+l.desp+','+hp+','+pM+','+sM+')">CONFIRMAR Y EJECUTAR</button><button class="btn-secondary" onclick="document.getElementById(\'modal-confirm\').classList.remove(\'show\')">Cancelar</button></div>';
+  h+='<div class="actions" style="margin-top:20px;"><button class="btn-primary" id="btn-ejecutar" onclick="ejecutarCierre('+crId+','+l.build_id+','+loteId+',\''+l.lote+'\','+l.aprob+','+l.rech+','+l.desp+','+hp+','+pM+','+sM+')">CONFIRMAR Y EJECUTAR</button><button class="btn-secondary" onclick="document.getElementById(\'modal-confirm\').classList.remove(\'show\')">Cancelar</button></div>';
   document.getElementById('modal-body').innerHTML=h;
 }
-async function ejecutarCierre(c,b,l,n,r,d,h,p,s){
+async function ejecutarCierre(c,b,l,n,a,r,d,h,p,s){
   document.getElementById('btn-ejecutar').disabled=true;
   document.getElementById('btn-ejecutar').textContent='Ejecutando...';
   try{
-    const res=await fetch(CERRAR,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({cr_id:c,build_id:b,lote_id:l,lote_nombre:n,item_assembly_id:'1256',cantidad_rechazo:r,cantidad_desperdicio:d,humedad_pct:h,polvo_m3_consumido:p,sello_m3_consumido:s,autorizado_por:'Director (v3.8)'})});
+    const res=await fetch(CERRAR,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({cr_id:c,build_id:b,lote_id:l,lote_nombre:n,item_assembly_id:'1256',cantidad_aprobada:a,cantidad_rechazo:r,cantidad_desperdicio:d,humedad_pct:h,polvo_m3_consumido:p,sello_m3_consumido:s,autorizado_por:'Director (v3.8.1)'})});
     const j=await res.json();
     document.getElementById('modal-confirm').classList.remove('show');
     if(j.success){
@@ -146,6 +149,8 @@ async function ejecutarCierre(c,b,l,n,r,d,h,p,s){
       if(adj.desperdicio)html+='<div class="summary-line"><span>Adj Desperdicio:</span><span>#'+adj.desperdicio.id+'</span></div>';
       if(adj.humedad_polvo)html+='<div class="summary-line"><span>Adj Humedad Polvo:</span><span>#'+adj.humedad_polvo.id+'</span></div>';
       if(adj.humedad_sello)html+='<div class="summary-line"><span>Adj Humedad Sello:</span><span>#'+adj.humedad_sello.id+'</span></div>';
+      if(j.transfer_created)html+='<div class="summary-line"><span><b>Transfer Order:</b></span><span style="color:#0a3d62;font-weight:600">#'+j.transfer_created.id+' ('+j.transfer_created.qty+' pzs)</span></div>';
+      if(j.warnings)html+='<div class="alert" style="background:#fef3c7;color:#92400e;margin-top:12px;"><b>Avisos:</b><div class="result-detail">'+JSON.stringify(j.warnings,null,2)+'</div></div>';
       document.getElementById('resultado-body').innerHTML=html;
     }else{
       document.getElementById('resultado-title').textContent='Error al cerrar lote';
