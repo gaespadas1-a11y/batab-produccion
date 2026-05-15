@@ -4054,6 +4054,10 @@ async function qcAbrirIniciar(loteIdx) {
   if (!lote) { showToast('Lote no encontrado', 'red'); return; }
   qcS.lote = lote;
 
+  // v3.7.5 FIX: resetear boton al abrir pantalla (puede haber quedado disabled de intento previo)
+  const _btnInit = document.getElementById('qc-btn-iniciar');
+  if (_btnInit) { _btnInit.disabled = false; _btnInit.innerHTML = '▶ Comenzar ensaye'; }
+
   document.getElementById('qc-iniciar-sub').textContent = lote.lote_v10 + ' · Gate ' + qcS.gate;
 
   const dim = lote.articulo?.dimensiones || {};
