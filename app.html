@@ -3309,7 +3309,7 @@ function renderReviewScreen(rec){
     const _banner = document.createElement('div');
     _banner.id = 'fase1-info-banner';
     _banner.style.cssText = 'background:#E8F5E9;color:#1B5E20;padding:14px 16px;border-radius:8px;margin:12px 4px;font-weight:600;text-align:center;border:2px solid #4CAF50;line-height:1.5;font-size:14px;';
-    _banner.innerHTML = '✅ <b>FASE 1 — Validación inicial</b><br>Al aprobar se crea la Work Order en NetSuite.<br><br>📝 Cantidad aprobada / rechazo / desperdicio se capturan en <b>Fase 2</b>, después de G1 y empaque final.';
+    _banner.innerHTML = '✅ <b>FASE 1 — Validación inicial</b><br>Al aprobar se crea la Work Order en NetSuite.<br><br>📝 Cantidad aprobada / rechazo / desperdicio se capturan en <b>Fase 2</b>, después de G1 y empaque final.<br><br><span style="font-size:11px;color:#2E7D32;">build v3.7.4 ✓</span>';
     _cierreSec.parentNode.insertBefore(_banner, _cierreSec);
   }
 
@@ -3333,6 +3333,25 @@ function renderReviewScreen(rec){
 
 // ═══════ CIERRE TEAPA — cálculo en vivo y validación de cuadre ═══════
 function calcCierreTeapa(){
+  // ⚡ FASE 1 GUARD v3.7.4: si no hay WO en NS aun, no validar suma (las cantidades reales se capturan en Fase 2)
+  try {
+    const _rec = (typeof getRecords==='function' && typeof S!=='undefined' && S.reviewRecordId)
+      ? getRecords().find(function(r){return r.id===S.reviewRecordId;}) : null;
+    const _isFase1 = !_rec || !_rec.netsuiteWO || _rec.netsuiteWO==='' || _rec.netsuiteWO===null;
+    if(_isFase1){
+      const _b = document.getElementById('rv-cuadre-box');
+      const _m = document.getElementById('rv-cuadre-msg');
+      if(_b){ _b.style.borderLeftColor='#4CAF50'; _b.style.background='#E8F5E9'; }
+      if(_m){ _m.style.color='#1B5E20'; _m.textContent='✓ FASE 1: validación inicial — captura de cantidades en Fase 2'; }
+      const _cierre = document.getElementById('rv-cierre-section');
+      if(_cierre) _cierre.style.display='none';
+      const _sumaEl = document.getElementById('rv-suma-ard');
+      const _realEl = document.getElementById('rv-real-eco');
+      if(_sumaEl) _sumaEl.textContent='—';
+      if(_realEl) _realEl.textContent='—';
+      return;
+    }
+  } catch(e){ console.warn('FASE 1 guard error:', e); }
   const real = parseFloat(document.getElementById('rv-real-empacada').value)||0;
   const cAp  = parseFloat(document.getElementById('rv-cant-aprobada').value)||0;
   const cRe  = parseFloat(document.getElementById('rv-cant-rechazo').value)||0;
