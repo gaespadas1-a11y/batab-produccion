@@ -1,7 +1,6 @@
 {
   "name": "BATAB Producción",
   "short_name": "BATAB",
-  "description": "Sistema integrado de producción y control de calidad BATAB",
   "start_url": "https://gaespadas1-a11y.github.io/batab-produccion/index.html",
   "scope": "https://gaespadas1-a11y.github.io/batab-produccion/",
   "display": "standalone",
