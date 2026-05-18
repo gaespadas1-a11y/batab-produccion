@@ -557,7 +557,6 @@ html,body{height:100%;background:var(--bg);color:var(--text);
 .qc-veredicto-motivo{font-size:13px;color:var(--text2);margin-top:8px;line-height:1.5;}
 
 </style>
-<!-- PWA / Add to Home Screen (v0.9.10 CAMBIO 8 - Pages + Storage) -->
 <link rel="manifest" href="https://gaespadas1-a11y.github.io/batab-produccion/manifest.json">
 <meta name="theme-color" content="#093F89">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -568,7 +567,6 @@ html,body{height:100%;background:var(--bg);color:var(--text);
 <link rel="apple-touch-icon" sizes="180x180" href="https://szrcmvlgxxpmvgrfmxak.supabase.co/storage/v1/object/public/batab-public/batab-icon-180.png">
 <link rel="icon" type="image/png" sizes="192x192" href="https://szrcmvlgxxpmvgrfmxak.supabase.co/storage/v1/object/public/batab-public/batab-icon-192.png">
 <link rel="icon" type="image/png" sizes="512x512" href="https://szrcmvlgxxpmvgrfmxak.supabase.co/storage/v1/object/public/batab-public/batab-icon-512.png">
-<!-- /PWA -->
 </head>
 <body>
 
@@ -4590,7 +4588,6 @@ startApp();
   'use strict';
   var API_BASE='https://szrcmvlgxxpmvgrfmxak.supabase.co/functions/v1/app-api';
   var bottomNavPrevDisplay = null;
-
   async function apiCall(path, opts){
     opts = opts || {};
     if(typeof window.qcFetch==='function'){
@@ -4603,11 +4600,9 @@ startApp();
     if(!r.ok){ throw new Error(d.error_message || ('HTTP '+r.status)); }
     return d;
   }
-
   function tst(msg, color){ if(typeof window.showToast==='function') return window.showToast(msg, color); console.log('[toast '+color+']', msg); }
   function showL(msg){ if(typeof window.showLoading==='function') window.showLoading(msg); }
   function hideL(){ if(typeof window.hideLoading==='function') window.hideLoading(); }
-
   function ensureF2SectionInjected(){
     var sup = document.getElementById('screen-supervisor');
     if(!sup) return false;
@@ -4616,11 +4611,10 @@ startApp();
     if(!wrap) return false;
     var sec = document.createElement('div');
     sec.id = 'super-f2-section';
-    sec.innerHTML = '<div class="section-title" style="color:#1565C0;">🏗️ Pendientes Fase 2 <span class="badge-count" id="super-f2-badge" style="background:#1565C0;color:#fff;">0</span></div><div id="super-f2-list"><div class="empty-state"><div class="empty-icon">🏗️</div><div class="empty-text">Cargando lotes F2...</div></div></div><div class="divider"></div>';
+    sec.innerHTML = '<div class="section-title" style="color:#1565C0;">Pendientes Fase 2 <span class="badge-count" id="super-f2-badge" style="background:#1565C0;color:#fff;">0</span></div><div id="super-f2-list"><div class="empty-state"><div class="empty-icon">F2</div><div class="empty-text">Cargando lotes F2...</div></div></div><div class="divider"></div>';
     wrap.insertBefore(sec, wrap.firstChild);
     return true;
   }
-
   async function loadF2Pendientes(){
     if(!ensureF2SectionInjected()) return;
     try{
@@ -4630,31 +4624,28 @@ startApp();
       var arr = d.pendientes || [];
       if(arr.length === 0){
         badge.textContent = '0';
-        list.innerHTML = '<div class="empty-state"><div class="empty-icon">🏗️</div><div class="empty-text">Sin lotes en Fase 2.</div></div>';
+        list.innerHTML = '<div class="empty-state"><div class="empty-icon">F2</div><div class="empty-text">Sin lotes en Fase 2.</div></div>';
         return;
       }
       badge.textContent = String(arr.length);
       list.innerHTML = arr.map(function(p){
-        return '<div class="record-card" onclick="openF2Capture('+p.cr1417_id+')" style="cursor:pointer;border-left:4px solid #1565C0;"><div class="record-card-main"><div class="record-card-folio">'+(p.folio||p.lote||'')+'</div><div class="record-card-meta">'+(p.articulo||'—')+' · WO '+(p.wo_id||'—')+' · '+(p.prod_reportada||0)+' pzs</div></div><div style="font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;background:#E3F2FD;color:#1565C0;">→ CAPTURAR</div></div>';
+        return '<div class="record-card" onclick="openF2Capture('+p.cr1417_id+')" style="cursor:pointer;border-left:4px solid #1565C0;"><div class="record-card-main"><div class="record-card-folio">'+(p.folio||p.lote||'')+'</div><div class="record-card-meta">'+(p.articulo||'-')+' WO '+(p.wo_id||'-')+' '+(p.prod_reportada||0)+' pzs</div></div><div style="font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;background:#E3F2FD;color:#1565C0;">CAPTURAR</div></div>';
       }).join('');
     } catch(e){
       console.warn('loadF2Pendientes:', e);
       var list2 = document.getElementById('super-f2-list');
-      if(list2) list2.innerHTML = '<div class="empty-state"><div class="empty-icon">⚠️</div><div class="empty-text">Error: '+e.message+'</div></div>';
+      if(list2) list2.innerHTML = '<div class="empty-state"><div class="empty-icon">!</div><div class="empty-text">Error: '+e.message+'</div></div>';
     }
   }
-
   function ensureF2CaptureScreen(){
     if(document.getElementById('screen-super-f2')) return;
     var div = document.createElement('div');
     div.className = 'screen';
     div.id = 'screen-super-f2';
-    div.innerHTML = '<div class="header"><div class="header-inner"><button class="header-back" onclick="showScreen(\'screen-supervisor\')">←</button><div style="flex:1;"><div class="header-title">Fase 2 — Cantidades</div><div class="header-sub" id="f2-sub">—</div></div></div></div><div class="content" style="padding-bottom:100px;"><div class="wrap"><div class="rv-section"><div class="rv-section-head"><div class="rv-section-title">📋 Lote</div></div><div class="rv-section-body" id="f2-info"></div></div><div class="rv-section"><div class="rv-section-head"><div class="rv-section-title">📊 Captura cantidades reales</div></div><div class="rv-section-body"><div class="form-group"><label class="form-label" style="color:#1A7A4A;font-weight:700;">✓ Aprobadas (status 1)</label><input type="number" id="f2-aprob" class="form-input" min="0" step="1" placeholder="0" style="font-size:24px;text-align:center;font-family:monospace;color:#1A7A4A;font-weight:700;" oninput="updateF2Total()"></div><div class="form-group"><label class="form-label" style="color:#C0392B;font-weight:700;">✗ Rechazo (status 3)</label><input type="number" id="f2-rech" class="form-input" min="0" step="1" placeholder="0" style="font-size:20px;text-align:center;font-family:monospace;color:#C0392B;font-weight:700;" oninput="updateF2Total()"></div><div class="form-group"><label class="form-label" style="color:#93700A;font-weight:700;">⚠ Desperdicio (status 2)</label><input type="number" id="f2-desp" class="form-input" min="0" step="1" placeholder="0" style="font-size:20px;text-align:center;font-family:monospace;color:#93700A;font-weight:700;" oninput="updateF2Total()"></div><div class="info-box" id="f2-totales" style="text-align:center;font-size:14px;">Total: <b>0</b> pzs</div></div></div></div></div><div class="bottom-bar" style="z-index:1000;"><button class="btn btn-secondary" onclick="showScreen(\'screen-supervisor\')">Cancelar</button><button class="btn btn-primary" id="f2-btn-aprobar" onclick="submitF2()">✓ Aprobar Fase 2</button></div>';
+    div.innerHTML = '<div class="header"><div class="header-inner"><button class="header-back" onclick="showScreen(\'screen-supervisor\')">Back</button><div style="flex:1;"><div class="header-title">Fase 2 - Cantidades</div><div class="header-sub" id="f2-sub">-</div></div></div></div><div class="content" style="padding-bottom:100px;"><div class="wrap"><div class="rv-section"><div class="rv-section-head"><div class="rv-section-title">Lote</div></div><div class="rv-section-body" id="f2-info"></div></div><div class="rv-section"><div class="rv-section-head"><div class="rv-section-title">Captura cantidades reales</div></div><div class="rv-section-body"><div class="form-group"><label class="form-label" style="color:#1A7A4A;font-weight:700;">Aprobadas</label><input type="number" id="f2-aprob" class="form-input" min="0" step="1" placeholder="0" style="font-size:24px;text-align:center;font-family:monospace;color:#1A7A4A;font-weight:700;" oninput="updateF2Total()"></div><div class="form-group"><label class="form-label" style="color:#C0392B;font-weight:700;">Rechazo</label><input type="number" id="f2-rech" class="form-input" min="0" step="1" placeholder="0" style="font-size:20px;text-align:center;font-family:monospace;color:#C0392B;font-weight:700;" oninput="updateF2Total()"></div><div class="form-group"><label class="form-label" style="color:#93700A;font-weight:700;">Desperdicio</label><input type="number" id="f2-desp" class="form-input" min="0" step="1" placeholder="0" style="font-size:20px;text-align:center;font-family:monospace;color:#93700A;font-weight:700;" oninput="updateF2Total()"></div><div class="info-box" id="f2-totales" style="text-align:center;font-size:14px;">Total: <b>0</b> pzs</div></div></div></div></div><div class="bottom-bar" style="z-index:1000;"><button class="btn btn-secondary" onclick="showScreen(\'screen-supervisor\')">Cancelar</button><button class="btn btn-primary" id="f2-btn-aprobar" onclick="submitF2()">Aprobar Fase 2</button></div>';
     document.body.appendChild(div);
   }
-
   var f2Current = null;
-
   window.openF2Capture = async function(cr1417_id){
     ensureF2CaptureScreen();
     showL('Cargando lote...');
@@ -4664,7 +4655,7 @@ startApp();
       if(!lote) throw new Error('Lote no encontrado en pendientes F2');
       f2Current = lote;
       document.getElementById('f2-sub').textContent = lote.folio || lote.lote || '';
-      document.getElementById('f2-info').innerHTML = '<table class="rv-table"><tr><td class="rk">Folio</td><td class="rv">'+(lote.folio||'—')+'</td></tr><tr><td class="rk">Lote</td><td class="rv">'+(lote.lote||'—')+'</td></tr><tr><td class="rk">Artículo</td><td class="rv">'+(lote.articulo||'—')+'</td></tr><tr><td class="rk">WO</td><td class="rv">'+(lote.wo_id||'—')+'</td></tr><tr><td class="rk">Producción reportada</td><td class="rv"><b>'+(lote.prod_reportada||0)+'</b> pzs</td></tr><tr><td class="rk">Bachadas</td><td class="rv">'+(lote.bachadas||0)+'</td></tr></table>';
+      document.getElementById('f2-info').innerHTML = '<table class="rv-table"><tr><td class="rk">Folio</td><td class="rv">'+(lote.folio||'-')+'</td></tr><tr><td class="rk">Lote</td><td class="rv">'+(lote.lote||'-')+'</td></tr><tr><td class="rk">Articulo</td><td class="rv">'+(lote.articulo||'-')+'</td></tr><tr><td class="rk">WO</td><td class="rv">'+(lote.wo_id||'-')+'</td></tr><tr><td class="rk">Produccion reportada</td><td class="rv"><b>'+(lote.prod_reportada||0)+'</b> pzs</td></tr><tr><td class="rk">Bachadas</td><td class="rv">'+(lote.bachadas||0)+'</td></tr></table>';
       document.getElementById('f2-aprob').value = '';
       document.getElementById('f2-rech').value = '';
       document.getElementById('f2-desp').value = '';
@@ -4676,7 +4667,6 @@ startApp();
       tst('Error: '+e.message, 'red');
     }
   };
-
   window.updateF2Total = function(){
     var ea = document.getElementById('f2-aprob'); var er = document.getElementById('f2-rech'); var ed = document.getElementById('f2-desp');
     if(!ea || !er || !ed) return;
@@ -4689,23 +4679,22 @@ startApp();
       el.style.background = cuadra ? '#D6F0E2' : '#FFF9E0';
       el.style.color = cuadra ? '#1A7A4A' : '#93700A';
       var hint = esperado>0 ? (' (esperado: '+esperado+')') : '';
-      var icon = cuadra ? ' ✓ cuadra' : (t>0 && esperado>0 ? ' ⚠ no cuadra' : '');
+      var icon = cuadra ? ' cuadra' : (t>0 && esperado>0 ? ' no cuadra' : '');
       el.innerHTML = 'Total: <b>'+t+'</b> pzs'+hint+icon;
     }
   };
-
   window.submitF2 = async function(){
     if(!f2Current){ tst('Sin lote seleccionado','red'); return; }
     var a = parseInt(document.getElementById('f2-aprob').value);
     var r = parseInt(document.getElementById('f2-rech').value)||0;
     var d = parseInt(document.getElementById('f2-desp').value)||0;
-    if(isNaN(a) || a < 0){ tst('Aprobadas debe ser número ≥ 0','red'); return; }
-    if(r < 0 || d < 0){ tst('Rechazo y Desperdicio deben ser ≥ 0','red'); return; }
+    if(isNaN(a) || a < 0){ tst('Aprobadas debe ser numero >= 0','red'); return; }
+    if(r < 0 || d < 0){ tst('Rechazo y Desperdicio deben ser >= 0','red'); return; }
     var total = a+r+d;
     if(total <= 0){ tst('Total debe ser mayor a 0','red'); return; }
     var esperado = f2Current.prod_reportada||0;
     if(esperado > 0 && total !== esperado){
-      if(!confirm('Total '+total+' ≠ producción reportada '+esperado+'. ¿Continuar?')) return;
+      if(!confirm('Total '+total+' != produccion reportada '+esperado+'. Continuar?')) return;
     }
     var btn = document.getElementById('f2-btn-aprobar');
     btn.disabled = true;
@@ -4715,7 +4704,7 @@ startApp();
       var out = await apiCall('/supervisor/aprobar-fase2', { method: 'POST', body: { folio: f2Current.folio, aprobado_por: usuario, cantidad_aprobada: a, cantidad_rechazo: r, cantidad_desperdicio: d } });
       hideL();
       btn.disabled = false;
-      tst('✓ Build '+out.build_id+' creado · '+a+' aprob / '+r+' rech / '+d+' desp', 'green');
+      tst('Build '+out.build_id+' creado: '+a+' aprob / '+r+' rech / '+d+' desp', 'green');
       showScreen('screen-supervisor');
       setTimeout(loadF2Pendientes, 500);
     } catch(e){
@@ -4724,7 +4713,6 @@ startApp();
       tst('Error: '+e.message, 'red');
     }
   };
-
   function startF2NavObserver(){
     var sf2 = document.getElementById('screen-super-f2');
     if(!sf2){ setTimeout(startF2NavObserver, 300); return; }
@@ -4743,7 +4731,6 @@ startApp();
     });
     obs.observe(sf2, { attributes:true, attributeFilter:['class'] });
   }
-
   function startSupervisorObserver(){
     var s = document.getElementById('screen-supervisor');
     if(!s){ setTimeout(startSupervisorObserver, 300); return; }
@@ -4753,21 +4740,72 @@ startApp();
     obs.observe(s, { attributes:true, attributeFilter:['class'] });
     if(s.classList.contains('active')) loadF2Pendientes();
   }
-
   if(document.readyState === 'loading'){
     document.addEventListener('DOMContentLoaded', function(){ startSupervisorObserver(); startF2NavObserver(); });
   } else {
     startSupervisorObserver();
     startF2NavObserver();
   }
-
   var _origGoSup = window.goSupervisor;
   window.goSupervisor = function(){
     if(typeof _origGoSup === 'function') try { _origGoSup.apply(this, arguments); } catch(_){}
     setTimeout(loadF2Pendientes, 400);
   };
+  console.log('[F2 patch v0.9.6] inyectado OK');
+})();
+</script>
 
-  console.log('[F2 patch v0.9.6] inyectado OK (con bottom-nav fix)');
+<script id="batab-qcfin-reset-v0911">
+(function(){
+  'use strict';
+  function resetFinalizarBtn(){
+    var b = document.getElementById('qc-btn-finalizar');
+    if (!b) return;
+    b.disabled = false;
+    b.removeAttribute('disabled');
+    b.classList.remove('disabled');
+    console.log('[QC Fin v0.9.11] reset qc-btn-finalizar -> enabled');
+  }
+  function startObserver(){
+    var s = document.getElementById('screen-qc-resumen');
+    if (!s) { setTimeout(startObserver, 500); return; }
+    var obs = new MutationObserver(function(){
+      if (s.classList.contains('active')) {
+        var st = (typeof window.qcS !== 'undefined') ? { ensayeId: window.qcS && window.qcS.ensayeId, lote: window.qcS && window.qcS.lote && window.qcS.lote.lote_v10, probetas: window.qcS && window.qcS.probetas && window.qcS.probetas.length } : 'qcS undefined';
+        console.log('[QC Fin v0.9.11] screen-qc-resumen ACTIVE; qcS:', st);
+        resetFinalizarBtn();
+        setTimeout(resetFinalizarBtn, 100);
+        setTimeout(resetFinalizarBtn, 500);
+        setTimeout(resetFinalizarBtn, 1500);
+      }
+    });
+    obs.observe(s, { attributes: true, attributeFilter: ['class'] });
+    if (s.classList.contains('active')) resetFinalizarBtn();
+  }
+  function wrapFinalizar(){
+    if (typeof window.qcFinalizarEnsaye !== 'function') { setTimeout(wrapFinalizar, 500); return; }
+    if (window.qcFinalizarEnsaye._batabWrapped) return;
+    var orig = window.qcFinalizarEnsaye;
+    window.qcFinalizarEnsaye = async function(){
+      console.log('[QC Fin v0.9.11] qcFinalizarEnsaye() invocada; qcS.ensayeId:', window.qcS && window.qcS.ensayeId);
+      try {
+        return await orig.apply(this, arguments);
+      } catch (e) {
+        console.error('[QC Fin v0.9.11] error:', e);
+        resetFinalizarBtn();
+        throw e;
+      }
+    };
+    window.qcFinalizarEnsaye._batabWrapped = true;
+    console.log('[QC Fin v0.9.11] qcFinalizarEnsaye wrapped OK');
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function(){ startObserver(); wrapFinalizar(); });
+  } else {
+    startObserver();
+    wrapFinalizar();
+  }
+  console.log('[QC Fin v0.9.11] modulo inyectado');
 })();
 </script>
 </body>
