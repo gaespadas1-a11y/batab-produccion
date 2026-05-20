@@ -3,10 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BATAB Director - Aprobacion Final v3.8.2</title>
+<title>BATAB Director - Aprobacion Final v3.8.4</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f6f8; color: #1a1a1a; padding: 16px; max-width: 980px; margin: 0 auto; }
+  .deploy-banner { background: #d1fae5; border: 2px solid #10b981; color: #065f46; padding: 10px 14px; border-radius: 8px; margin-bottom: 12px; font-size: 13px; font-weight: 600; text-align: center; }
   header { background: #0a3d62; color: white; padding: 20px 24px; border-radius: 12px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
   header h1 { font-size: 22px; font-weight: 700; }
   header .badge { background: rgba(255,255,255,0.2); padding: 6px 12px; border-radius: 20px; font-size: 13px; }
@@ -43,21 +44,22 @@
   .modal-overlay.show { display: flex; }
   .modal { background: white; border-radius: 12px; padding: 24px; max-width: 540px; width: 100%; max-height: 85vh; overflow-y: auto; }
   .modal h2 { color: #0a3d62; margin-bottom: 16px; font-size: 18px; }
-  .modal .summary-line { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f3f4f6; font-size: 13px; gap: 8px; }
+  .modal .summary-line { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f3f4f6; font-size: 13px; gap: 8px; align-items: baseline; }
   .modal .summary-line:last-child { border-bottom: none; }
+  .modal .summary-line .equiv-m3 { font-size: 11px; color: #9ca3af; font-weight: 400; margin-left: 6px; }
   .modal .actions { margin-top: 20px; }
   .alert { padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; font-size: 14px; }
   .alert-info { background: #dbeafe; color: #1e40af; }
   .alert-success { background: #d1fae5; color: #065f46; }
   .alert-error { background: #fee2e2; color: #991b1b; }
+  .alert-warning { background: #fef3c7; color: #92400e; }
   .result-detail { font-family: 'Courier New', monospace; font-size: 11px; background: #f9fafb; padding: 12px; border-radius: 6px; margin-top: 8px; max-height: 200px; overflow-y: auto; white-space: pre-wrap; word-break: break-all; }
   .version-tag { text-align: center; font-size: 11px; color: #9ca3af; margin-top: 20px; padding: 8px; }
-  .source-pill { display:inline-block; font-size:10px; padding:2px 8px; border-radius:10px; margin-left:6px; font-weight:600; }
-  .source-payload { background:#d1fae5; color:#065f46; }
-  .source-build { background:#fef3c7; color:#92400e; }
+  .kg-real { background: #10b981; color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; }
 </style>
 </head>
 <body>
+<div class="deploy-banner">APP ACTUALIZADA v3.8.4 - ajustes de humedad en KG - backend v1.4.0 (auto-resuelve item y lote)</div>
 <header>
   <div><h1>BATAB Director</h1><div style="font-size: 13px; opacity: 0.8; margin-top: 4px;">Aprobacion final de lotes productivos</div></div>
   <span class="badge" id="badge-count">Cargando...</span>
@@ -69,16 +71,14 @@
   <button data-filter="falta-build">Falta Build</button>
 </div>
 <div id="contenido"><div class="loading"><div class="spinner"></div><div style="margin-top: 12px;">Cargando lotes pendientes...</div></div></div>
-<div class="version-tag">v3.8.2 - lee humedad y consumos del payload operador</div>
+<div class="version-tag">v3.8.4 - GitHub Pages - backend director-cerrar-lote v1.4.0</div>
 <div class="modal-overlay" id="modal-confirm"><div class="modal"><h2>Confirmar cierre del lote</h2><div id="modal-body"></div></div></div>
 <div class="modal-overlay" id="modal-resultado"><div class="modal"><h2 id="resultado-title">Resultado</h2><div id="resultado-body"></div><div class="actions"><button class="btn-secondary" onclick="document.getElementById('modal-resultado').classList.remove('show'); cargarLotes();">Cerrar</button></div></div></div>
 <script>
 const SB='https://szrcmvlgxxpmvgrfmxak.supabase.co';
 const NS_PROXY=SB+'/functions/v1/netsuite-proxy';
 const CERRAR=SB+'/functions/v1/director-cerrar-lote';
-// v3.8.2: densidades para conversion KG -> m3
-const DENS_POLVO=1650; // kg/m3
-const DENS_SELLO=1550; // kg/m3
+const DENS_POLVO=1650; const DENS_SELLO=1550;
 let lotesData=[]; let currentFilter='all';
 async function suiteql(sql){
   const res=await fetch(NS_PROXY,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({method:'POST',endpoint:'/services/rest/query/v1/suiteql?limit=100',payload:{q:sql},extraHeaders:{'Prefer':'transient'}})});
@@ -86,25 +86,8 @@ async function suiteql(sql){
 }
 async function cargarLotes(){
   document.getElementById('contenido').innerHTML='<div class="loading"><div class="spinner"></div><div style="margin-top:12px;">Consultando NetSuite...</div></div>';
-  // v3.8.2: agregar payload_json al SELECT para leer humedad y totalesConsumo del operador
-  const sql="SELECT cr.id, cr.name AS folio, cr.custrecord_batab_status AS status, cr.custrecord_batab_lote AS lote, cr.custrecord_batab_cantidad_aprobada AS aprob, cr.custrecord_batab_cantidad_rechazo AS rech, cr.custrecord_batab_cantidad_desperdicio AS desp, cr.custrecord_batab_workorder AS wo, cr.custrecord_batab_build_id AS build_id, cr.custrecord_batab_humedad_pct AS humedad, cr.custrecord_batab_json_payload AS payload_json FROM customrecord_batab_produccion cr WHERE cr.custrecord_batab_status = '12' ORDER BY cr.lastmodified DESC";
+  const sql="SELECT cr.id, cr.name AS folio, cr.custrecord_batab_status AS status, cr.custrecord_batab_lote AS lote, cr.custrecord_batab_cantidad_aprobada AS aprob, cr.custrecord_batab_cantidad_rechazo AS rech, cr.custrecord_batab_cantidad_desperdicio AS desp, cr.custrecord_batab_workorder AS wo, cr.custrecord_batab_build_id AS build_id, cr.custrecord_batab_humedad_pct AS humedad, cr.custrecord_batab_articulo AS articulo FROM customrecord_batab_produccion cr WHERE cr.custrecord_batab_status = '12' ORDER BY cr.lastmodified DESC";
   try{const r=await suiteql(sql);if(!r.success||!r.data||!r.data.items){document.getElementById('contenido').innerHTML='<div class="empty"><div class="icon">!</div><div>Error consultando NetSuite</div></div>';return;}lotesData=r.data.items;renderLotes();}catch(e){document.getElementById('contenido').innerHTML='<div class="empty"><div class="icon">X</div><div>Error de conexion</div></div>';}
-}
-// v3.8.2: helper para parsear payload del operador y extraer humedad + totalesConsumo
-function parsePayloadOperador(l){
-  let payload=null;
-  if(l.payload_json){ try { payload=JSON.parse(l.payload_json); } catch(_){} }
-  const tc=payload&&payload.totalesConsumo||null;
-  const humedadPayload=payload&&payload.humedad!=null?parseFloat(payload.humedad):null;
-  // v3.8.2: prioridad humedad: CR campo > payload
-  const hp=parseFloat(l.humedad)||humedadPayload||0;
-  // v3.8.2: pM/sM REALES desde payload (KG) / densidad = m3
-  let pM_real=null, sM_real=null;
-  if(tc){
-    if(Number(tc.tolva2)>0) pM_real=Number(tc.tolva2)/DENS_POLVO;
-    if(Number(tc.tolva1)>0) sM_real=Number(tc.tolva1)/DENS_SELLO;
-  }
-  return { hp, pM_real, sM_real, humedadSource: l.humedad?'cr':humedadPayload!=null?'payload':'none' };
 }
 function renderLotes(){
   let f=lotesData;
@@ -117,7 +100,6 @@ function renderLotes(){
     const tb=!!l.build_id;
     const k=tb?'listo':'falta-build';
     const st=tb?'Listo para cerrar':'Falta crear Build en NetSuite';
-    // v3.8.2 FIX TOTAL: usar Number() para evitar concatenacion de strings
     const totalPzs=(Number(l.aprob)||0)+(Number(l.rech)||0)+(Number(l.desp)||0);
     h+='<div class="lote-card '+k+'"><div class="row"><div><h3>'+(l.folio||'Sin folio')+'</h3><div style="font-size:13px;color:#6b7280;margin-top:2px;">Lote <span class="lote-num">'+(l.lote||'?')+'</span></div><div class="meta">'+st+'</div></div><div style="text-align:right;font-size:12px;color:#6b7280;">';
     if(l.wo)h+='WO #'+l.wo+'<br>';
@@ -134,70 +116,63 @@ async function confirmarCierre(crId){
   const l=lotesData.find(x=>x.id==crId); if(!l)return;
   document.getElementById('modal-body').innerHTML='<div class="loading"><div class="spinner"></div><div style="margin-top:12px;">Calculando ajustes...</div></div>';
   document.getElementById('modal-confirm').classList.add('show');
-  // v3.8.2: tomar pM/sM/hp del payload del operador (preferido) y del Build (fallback)
-  const datos=parsePayloadOperador(l);
-  // Consulta del lote ID en NetSuite (necesario para inventoryassignment)
-  const sL="SELECT id FROM inventorynumber WHERE inventorynumber = '"+l.lote+"'";
-  const rL=await suiteql(sL);
-  // Tambien consultamos Build como fallback secundario
+  // v3.8.4: solo consultamos consumos del Build para calcular humedad en kg. NO consultamos inventorynumber (backend lo resuelve).
   const sB="SELECT tl.item, i.itemid AS item_code, tl.quantity FROM transactionline tl LEFT JOIN item i ON i.id = tl.item WHERE tl.transaction = "+l.build_id+" AND i.itemid IN ('MATERIAS PRIMAS - AGREGADOS - POLVO 3/16 AFI', 'MATERIAS PRIMAS - AGREGADOS - SELLO3/8')";
   const rB=await suiteql(sB);
-  if(!rL.success||!rL.data||!rL.data.items||rL.data.items.length===0){document.getElementById('modal-body').innerHTML='<div class="alert alert-error">Error obteniendo lote ID en NetSuite.</div><div class="actions"><button class="btn-secondary" onclick="document.getElementById(\'modal-confirm\').classList.remove(\'show\')">Cerrar</button></div>';return;}
-  const loteId=rL.data.items[0].id;
-  // v3.8.2 logica de fallback m3:
-  //   1) payload operador (kg reales / densidad) — PREFERIDO
-  //   2) Build de NetSuite (m3 directo) — fallback
-  let pM=0, sM=0, source='build';
-  if(datos.pM_real!=null&&datos.sM_real!=null){
-    pM=datos.pM_real; sM=datos.sM_real; source='payload';
-  } else if(rB.success&&rB.data&&rB.data.items){
-    for(const it of rB.data.items){
-      if(it.item_code==='MATERIAS PRIMAS - AGREGADOS - POLVO 3/16 AFI') pM=Math.abs(parseFloat(it.quantity));
-      if(it.item_code==='MATERIAS PRIMAS - AGREGADOS - SELLO3/8') sM=Math.abs(parseFloat(it.quantity));
-    }
+  if(!rB.success){document.getElementById('modal-body').innerHTML='<div class="alert alert-error">Error obteniendo consumos del Build.</div><div class="actions"><button class="btn-secondary" onclick="document.getElementById(\'modal-confirm\').classList.remove(\'show\')">Cerrar</button></div>';return;}
+  let pM=0, sM=0;
+  const items=(rB.data&&rB.data.items)||[];
+  for(const it of items){
+    if(it.item_code==='MATERIAS PRIMAS - AGREGADOS - POLVO 3/16 AFI') pM=Math.abs(parseFloat(it.quantity));
+    if(it.item_code==='MATERIAS PRIMAS - AGREGADOS - SELLO3/8') sM=Math.abs(parseFloat(it.quantity));
   }
-  const hp=datos.hp;
-  const ap=(pM*hp/100).toFixed(6); const as=(sM*hp/100).toFixed(6);
+  const hp=parseFloat(l.humedad)||0;
+  const apM3=pM*hp/100, asM3=sM*hp/100;
+  const apKg=apM3*DENS_POLVO, asKg=asM3*DENS_SELLO;
+  const fmtKg=(n)=>n.toLocaleString('es-MX',{maximumFractionDigits:2});
+  const fmtM3=(n)=>n.toFixed(6);
   const totalPzs=(Number(l.aprob)||0)+(Number(l.rech)||0)+(Number(l.desp)||0);
   let h='<div class="alert alert-info">Se crearan los siguientes documentos en NetSuite:</div>';
   h+='<div class="summary-line"><span><b>Lote:</b></span><span>'+l.lote+'</span></div>';
   h+='<div class="summary-line"><span><b>Folio:</b></span><span>'+l.folio+'</span></div>';
+  h+='<div class="summary-line"><span><b>Articulo:</b></span><span style="text-align:right;font-size:12px">'+(l.articulo||'?')+'</span></div>';
   h+='<div class="summary-line"><span><b>Build:</b></span><span>#'+l.build_id+'</span></div>';
   h+='<div class="summary-line"><span><b>Aprobadas:</b></span><span style="color:#10b981;font-weight:600">'+(Number(l.aprob)||0)+' pzs</span></div>';
   if(Number(l.rech)>0)h+='<div class="summary-line"><span>Adj rechazo:</span><span>-'+(Number(l.rech)||0)+' pzs (1374)</span></div>';
   if(Number(l.desp)>0)h+='<div class="summary-line"><span>Adj desperdicio:</span><span>-'+(Number(l.desp)||0)+' pzs (1474)</span></div>';
   h+='<div class="summary-line"><span><b>Total:</b></span><span>'+totalPzs+' pzs</span></div>';
-  // v3.8.2: mostrar humedad y fuente
-  const pillH=datos.humedadSource==='payload'?'<span class="source-pill source-payload">payload</span>':datos.humedadSource==='cr'?'<span class="source-pill source-build">CR</span>':'';
   if(hp>0){
-    h+='<div class="summary-line"><span>Humedad:</span><span>'+hp+'% '+pillH+'</span></div>';
-    const pillS=source==='payload'?'<span class="source-pill source-payload">KG real</span>':'<span class="source-pill source-build">Build</span>';
-    if(pM>0)h+='<div class="summary-line"><span>Adj humedad polvo:</span><span>+'+ap+' m3 '+pillS+'</span></div>';
-    if(sM>0)h+='<div class="summary-line"><span>Adj humedad sello:</span><span>+'+as+' m3 '+pillS+'</span></div>';
+    h+='<div class="summary-line"><span>Humedad:</span><span>'+hp+'%</span></div>';
+    if(pM>0)h+='<div class="summary-line"><span>Adj humedad polvo:</span><span><b style="color:#10b981">+'+fmtKg(apKg)+' kg</b> <span class="kg-real">KG</span><span class="equiv-m3">('+fmtM3(apM3)+' m&sup3;)</span></span></div>';
+    if(sM>0)h+='<div class="summary-line"><span>Adj humedad sello:</span><span><b style="color:#10b981">+'+fmtKg(asKg)+' kg</b> <span class="kg-real">KG</span><span class="equiv-m3">('+fmtM3(asM3)+' m&sup3;)</span></span></div>';
   }
   if(Number(l.aprob)>0)h+='<div class="summary-line"><span style="color:#0a3d62;font-weight:600">Transfer Order:</span><span style="color:#0a3d62;font-weight:600">'+(Number(l.aprob)||0)+' pzs MP &rarr; Teapa</span></div>';
   h+='<div class="summary-line"><span><b>CR 1417:</b></span><span>status -> 7</span></div>';
-  h+='<div class="actions" style="margin-top:20px;"><button class="btn-primary" id="btn-ejecutar" onclick="ejecutarCierre('+crId+','+l.build_id+','+loteId+',\''+l.lote+'\','+(Number(l.aprob)||0)+','+(Number(l.rech)||0)+','+(Number(l.desp)||0)+','+hp+','+pM+','+sM+')">CONFIRMAR Y EJECUTAR</button><button class="btn-secondary" onclick="document.getElementById(\'modal-confirm\').classList.remove(\'show\')">Cancelar</button></div>';
+  // v3.8.4: payload SIMPLIFICADO - NO mandamos item_assembly_id ni lote_id (backend v1.4.0 los resuelve)
+  h+='<div class="actions" style="margin-top:20px;"><button class="btn-primary" id="btn-ejecutar" onclick="ejecutarCierre('+crId+','+l.build_id+',\''+l.lote+'\','+(Number(l.aprob)||0)+','+(Number(l.rech)||0)+','+(Number(l.desp)||0)+','+hp+','+pM+','+sM+')">CONFIRMAR Y EJECUTAR</button><button class="btn-secondary" onclick="document.getElementById(\'modal-confirm\').classList.remove(\'show\')">Cancelar</button></div>';
   document.getElementById('modal-body').innerHTML=h;
 }
-async function ejecutarCierre(c,b,l,n,a,r,d,h,p,s){
+async function ejecutarCierre(c,b,n,a,r,d,h,p,s){
   document.getElementById('btn-ejecutar').disabled=true;
   document.getElementById('btn-ejecutar').textContent='Ejecutando...';
   try{
-    const res=await fetch(CERRAR,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({cr_id:c,build_id:b,lote_id:l,lote_nombre:n,item_assembly_id:'1256',cantidad_aprobada:a,cantidad_rechazo:r,cantidad_desperdicio:d,humedad_pct:h,polvo_m3_consumido:p,sello_m3_consumido:s,autorizado_por:'Director (v3.8.2)'})});
+    // v3.8.4: payload simplificado - sin item_assembly_id ni lote_id
+    const res=await fetch(CERRAR,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({cr_id:c,build_id:b,lote_nombre:n,cantidad_aprobada:a,cantidad_rechazo:r,cantidad_desperdicio:d,humedad_pct:h,polvo_m3_consumido:p,sello_m3_consumido:s,autorizado_por:'Director (v3.8.4 GitHub Pages)'})});
     const j=await res.json();
     document.getElementById('modal-confirm').classList.remove('show');
     if(j.success){
       document.getElementById('resultado-title').textContent='Lote cerrado exitosamente';
-      let html='<div class="alert alert-success">El lote <b>'+n+'</b> quedo cerrado en NetSuite.</div>';
+      let html='<div class="alert alert-success">El lote <b>'+n+'</b> quedo cerrado en NetSuite. CR 1417 status = 7.</div>';
       html+='<h3 style="margin-bottom:8px;font-size:14px;color:#374151;">Documentos creados:</h3>';
+      html+='<div class="summary-line"><span>Item resuelto:</span><span style="font-size:12px">'+(j.item_assembly_name||'?')+' (id '+(j.item_assembly_id_resuelto||'?')+')</span></div>';
+      html+='<div class="summary-line"><span>Lote internal ID:</span><span style="font-size:12px">'+(j.lote_id_resuelto||'?')+'</span></div>';
       const adj=j.adjustments_created||{};
       if(adj.rechazo)html+='<div class="summary-line"><span>Adj Rechazo:</span><span>#'+adj.rechazo.id+'</span></div>';
       if(adj.desperdicio)html+='<div class="summary-line"><span>Adj Desperdicio:</span><span>#'+adj.desperdicio.id+'</span></div>';
-      if(adj.humedad_polvo)html+='<div class="summary-line"><span>Adj Humedad Polvo:</span><span>#'+adj.humedad_polvo.id+'</span></div>';
-      if(adj.humedad_sello)html+='<div class="summary-line"><span>Adj Humedad Sello:</span><span>#'+adj.humedad_sello.id+'</span></div>';
+      if(adj.humedad_polvo)html+='<div class="summary-line"><span>Adj Humedad Polvo:</span><span>#'+adj.humedad_polvo.id+' (+'+(adj.humedad_polvo.qty_kg||0).toLocaleString('es-MX')+' kg)</span></div>';
+      if(adj.humedad_sello)html+='<div class="summary-line"><span>Adj Humedad Sello:</span><span>#'+adj.humedad_sello.id+' (+'+(adj.humedad_sello.qty_kg||0).toLocaleString('es-MX')+' kg)</span></div>';
       if(j.transfer_created)html+='<div class="summary-line"><span><b>Transfer Order:</b></span><span style="color:#0a3d62;font-weight:600">#'+j.transfer_created.id+' ('+j.transfer_created.qty+' pzs)</span></div>';
-      if(j.warnings)html+='<div class="alert" style="background:#fef3c7;color:#92400e;margin-top:12px;"><b>Avisos:</b><div class="result-detail">'+JSON.stringify(j.warnings,null,2)+'</div></div>';
+      if(j.warnings)html+='<div class="alert alert-warning" style="margin-top:12px;"><b>Avisos:</b><div class="result-detail">'+JSON.stringify(j.warnings,null,2)+'</div></div>';
       document.getElementById('resultado-body').innerHTML=html;
     }else{
       document.getElementById('resultado-title').textContent='Error al cerrar lote';
