@@ -4209,10 +4209,34 @@ async function qcIniciarEnsaye() {
     qcS.ensayeId = d.ensaye_id;
     qcS.probetas = d.probetas;
     qcS.ensayeNumero = d.probetas?.[0]?.codigo?.replace(/-\d+$/, '') || null;
-    qcS.fotoActual = 0;
     qcS.fotos = {};
+    // v0.9.9 RETOMAR: si el ensaye ya existia (reanudable), reconstruye desde NetSuite las
+    // capturas ya hechas y deja continuar lo que falta, en cualquier orden.
+    let _reanudado = 0;
+    if (d.reanudable && Array.isArray(d.probetas)) {
+      QC_PLAN.forEach(plan => {
+        const pr = d.probetas.find(p => p.posicion === plan.posicion);
+        const paso = pr && pr[plan.tipo];
+        if (paso && paso.hecho) {
+          const valor = plan.tipo === 'prensa' ? paso.valor_kgcm2 : paso.valor_g;
+          qcS.fotos[plan.idx] = { urlFoto: paso.url || null, b64: null, valor: valor, confianza: 100, override: false, confirmado: true, recuperado: true, vision: { confianza_pct: 100, valor_visto: '(recuperado de NetSuite)' } };
+          _reanudado++;
+        }
+      });
+    }
+    const _primerFalta = QC_PLAN.findIndex(plan => !qcS.fotos[plan.idx]);
+    qcS.fotoActual = _primerFalta === -1 ? 8 : _primerFalta;
     hideLoading();
-    showToast('Ensaye iniciado · ' + (d.probetas?.[0]?.codigo || ''), 'green');
+    if (d.todas_completas) {
+      showToast('Ensaye ya completo · revisa y finaliza', 'green');
+      qcMostrarResumen();
+      return;
+    }
+    if (_reanudado > 0) {
+      showToast('Reanudado · ' + _reanudado + '/9 hechas · faltan ' + (9 - _reanudado), 'green');
+    } else {
+      showToast('Ensaye iniciado · ' + (d.probetas?.[0]?.codigo || ''), 'green');
+    }
     qcAbrirCaptura();
   } catch (e) {
     hideLoading();
@@ -4249,7 +4273,7 @@ function qcRenderCaptura() {
         const done = !!qcS.fotos[i];
         const cur  = i === idx;
         const cls  = done ? 'done' : cur ? 'active' : '';
-        return `<div class="step-dot ${cls}" style="font-size:9px;width:30px;height:30px;flex-shrink:0;" title="${p.lbl}">${done ? '✓' : i+1}</div>${i<8 ? '<div class="step-line ' + (done?'done':'') + '" style="min-width:6px;"></div>' : ''}`;
+        return `<div class="step-dot ${cls}" onclick="qcIrAFoto(${i})" style="font-size:9px;width:30px;height:30px;flex-shrink:0;cursor:pointer;" title="${p.lbl}">${done ? '✓' : i+1}</div>${i<8 ? '<div class="step-line ' + (done?'done':'') + '" style="min-width:6px;"></div>' : ''}`;
       }).join('')}
     </div>`;
 
@@ -4273,6 +4297,12 @@ function qcRenderCaptura() {
     document.getElementById('qc-btn-confirmar').disabled = true;
     document.getElementById('qc-btn-retomar').style.display = 'none';
   }
+}
+
+function qcIrAFoto(i) {
+  if (i < 0 || i > 8) return;
+  qcS.fotoActual = i;
+  qcRenderCaptura();
 }
 
 function qcRenderVisionResult(fotoData) {
@@ -4386,11 +4416,17 @@ async function qcConfirmarFoto() {
     foto.confirmado = true;
     hideLoading();
 
-    if (qcS.fotoActual < 8) {
-      qcS.fotoActual++;
-      qcRenderCaptura();
-    } else {
+    // v0.9.9: avanzar al siguiente paso que FALTE (orden libre / retomar), no solo +1
+    let _next = -1;
+    for (let k = 1; k <= 8; k++) {
+      const cand = (qcS.fotoActual + k) % 9;
+      if (!qcS.fotos[cand]) { _next = cand; break; }
+    }
+    if (_next === -1) {
       qcMostrarResumen();
+    } else {
+      qcS.fotoActual = _next;
+      qcRenderCaptura();
     }
   } catch (e) {
     hideLoading();
