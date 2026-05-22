@@ -1761,9 +1761,50 @@ async function getCounterRemote(l){
     return parseInt(v) - 1;
   } catch(e){ console.warn('preview_folio fallo:',e); return parseInt(localStorage.getItem('batab_ctr_'+l)||'0'); }
 }
+// v2 CAPA 2 anti-choque de folios:
+// Antes de reservar, consulta a NetSuite el folio MAX real de la linea (via netsuite-proxy)
+// y reserva con reservar_folio_v2 = GREATEST(contador, netsuite_max)+1.
+// Asi nunca choca con folios creados por fuera de la app (backfill manual).
+// Si NetSuite no responde (sin red), cae al siguiente_folio normal (la Capa 1 sigue protegiendo).
+async function nsMaxFolio(linea, anio){
+  try{
+    const q = `SELECT MAX(custrecord_batab_folio) AS fmax FROM customrecord_batab_produccion `
+            + `WHERE custrecord_batab_folio LIKE '${linea}-${anio}-%' AND isinactive = 'F'`;
+    const envelope = {
+      method: 'POST',
+      endpoint: '/services/rest/query/v1/suiteql',
+      payload: { q },
+      extraHeaders: { 'Prefer': 'transient' }
+    };
+    const res = await fetch(NS_REST_URL, {
+      method:'POST',
+      headers:{'Content-Type':'application/json',
+        'apikey':'sb_publishable_VOhn9Z2Ev8gYK3nFKr44Sw_VngbAX4N',
+        'Authorization':'Bearer sb_publishable_VOhn9Z2Ev8gYK3nFKr44Sw_VngbAX4N'},
+      body: JSON.stringify(envelope)
+    });
+    const j = await res.json();
+    const fmax = j?.data?.items?.[0]?.fmax || null;   // ej "B1-2026-0025"
+    if(!fmax) return 0;
+    const m = String(fmax).match(/-(\d+)$/);
+    return m ? parseInt(m[1]) : 0;
+  }catch(e){ console.warn('nsMaxFolio fallo (se usa fallback):', e); return null; }
+}
+
 async function incCounterRemote(l){
-  const v = await sbRpc('siguiente_folio',{p_linea:l,p_anio:new Date().getFullYear()});
-  const n = parseInt(v);
+  const anio = new Date().getFullYear();
+  // 1) consultar folio max real en NetSuite (puede ser null si no hay red)
+  const nsMax = await nsMaxFolio(l, anio);
+  let n;
+  if(nsMax !== null){
+    // 2) reserva blindada: GREATEST(contador, nsMax)+1
+    const v = await sbRpc('reservar_folio_v2',{p_linea:l,p_anio:anio,p_netsuite_max:nsMax});
+    n = parseInt(v);
+  } else {
+    // 3) fallback elegante: sin NetSuite, usa el contador normal (Capa 1 protege)
+    const v = await sbRpc('siguiente_folio',{p_linea:l,p_anio:anio});
+    n = parseInt(v);
+  }
   localStorage.setItem('batab_ctr_'+l, n);
   return n;
 }
