@@ -124,16 +124,6 @@
       <button class="btn grande" id="btnReg" onclick="registrar()">Registrar paro</button>
     </div>
 
-    <div class="card">
-      <h2><span class="n">=</span> Paros de este turno</h2>
-      <div id="listaParos"><div class="loading">Cargando…</div></div>
-    </div>
-
-    <div class="card">
-      <h2><span class="n">!</span> Dónde se pierde más tiempo</h2>
-      <div id="criticidad"><div class="vacio">Aún sin datos del turno.</div></div>
-    </div>
-
     <div style="margin:14px;">
       <button class="btn sec" onclick="regresarRegistro()">✓ Terminar y volver al registro de producción</button>
       <div style="text-align:center;color:var(--suave);font-size:12px;font-weight:500;margin-top:8px;">Cuando ya anotaste todos los paros del turno.</div>
@@ -155,7 +145,7 @@
     </div>
   </div>
 
-  <div class="foottag">paros.html · conectado a paros-api · v1.3</div>
+  <div class="foottag">paros.html · conectado a paros-api · v1.4</div>
 </div>
 
 <script>
@@ -290,14 +280,17 @@ function tarjetaParo(p, conBorrar){
 }
 
 function pintarParos(){
+  const vacio='<div class="vacio">Sin paros registrados en este turno.</div>';
+  const html = PAROS.length ? PAROS.map(p=>tarjetaParo(p,true)).join('') : vacio;
   const cont = document.getElementById('listaParos');
-  if(!PAROS.length){ cont.innerHTML='<div class="vacio">Sin paros registrados en este turno.</div>'; return; }
-  cont.innerHTML = PAROS.map(p=>tarjetaParo(p,true)).join('');
-  document.getElementById('listaParosSup').innerHTML = PAROS.map(p=>tarjetaParo(p,true)).join('');
+  if(cont) cont.innerHTML = html;
+  const sup = document.getElementById('listaParosSup');
+  if(sup) sup.innerHTML = html;
 }
 
 function pintarCriticidad(){
   const cont = document.getElementById('criticidad');
+  if(!cont) return;
   if(!PAROS.length){ cont.innerHTML='<div class="vacio">Aún sin datos del turno.</div>'; return; }
   const por = {};
   PAROS.forEach(p=>{
