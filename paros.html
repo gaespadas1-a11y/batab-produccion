@@ -150,7 +150,7 @@
     </div>
   </div>
 
-  <div class="foottag">paros.html · conectado a paros-api · v1.1</div>
+  <div class="foottag">paros.html · conectado a paros-api · v1.2</div>
 </div>
 
 <script>
@@ -353,19 +353,25 @@ async function borrar(id){
 // recargar paros al cambiar de folio
 document.getElementById('folio').addEventListener('change', cargarParos);
 
-// la app del teléfono abre esta página pasándole el folio del turno activo:
-//   paros.html?folio=1B26EM09&reporta=Capetillo
-// si vienen en la URL, se llenan solos y el folio queda fijo (no se teclea).
+// la app del teléfono abre esta página pasándole el folio y el operador:
+//   paros.html?folio=1B26EM09&reporta=Juan%20Pérez
+// si vienen, se usan solos y se oculta el bloque editable (no se teclea nada).
 (function leerTurnoDesdeApp(){
   const p = new URLSearchParams(location.search);
   const f = p.get('folio');
   const r = p.get('reporta');
-  if(f){
-    const fi = document.getElementById('folio');
-    fi.value = f; fi.readOnly = true;
-    fi.style.background = '#EEF1F4'; fi.style.color = '#16314F'; fi.style.fontWeight = '700';
+  if(f) document.getElementById('folio').value = f;
+  if(r) document.getElementById('reporta').value = r;
+  if(f || r){
+    // viene desde la app: los inputs quedan ocultos (pero con su valor) y se muestra una barra de contexto
+    const turno = document.querySelector('.turno');
+    if(turno) turno.style.display = 'none';
+    const bar = document.createElement('div');
+    bar.style.cssText = 'margin:14px;padding:12px 15px;background:#16314F;color:#fff;border-radius:12px;font-size:14.5px;font-weight:600;display:flex;flex-wrap:wrap;gap:5px 18px;box-shadow:0 2px 8px rgba(20,30,40,.12);';
+    bar.innerHTML = (f ? '<span>📋 Turno: '+f+'</span>' : '') + (r ? '<span>👤 '+r+'</span>' : '');
+    const header = document.querySelector('header');
+    if(header) header.insertAdjacentElement('afterend', bar);
   }
-  if(r){ document.getElementById('reporta').value = r; }
 })();
 
 // arranque
