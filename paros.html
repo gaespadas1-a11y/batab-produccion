@@ -76,10 +76,6 @@
   <header>
     <div class="t"><span class="dot"></span> Paros de producción</div>
     <div class="sub">BATAB · registro de tiempos muertos</div>
-    <div class="roles">
-      <button id="rOp" class="on" onclick="setRol('op')">Operador</button>
-      <button id="rSup" onclick="setRol('sup')">Supervisor</button>
-    </div>
   </header>
 
   <div class="turno">
@@ -130,22 +126,7 @@
     </div>
   </div>
 
-  <!-- ===== SUPERVISOR ===== -->
-  <div id="vistaSup" class="hide">
-    <div class="card">
-      <h2><span class="n">?</span> Paros por clasificar (OTRO)</h2>
-      <p style="font-size:13px; color:var(--suave); font-weight:500; margin-bottom:12px;">
-        Estos los reportó el operador como "OTRO". Asígnale la falla correcta del catálogo.
-      </p>
-      <div id="listaOtros"><div class="loading">Cargando…</div></div>
-    </div>
-    <div class="card">
-      <h2><span class="n">=</span> Todos los paros del turno</h2>
-      <div id="listaParosSup"><div class="loading">Cargando…</div></div>
-    </div>
-  </div>
-
-  <div class="foottag">paros.html · conectado a paros-api · v1.4</div>
+  <div class="foottag">paros.html · conectado a paros-api · v1.5</div>
 </div>
 
 <script>
