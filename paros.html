@@ -133,6 +133,11 @@
       <h2><span class="n">!</span> Dónde se pierde más tiempo</h2>
       <div id="criticidad"><div class="vacio">Aún sin datos del turno.</div></div>
     </div>
+
+    <div style="margin:14px;">
+      <button class="btn sec" onclick="regresarRegistro()">✓ Terminar y volver al registro de producción</button>
+      <div style="text-align:center;color:var(--suave);font-size:12px;font-weight:500;margin-top:8px;">Cuando ya anotaste todos los paros del turno.</div>
+    </div>
   </div>
 
   <!-- ===== SUPERVISOR ===== -->
@@ -150,7 +155,7 @@
     </div>
   </div>
 
-  <div class="foottag">paros.html · conectado a paros-api · v1.2</div>
+  <div class="foottag">paros.html · conectado a paros-api · v1.3</div>
 </div>
 
 <script>
@@ -348,6 +353,12 @@ async function borrar(id){
   if(!confirm('¿Borrar este paro?')) return;
   try{ await api({action:'borrar', id}); await cargarParos(); }
   catch(e){ aviso('No se pudo borrar: '+e.message,'err'); }
+}
+
+function regresarRegistro(){
+  // se abrió desde la app en pestaña nueva: cerrarla regresa al registro de producción
+  window.close();
+  setTimeout(function(){ aviso('Listo. Cierra esta pestaña para volver a tu registro de producción.', 'ok'); }, 250);
 }
 
 // recargar paros al cambiar de folio
