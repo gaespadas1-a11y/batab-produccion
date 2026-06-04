@@ -155,14 +155,7 @@ function aviso(txt, tipo){
   if(tipo==='ok') setTimeout(()=>{ m.className='msg'; }, 3500);
 }
 
-function setRol(r){
-  ROL = r;
-  document.getElementById('rOp').classList.toggle('on', r==='op');
-  document.getElementById('rSup').classList.toggle('on', r==='sup');
-  document.getElementById('vistaOp').classList.toggle('hide', r!=='op');
-  document.getElementById('vistaSup').classList.toggle('hide', r!=='sup');
-  if(r==='sup') pintarSupervisor();
-}
+function setRol(r){ /* roles retirados: la pantalla es solo captura del operador */ }
 
 // ---- cargar catálogo y armar selects ----
 async function cargarCatalogo(){
@@ -240,7 +233,6 @@ async function cargarParos(){
   }catch(e){ PAROS=[]; aviso('No se pudieron leer los paros: '+e.message,'err'); }
   pintarParos();
   pintarCriticidad();
-  if(ROL==='sup') pintarSupervisor();
 }
 
 function tarjetaParo(p, conBorrar){
