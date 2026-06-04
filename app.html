@@ -948,10 +948,16 @@ html,body{height:100%;background:var(--bg);color:var(--text);
       <span id="m-pct-merma" style="display:none;">—</span>
       <span id="m-efic" style="display:none;">—</span>
       <span id="efic-fill" style="display:none;"></span>
+      <!-- ═══ MÓDULO PAROS: reemplaza "Observaciones del turno" (para apagar: restaura el textarea f-obs) ═══ -->
       <div class="form-group">
-        <label class="form-label">Observaciones del turno</label>
-        <textarea class="form-textarea" id="f-obs" placeholder="Incidentes, paros, notas..."></textarea>
+        <label class="form-label">Paros del turno</label>
+        <button type="button" onclick="(function(){var e=document.getElementById('f-lote');var f=e&&e.value?e.value.trim():'';var u='paros.html'+(f?('?folio='+encodeURIComponent(f)):'');window.open(u,'_blank');})()" style="width:100%;background:#C0560F;color:#fff;border:none;border-radius:12px;padding:16px;font-size:17px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:9px;box-shadow:0 3px 10px rgba(192,86,15,.3);">
+          <span style="font-size:20px;">⚠️</span><span>Registrar paros / incidentes</span>
+        </button>
+        <div class="form-hint">Aquí se anotan los tiempos muertos y fallas del turno (antes "observaciones").</div>
+        <input type="hidden" id="f-obs" value="">
       </div>
+      <!-- ═══ FIN MÓDULO PAROS ═══ -->
     </div>
     <!-- STEP 5 -->
     <div class="step" id="step5">
@@ -1650,29 +1656,6 @@ html,body{height:100%;background:var(--bg);color:var(--text);
   <button class="nav-item" id="nav-settings" onclick="goSettings();navTo('screen-settings','nav-settings')"><span class="nav-icon">⚙️</span><span>Ajustes</span></button>
 </nav>
 
-<!-- ═══════════ INICIO MÓDULO PAROS (botón flotante, aislado) ═══════════ -->
-<!-- Para APAGAR este módulo: borra todo este bloque (hasta FIN MÓDULO PAROS). La app queda igual que antes. -->
-<button id="fab-paros" onclick="abrirParos()" style="display:none;position:fixed;right:16px;bottom:80px;z-index:9999;background:#C0560F;color:#fff;border:none;border-radius:30px;padding:14px 20px;font-size:15px;font-weight:700;box-shadow:0 4px 14px rgba(0,0,0,.32);cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:7px;">
-  <span style="font-size:17px;">⚠️</span><span>Paros</span>
-</button>
-<script>
-(function(){
-  var nav=document.getElementById('bottom-nav');
-  var fab=document.getElementById('fab-paros');
-  function sync(){ fab.style.display=(nav&&nav.style.display!=='none')?'flex':'none'; }
-  sync();
-  if(nav){ new MutationObserver(sync).observe(nav,{attributes:true,attributeFilter:['style']}); }
-})();
-function abrirParos(){
-  var f='';
-  var el=document.getElementById('f-lote');
-  if(el&&el.value) f=el.value.trim();
-  if(!f){ var fd=document.getElementById('f-folio'); if(fd){ var t=(fd.textContent||'').trim(); if(/\d/.test(t)) f=t; } }
-  var url='paros.html'+(f?('?folio='+encodeURIComponent(f)):'');
-  window.open(url,'_blank');
-}
-</script>
-<!-- ═══════════ FIN MÓDULO PAROS ═══════════ -->
 
 <script>
 // ═══════ CONSTANTS ═══════
