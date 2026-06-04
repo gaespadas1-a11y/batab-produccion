@@ -951,7 +951,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);
       <!-- ═══ MÓDULO PAROS: reemplaza "Observaciones del turno" (para apagar: restaura el textarea f-obs) ═══ -->
       <div class="form-group">
         <label class="form-label">Paros del turno</label>
-        <button type="button" onclick="(function(){var e=document.getElementById('f-lote');var f=e&&e.value?e.value.trim():'';var u='paros.html'+(f?('?folio='+encodeURIComponent(f)):'');window.open(u,'_blank');})()" style="width:100%;background:#C0560F;color:#fff;border:none;border-radius:12px;padding:16px;font-size:17px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:9px;box-shadow:0 3px 10px rgba(192,86,15,.3);">
+        <button type="button" onclick="(function(){var e=document.getElementById('f-lote');var f=e&&e.value?e.value.trim():'';var n='';try{n=(S&&S.currentUser&&S.currentUser.nombre)||'';}catch(_){}; var q=[];if(f)q.push('folio='+encodeURIComponent(f));if(n)q.push('reporta='+encodeURIComponent(n));var u='paros.html'+(q.length?('?'+q.join('&')):'');window.open(u,'_blank');})()" style="width:100%;background:#C0560F;color:#fff;border:none;border-radius:12px;padding:16px;font-size:17px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:9px;box-shadow:0 3px 10px rgba(192,86,15,.3);">
           <span style="font-size:20px;">⚠️</span><span>Registrar paros / incidentes</span>
         </button>
         <div class="form-hint">Aquí se anotan los tiempos muertos y fallas del turno (antes "observaciones").</div>
