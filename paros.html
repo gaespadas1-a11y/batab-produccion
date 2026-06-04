@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>BATAB · Paros de producción</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;800&family=Barlow+Semi+Condensed:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --concreto:#E8E6E1; --concreto2:#F4F3F0; --navy:#16314F; --navy2:#1E4368;
+    --naranja:#C0560F; --naranja2:#E0670F; --linea:#CFCBC2; --texto:#23262B; --suave:#6B6A66;
+    --rojo:#C0392B; --ambar:#D68910; --verde:#1E8449;
+    --sombra:0 2px 8px rgba(20,30,40,.10); --sombra2:0 6px 22px rgba(20,30,40,.16);
+  }
+  *{box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent;}
+  body{font-family:'Barlow',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; background:var(--concreto); color:var(--texto); padding-bottom:40px;}
+  .wrap{max-width:540px; margin:0 auto; min-height:100vh; background:var(--concreto2);}
+  header{background:var(--navy); color:#fff; padding:16px 18px; position:sticky; top:0; z-index:50; box-shadow:var(--sombra);}
+  header .t{font-family:'Barlow Semi Condensed',sans-serif; font-weight:700; font-size:22px; letter-spacing:.4px; display:flex; align-items:center; gap:9px;}
+  header .t .dot{width:11px; height:11px; border-radius:50%; background:var(--naranja2); box-shadow:0 0 0 4px rgba(224,103,15,.25);}
+  header .sub{font-size:13px; color:#A9C0D6; margin-top:2px; font-weight:500;}
+  /* roles */
+  .roles{display:flex; gap:0; background:var(--navy2); border-radius:11px; margin-top:12px; padding:4px;}
+  .roles button{flex:1; border:0; background:transparent; color:#A9C0D6; font-family:inherit; font-weight:700; font-size:15px; padding:9px 0; border-radius:8px; cursor:pointer; transition:.15s;}
+  .roles button.on{background:var(--naranja); color:#fff; box-shadow:var(--sombra);}
+  /* turno bar */
+  .turno{background:#fff; margin:14px; border-radius:13px; padding:14px; box-shadow:var(--sombra); border:1px solid var(--linea);}
+  .turno label{display:block; font-size:12.5px; font-weight:700; color:var(--suave); text-transform:uppercase; letter-spacing:.5px; margin-bottom:5px;}
+  .row2{display:flex; gap:10px;}
+  .row2>div{flex:1;}
+  input,select,textarea{width:100%; font-family:inherit; font-size:16px; padding:12px 12px; border:1.5px solid var(--linea); border-radius:10px; background:#fff; color:var(--texto); font-weight:500;}
+  input:focus,select:focus,textarea:focus{outline:none; border-color:var(--navy2); box-shadow:0 0 0 3px rgba(30,67,104,.13);}
+  textarea{resize:vertical; min-height:64px;}
+  /* card */
+  .card{background:#fff; margin:14px; border-radius:14px; padding:16px; box-shadow:var(--sombra); border:1px solid var(--linea);}
+  .card h2{font-family:'Barlow Semi Condensed',sans-serif; font-size:19px; color:var(--navy); margin-bottom:13px; display:flex; align-items:center; gap:8px;}
+  .card h2 .n{background:var(--naranja); color:#fff; width:24px; height:24px; border-radius:7px; display:inline-flex; align-items:center; justify-content:center; font-size:14px;}
+  .field{margin-bottom:13px;}
+  .field>label{display:block; font-size:13px; font-weight:700; color:var(--texto); margin-bottom:6px;}
+  .field .hint{font-weight:500; color:var(--suave); font-size:12px;}
+  .btn{width:100%; border:0; border-radius:12px; padding:16px; font-family:'Barlow Semi Condensed',sans-serif; font-weight:700; font-size:18px; letter-spacing:.3px; cursor:pointer; transition:.15s; color:#fff; background:var(--naranja);}
+  .btn:active{transform:scale(.98);}
+  .btn.grande{box-shadow:var(--sombra2);}
+  .btn:disabled{opacity:.5;}
+  .btn.sec{background:var(--navy2);}
+  .btn.fant{background:#fff; color:var(--navy); border:1.5px solid var(--linea); font-size:14px; padding:10px;}
+  /* lista paros */
+  .paro{border:1px solid var(--linea); border-radius:12px; padding:12px 13px; margin-bottom:10px; background:#fff; position:relative; border-left:5px solid var(--suave);}
+  .paro.t-Mecanico{border-left-color:#7D6608;} .paro.t-Electrico{border-left-color:#1F618D;}
+  .paro.t-Hidraulico{border-left-color:#117864;} .paro.t-Neumatico{border-left-color:#5B2C6F;}
+  .paro.t-Operacion{border-left-color:#922B21;} .paro.t-Calidad{border-left-color:#B9770E;}
+  .paro .top{display:flex; justify-content:space-between; align-items:flex-start; gap:8px;}
+  .paro .falla{font-weight:700; font-size:15.5px; line-height:1.25;}
+  .paro .min{background:var(--navy); color:#fff; font-weight:800; font-size:15px; padding:4px 10px; border-radius:9px; white-space:nowrap; font-family:'Barlow Semi Condensed';}
+  .paro .meta{font-size:12.5px; color:var(--suave); margin-top:5px; font-weight:500; display:flex; flex-wrap:wrap; gap:4px 12px;}
+  .paro .otro{display:inline-block; background:#FDEBD0; color:#9C640C; font-weight:700; font-size:11px; padding:2px 8px; border-radius:20px; margin-top:6px;}
+  .paro .x{position:absolute; bottom:10px; right:12px; background:transparent; border:0; color:var(--suave); font-size:12px; font-weight:700; cursor:pointer; text-decoration:underline;}
+  /* criticidad */
+  .crit{display:flex; align-items:center; gap:11px; padding:11px 12px; border-radius:11px; margin-bottom:8px; background:#fff; border:1px solid var(--linea);}
+  .crit .bar{width:8px; align-self:stretch; border-radius:6px;}
+  .crit .nom{flex:1; font-weight:700; font-size:14.5px;}
+  .crit .tot{font-family:'Barlow Semi Condensed'; font-weight:700; font-size:15px;}
+  .crit .lvl{font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.5px; padding:3px 9px; border-radius:20px; color:#fff;}
+  .lvl.alta,.bar.alta{background:var(--rojo);} .lvl.media,.bar.media{background:var(--ambar);} .lvl.baja,.bar.baja{background:var(--verde);}
+  .vacio{text-align:center; color:var(--suave); padding:22px 10px; font-weight:500; font-size:14px;}
+  .msg{margin:0 14px 12px; padding:11px 13px; border-radius:10px; font-weight:600; font-size:14px; display:none;}
+  .msg.ok{background:#D5F4E6; color:#0E6251; display:block;} .msg.err{background:#FADBD8; color:#922B21; display:block;}
+  .hide{display:none !important;}
+  .loading{text-align:center; padding:30px; color:var(--suave); font-weight:600;}
+  .foottag{text-align:center; color:var(--suave); font-size:11.5px; padding:14px; font-weight:500;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="t"><span class="dot"></span> Paros de producción</div>
+    <div class="sub">BATAB · registro de tiempos muertos</div>
+    <div class="roles">
+      <button id="rOp" class="on" onclick="setRol('op')">Operador</button>
+      <button id="rSup" onclick="setRol('sup')">Supervisor</button>
+    </div>
+  </header>
+
+  <div class="turno">
+    <div class="row2">
+      <div>
+        <label>Folio del turno</label>
+        <input id="folio" placeholder="ej. 1B26EM09" autocomplete="off">
+      </div>
+      <div>
+        <label>Quién reporta</label>
+        <input id="reporta" placeholder="Nombre" autocomplete="off">
+      </div>
+    </div>
+  </div>
+
+  <div id="msg" class="msg"></div>
+
+  <!-- ===== OPERADOR ===== -->
+  <div id="vistaOp">
+    <div class="card">
+      <h2><span class="n">+</span> Registrar un paro</h2>
+      <div class="field">
+        <label>1. ¿En qué parte fue?</label>
+        <select id="subsistema" onchange="llenarFallas()"><option value="">Cargando…</option></select>
+      </div>
+      <div class="field">
+        <label>2. ¿Qué pasó?</label>
+        <select id="falla"><option value="">Primero elige la parte</option></select>
+      </div>
+      <div class="field hide" id="campoOtro">
+        <label>Describe la falla <span class="hint">(obligatorio)</span></label>
+        <textarea id="otroTxt" placeholder="Escribe qué pasó con tus palabras…"></textarea>
+      </div>
+      <div class="field">
+        <label>3. ¿Cuántos minutos paró?</label>
+        <input id="minutos" type="number" inputmode="numeric" min="0" step="1" placeholder="ej. 25">
+      </div>
+      <div class="field">
+        <label>Acción tomada <span class="hint">(opcional)</span></label>
+        <input id="accion" placeholder="ej. Se cambió la manguera" autocomplete="off">
+      </div>
+      <button class="btn grande" id="btnReg" onclick="registrar()">Registrar paro</button>
+    </div>
+
+    <div class="card">
+      <h2><span class="n">=</span> Paros de este turno</h2>
+      <div id="listaParos"><div class="loading">Cargando…</div></div>
+    </div>
+
+    <div class="card">
+      <h2><span class="n">!</span> Dónde se pierde más tiempo</h2>
+      <div id="criticidad"><div class="vacio">Aún sin datos del turno.</div></div>
+    </div>
+  </div>
+
+  <!-- ===== SUPERVISOR ===== -->
+  <div id="vistaSup" class="hide">
+    <div class="card">
+      <h2><span class="n">?</span> Paros por clasificar (OTRO)</h2>
+      <p style="font-size:13px; color:var(--suave); font-weight:500; margin-bottom:12px;">
+        Estos los reportó el operador como "OTRO". Asígnale la falla correcta del catálogo.
+      </p>
+      <div id="listaOtros"><div class="loading">Cargando…</div></div>
+    </div>
+    <div class="card">
+      <h2><span class="n">=</span> Todos los paros del turno</h2>
+      <div id="listaParosSup"><div class="loading">Cargando…</div></div>
+    </div>
+  </div>
+
+  <div class="foottag">paros.html · conectado a paros-api · v1.1</div>
+</div>
+
+<script>
+const API = "https://szrcmvlgxxpmvgrfmxak.supabase.co/functions/v1/paros-api";
+const APIKEY = "sb_publishable_VOhn9Z2Ev8gYK3nFKr44Sw_VngbAX4N";
+
+let CATALOGO = [];      // todas las fallas activas
+let PAROS = [];         // reportes del folio actual
+let ROL = 'op';
+
+// ---- llamada al conector ----
+async function api(payload){
+  const r = await fetch(API, {
+    method:'POST',
+    headers:{ 'Content-Type':'application/json', 'apikey':APIKEY, 'Authorization':'Bearer '+APIKEY },
+    body: JSON.stringify(payload)
+  });
+  const j = await r.json().catch(()=>({ok:false,error:'Respuesta inválida'}));
+  if(!j.ok) throw new Error(j.error || 'Error de servidor');
+  return j.data;
+}
+
+function aviso(txt, tipo){
+  const m = document.getElementById('msg');
+  m.textContent = txt; m.className = 'msg '+tipo;
+  if(tipo==='ok') setTimeout(()=>{ m.className='msg'; }, 3500);
+}
+
+function setRol(r){
+  ROL = r;
+  document.getElementById('rOp').classList.toggle('on', r==='op');
+  document.getElementById('rSup').classList.toggle('on', r==='sup');
+  document.getElementById('vistaOp').classList.toggle('hide', r!=='op');
+  document.getElementById('vistaSup').classList.toggle('hide', r!=='sup');
+  if(r==='sup') pintarSupervisor();
+}
+
+// ---- cargar catálogo y armar selects ----
+async function cargarCatalogo(){
+  try{
+    CATALOGO = await api({action:'catalogo'});
+    const subs = [...new Set(CATALOGO.map(f=>f.subsistema))].sort();
+    const sel = document.getElementById('subsistema');
+    sel.innerHTML = '<option value="">Elige una parte…</option>' +
+      subs.map(s=>`<option value="${s}">${s}</option>`).join('');
+  }catch(e){ aviso('No se pudo cargar el catálogo: '+e.message, 'err'); }
+}
+
+function llenarFallas(){
+  const sub = document.getElementById('subsistema').value;
+  const sel = document.getElementById('falla');
+  const campoOtro = document.getElementById('campoOtro');
+  campoOtro.classList.add('hide');
+  if(!sub){ sel.innerHTML='<option value="">Primero elige la parte</option>'; return; }
+  const fallas = CATALOGO.filter(f=>f.subsistema===sub && f.codigo_falla!=='OTRO-000');
+  sel.innerHTML = '<option value="">Elige la falla…</option>' +
+    fallas.map(f=>`<option value="${f.codigo_falla}">${f.componente} — ${f.falla}</option>`).join('') +
+    '<option value="OTRO-000">⚠ OTRO (no está en la lista)</option>';
+  sel.onchange = ()=>{ campoOtro.classList.toggle('hide', sel.value!=='OTRO-000'); };
+}
+
+// ---- registrar ----
+async function registrar(){
+  const folio = document.getElementById('folio').value.trim();
+  const codigo = document.getElementById('falla').value;
+  const minutos = document.getElementById('minutos').value;
+  const esOtro = codigo === 'OTRO-000';
+  const otroTxt = document.getElementById('otroTxt').value.trim();
+
+  if(!codigo){ aviso('Elige la parte y la falla.', 'err'); return; }
+  if(esOtro && !otroTxt){ aviso('Describe la falla (OTRO es obligatorio).', 'err'); return; }
+  if(minutos==='' || Number(minutos)<0){ aviso('Pon cuántos minutos paró.', 'err'); return; }
+
+  const cat = CATALOGO.find(f=>f.codigo_falla===codigo) || {};
+  const payload = {
+    action:'registrar',
+    folio: folio || null,
+    linea: cat.equipo || null,
+    equipo: cat.equipo || null,
+    codigo_falla: codigo,
+    falla_texto: esOtro ? otroTxt : (cat.componente+' — '+cat.falla),
+    es_otro: esOtro,
+    descripcion_libre: esOtro ? otroTxt : null,
+    tipo: cat.tipo || null,
+    minutos: Math.round(Number(minutos)),
+    reporta: document.getElementById('reporta').value.trim() || null
+  };
+
+  const btn = document.getElementById('btnReg');
+  btn.disabled = true; btn.textContent = 'Guardando…';
+  try{
+    await api(payload);
+    aviso('Paro registrado ✓', 'ok');
+    document.getElementById('falla').value='';
+    document.getElementById('subsistema').value='';
+    document.getElementById('minutos').value='';
+    document.getElementById('accion').value='';
+    document.getElementById('otroTxt').value='';
+    document.getElementById('campoOtro').classList.add('hide');
+    llenarFallas();
+    await cargarParos();
+  }catch(e){ aviso('No se guardó: '+e.message, 'err'); }
+  btn.disabled=false; btn.textContent='Registrar paro';
+}
+
+// ---- cargar y pintar paros ----
+async function cargarParos(){
+  const folio = document.getElementById('folio').value.trim();
+  try{
+    PAROS = await api({action:'listar', folio: folio || null});
+  }catch(e){ PAROS=[]; aviso('No se pudieron leer los paros: '+e.message,'err'); }
+  pintarParos();
+  pintarCriticidad();
+  if(ROL==='sup') pintarSupervisor();
+}
+
+function tarjetaParo(p, conBorrar){
+  const tc = (p.tipo||'').replace(/[^A-Za-z]/g,'');
+  return `<div class="paro t-${tc}">
+    <div class="top">
+      <div class="falla">${p.falla_texto||'(sin falla)'}</div>
+      <div class="min">${p.minutos!=null?p.minutos:'?'} min</div>
+    </div>
+    <div class="meta">
+      ${p.tipo?`<span>🔧 ${p.tipo}</span>`:''}
+      ${p.reporta?`<span>👤 ${p.reporta}</span>`:''}
+      ${p.accion?`<span>✓ ${p.accion}</span>`:''}
+    </div>
+    ${p.es_otro?'<span class="otro">⚠ OTRO · por clasificar</span>':''}
+    ${conBorrar?`<button class="x" onclick="borrar(${p.id})">borrar</button>`:''}
+  </div>`;
+}
+
+function pintarParos(){
+  const cont = document.getElementById('listaParos');
+  if(!PAROS.length){ cont.innerHTML='<div class="vacio">Sin paros registrados en este turno.</div>'; return; }
+  cont.innerHTML = PAROS.map(p=>tarjetaParo(p,true)).join('');
+  document.getElementById('listaParosSup').innerHTML = PAROS.map(p=>tarjetaParo(p,true)).join('');
+}
+
+function pintarCriticidad(){
+  const cont = document.getElementById('criticidad');
+  if(!PAROS.length){ cont.innerHTML='<div class="vacio">Aún sin datos del turno.</div>'; return; }
+  const por = {};
+  PAROS.forEach(p=>{
+    const cat = CATALOGO.find(f=>f.codigo_falla===p.codigo_falla);
+    const sub = cat ? cat.subsistema : 'Sin clasificar';
+    por[sub] = (por[sub]||0) + (Number(p.minutos)||0);
+  });
+  const arr = Object.entries(por).sort((a,b)=>b[1]-a[1]);
+  cont.innerHTML = arr.map(([sub,min])=>{
+    const lvl = min>=60?'alta':(min>=20?'media':'baja');
+    const txt = lvl==='alta'?'Alta':(lvl==='media'?'Media':'Baja');
+    return `<div class="crit">
+      <div class="bar ${lvl}"></div>
+      <div class="nom">${sub}</div>
+      <div class="tot">${min} min</div>
+      <div class="lvl ${lvl}">${txt}</div>
+    </div>`;
+  }).join('');
+}
+
+// ---- supervisor: clasificar OTRO ----
+function pintarSupervisor(){
+  const cont = document.getElementById('listaOtros');
+  const otros = PAROS.filter(p=>p.es_otro);
+  if(!otros.length){ cont.innerHTML='<div class="vacio">No hay paros pendientes de clasificar. 👍</div>'; return; }
+  const opciones = CATALOGO.filter(f=>f.codigo_falla!=='OTRO-000')
+    .map(f=>`<option value="${f.codigo_falla}">${f.subsistema} · ${f.componente} — ${f.falla}</option>`).join('');
+  cont.innerHTML = otros.map(p=>`
+    <div class="paro" style="border-left-color:#9C640C;">
+      <div class="falla">${p.descripcion_libre||p.falla_texto}</div>
+      <div class="meta"><span>${p.minutos} min</span>${p.reporta?`<span>👤 ${p.reporta}</span>`:''}</div>
+      <div style="margin-top:10px;">
+        <select id="cl-${p.id}">${'<option value=\"\">Asignar falla del catálogo…</option>'+opciones}</select>
+        <button class="btn fant" style="margin-top:8px;" onclick="clasificar(${p.id})">Guardar clasificación</button>
+      </div>
+    </div>`).join('');
+}
+
+async function clasificar(id){
+  const codigo = document.getElementById('cl-'+id).value;
+  if(!codigo){ aviso('Elige una falla del catálogo.', 'err'); return; }
+  const cat = CATALOGO.find(f=>f.codigo_falla===codigo) || {};
+  try{
+    await api({ action:'clasificar', id, codigo_falla:codigo,
+      falla_texto: cat.componente+' — '+cat.falla, tipo: cat.tipo,
+      clasificado_por: document.getElementById('reporta').value.trim()||'Supervisor' });
+    aviso('Clasificado ✓', 'ok');
+    await cargarParos();
+  }catch(e){ aviso('No se pudo clasificar: '+e.message,'err'); }
+}
+
+async function borrar(id){
+  if(!confirm('¿Borrar este paro?')) return;
+  try{ await api({action:'borrar', id}); await cargarParos(); }
+  catch(e){ aviso('No se pudo borrar: '+e.message,'err'); }
+}
+
+// recargar paros al cambiar de folio
+document.getElementById('folio').addEventListener('change', cargarParos);
+
+// la app del teléfono abre esta página pasándole el folio del turno activo:
+//   paros.html?folio=1B26EM09&reporta=Capetillo
+// si vienen en la URL, se llenan solos y el folio queda fijo (no se teclea).
+(function leerTurnoDesdeApp(){
+  const p = new URLSearchParams(location.search);
+  const f = p.get('folio');
+  const r = p.get('reporta');
+  if(f){
+    const fi = document.getElementById('folio');
+    fi.value = f; fi.readOnly = true;
+    fi.style.background = '#EEF1F4'; fi.style.color = '#16314F'; fi.style.fontWeight = '700';
+  }
+  if(r){ document.getElementById('reporta').value = r; }
+})();
+
+// arranque
+(async function(){
+  await cargarCatalogo();
+  await cargarParos();
+})();
+</script>
+</body>
+</html>
