@@ -2742,7 +2742,9 @@ TOTALES: La fila TOTAL al final de cada bloque de 10 bachadas y la fila de TOTAL
         setVal('f-lote', conTurno!==lo?conTurno:lo);
       }else setVal('f-lote',lo);
     }
-    setVal('f-mf',p.modulo_finura); setVal('f-humedad',p.humedad);
+    // Humedad y Módulo de finura son datos de LABORATORIO del operador: el OCR solo los sugiere si están VACÍOS, NUNCA pisa lo capturado a mano.
+    if(!document.getElementById('f-mf').value.trim()) setVal('f-mf',p.modulo_finura);
+    if(!document.getElementById('f-humedad').value.trim()) setVal('f-humedad',p.humedad);
     setVal('mp-cemento-tipo',mapM(p.cemento_tipo)); setVal('mp-cemento-kg',p.cemento_kg);
     setVal('mp-t1-mat',mapM(p.tolva1_material));    setVal('mp-t1-kg',p.tolva1_kg);
     setVal('mp-t2-mat',mapM(p.tolva2_material));    setVal('mp-t2-kg',p.tolva2_kg);
