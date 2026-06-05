@@ -2591,16 +2591,63 @@ async function onDosiPhoto2Selected(e){
   document.getElementById('ocr-status').textContent=S.dosiPhotoB64?'✅ Ambas fotos listas — toca OCR':'📋 Foto 2 lista — agrega Foto 1 también';
   e.target.value='';
 }
+// ═══ OCR robusto: comprime la foto y reintenta si la IA está ocupada ═══
+function comprimirImagenOCR(dataUrl, maxLado){
+  return new Promise(function(resolve){
+    try{
+      const img=new Image();
+      img.onload=function(){
+        let w=img.width, h=img.height; const m=maxLado||1800;
+        if(w>m||h>m){ if(w>=h){ h=Math.round(h*m/w); w=m; } else { w=Math.round(w*m/h); h=m; } }
+        const c=document.createElement('canvas'); c.width=w; c.height=h;
+        c.getContext('2d').drawImage(img,0,0,w,h);
+        resolve(c.toDataURL('image/jpeg',0.85));
+      };
+      img.onerror=function(){ resolve(dataUrl); }; // si algo falla, manda la original
+      img.src=dataUrl;
+    }catch(e){ resolve(dataUrl); }
+  });
+}
+async function ocrFetchConReintento(body, key, maxIntentos){
+  let ultimo='';
+  for(let i=1; i<=maxIntentos; i++){
+    try{
+      const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',
+        headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+        body:JSON.stringify(body)});
+      if(res.ok) return res;
+      let msg=''; try{ msg=(await res.json()).error?.message||res.statusText; }catch(_){ msg=res.statusText; }
+      ultimo=msg||('HTTP '+res.status);
+      if([429,500,502,503,529].includes(res.status) && i<maxIntentos){
+        document.getElementById('ocr-status').textContent='⏳ La IA está ocupada, reintentando ('+i+'/'+(maxIntentos-1)+')...';
+        await new Promise(r=>setTimeout(r, 1000*i)); continue;
+      }
+      throw new Error(ultimo);
+    }catch(e){
+      ultimo=e.message||String(e);
+      if(i<maxIntentos && /fetch|network|Failed|load|timeout/i.test(ultimo)){
+        document.getElementById('ocr-status').textContent='⏳ Reintentando conexión ('+i+'/'+(maxIntentos-1)+')...';
+        await new Promise(r=>setTimeout(r, 1000*i)); continue;
+      }
+      throw new Error(ultimo);
+    }
+  }
+  throw new Error(ultimo||'No se pudo conectar con la IA');
+}
+
 async function runOCR(){
   const key=getOcrKey();if(!key){showToast('Configura tu API key en Ajustes','red');return;}
   if(!S.dosiPhotoB64){showToast('Primero toma la Foto 1 (encabezado)','red');return;}
   const btn=document.getElementById('ocr-btn');btn.disabled=true;
-  const toB64=(d)=>d.replace(/^data:image\/\w+;base64,/,'');
-  const toMt=(d)=>d.startsWith('data:image/png')?'image/png':'image/jpeg';
+  document.getElementById('ocr-status').textContent='⏳ Preparando fotos...';
+  const quitarPrefijo=(d)=>d.replace(/^data:image\/\w+;base64,/,'');
+  // Comprimir antes de enviar: pesa mucho menos y casi nunca rebota
+  const foto1=await comprimirImagenOCR(S.dosiPhotoB64,1800);
+  const foto2=S.dosiPhotoB64_2?await comprimirImagenOCR(S.dosiPhotoB64_2,1800):null;
   const blocks=[];
-  blocks.push({type:'image',source:{type:'base64',media_type:toMt(S.dosiPhotoB64),data:toB64(S.dosiPhotoB64)}});
-  if(S.dosiPhotoB64_2){
-    blocks.push({type:'image',source:{type:'base64',media_type:toMt(S.dosiPhotoB64_2),data:toB64(S.dosiPhotoB64_2)}});
+  blocks.push({type:'image',source:{type:'base64',media_type:'image/jpeg',data:quitarPrefijo(foto1)}});
+  if(foto2){
+    blocks.push({type:'image',source:{type:'base64',media_type:'image/jpeg',data:quitarPrefijo(foto2)}});
     document.getElementById('ocr-status').textContent='⏳ Analizando 2 fotos...';
   }else{
     document.getElementById('ocr-status').textContent='⏳ Analizando foto 1...';
@@ -2622,11 +2669,7 @@ AGUA: El agua está en LITROS. Valores típicos por bachada: 200-400 L. En total
 RANGOS ESPERADOS por bachada: Cemento 100-250 kg, Agregados 300-3000 kg cada tolva, Agua 150-450 L, Aditivo 0.3-3.0 kg.
 TOTALES: La fila TOTAL al final de cada bloque de 10 bachadas y la fila de TOTALES GENERALES al final de la hoja son los consumos acumulados reales del turno completo.`});
   try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',
-      headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-      body:JSON.stringify({model:'claude-opus-4-6',max_tokens:1200,messages:[{role:'user',content:blocks}]})
-    });
-    if(!res.ok)throw new Error((await res.json()).error?.message||res.statusText);
+    const res=await ocrFetchConReintento({model:'claude-opus-4-6',max_tokens:1200,messages:[{role:'user',content:blocks}]}, key, 3);
     const d=await res.json();
     const text=d.content.find(c=>c.type==='text')?.text||'';
     // Extraer JSON robusto: buscar primer { y último } aunque haya texto extra
