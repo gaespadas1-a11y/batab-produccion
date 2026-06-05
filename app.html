@@ -1084,9 +1084,9 @@ html,body{height:100%;background:var(--bg);color:var(--text);
             <div class="rv-section-body"><table class="rv-table" id="rv-lab-table"></table></div>
           </div>
 
-          <!-- Observaciones -->
+          <!-- Paros del turno (del módulo de paros) -->
           <div class="rv-section" id="rv-obs-section" style="display:none;">
-            <div class="rv-section-head"><div class="rv-section-title">📝 Observaciones</div></div>
+            <div class="rv-section-head"><div class="rv-section-title">⚠️ Paros del turno</div></div>
             <div class="rv-section-body"><div id="rv-obs-text" style="font-size:13px;line-height:1.6;color:var(--text2);"></div></div>
           </div>
 
@@ -3096,6 +3096,31 @@ function saveRecord(){
 
 // ═══════ SUPERVISOR ═══════
 let superPinBuf='';
+async function cargarParosSupervisor(folioLote){
+  const sec=document.getElementById('rv-obs-section');
+  const cont=document.getElementById('rv-obs-text');
+  if(!sec||!cont) return;
+  sec.style.display='';
+  cont.innerHTML='<span style="color:var(--text3);">Cargando paros del turno…</span>';
+  const PAROS_API='https://szrcmvlgxxpmvgrfmxak.supabase.co/functions/v1/paros-api';
+  const PAROS_KEY='sb_publishable_VOhn9Z2Ev8gYK3nFKr44Sw_VngbAX4N';
+  try{
+    const r=await fetch(PAROS_API,{method:'POST',
+      headers:{'Content-Type':'application/json','apikey':PAROS_KEY,'Authorization':'Bearer '+PAROS_KEY},
+      body:JSON.stringify({action:'listar',folio:folioLote})});
+    const j=await r.json();
+    const paros=(j&&j.ok&&Array.isArray(j.data))?j.data:[];
+    if(!paros.length){ cont.innerHTML='<span style="color:var(--text3);">Sin paros registrados en este turno.</span>'; return; }
+    const total=paros.reduce((a,p)=>a+(Number(p.minutos)||0),0);
+    cont.innerHTML = paros.map(p=>`<div style="padding:8px 0;border-bottom:1px solid var(--line);">
+        <div style="font-weight:600;color:var(--text1);">${p.falla_texto||'(sin falla)'} <span style="color:var(--accent);font-weight:700;">· ${p.minutos!=null?p.minutos:'?'} min</span></div>
+        <div style="font-size:12px;color:var(--text3);">${[p.tipo,p.reporta,(p.es_otro?'⚠ OTRO':'')].filter(Boolean).join(' · ')}</div>
+        ${p.es_otro&&p.descripcion_libre?`<div style="font-size:12px;color:var(--text2);margin-top:2px;">“${p.descripcion_libre}”</div>`:''}
+      </div>`).join('') +
+      `<div style="margin-top:10px;font-weight:700;color:var(--text1);">⏱️ Total paro del turno: ${total} min · ${paros.length} evento(s)</div>`;
+  }catch(e){ cont.innerHTML='<span style="color:#ef4444;">No se pudieron cargar los paros del turno.</span>'; }
+}
+
 function goSupervisor(){
   const u=S.currentUser;
   if(u&&(u.rol==='supervisor'||u.rol==='director')){S.superUser=u;loadSupervisorScreen();navTo('screen-supervisor','nav-super');}
@@ -3326,11 +3351,8 @@ function renderReviewScreen(rec){
     <tr><td class="rk">Humedad</td><td class="rv">${rec.humedad!=null?rec.humedad+'%':'—'}</td></tr>
     ${rec.obsLab?`<tr><td class="rk">Obs. lab</td><td class="rv" style="font-size:12px;font-family:inherit;">${rec.obsLab}</td></tr>`:''}`;
 
-  // Observaciones
-  if(rec.obs){
-    document.getElementById('rv-obs-section').style.display='';
-    document.getElementById('rv-obs-text').textContent=rec.obs;
-  }else document.getElementById('rv-obs-section').style.display='none';
+  // Paros del turno (cargados del módulo de paros por número de lote)
+  cargarParosSupervisor(rec.lote || rec.folio);
 
   // Checklist
   S.checks={};
