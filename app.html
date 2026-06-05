@@ -2651,7 +2651,7 @@ function traducirErrorOCR(msg){
 }
 
 async function runOCR(){
-  const key=getOcrKey();if(!key){showToast('Configura tu API key en Ajustes','red');return;}
+  // OCR por SERVIDOR (Opción B): ya NO se requiere la API key del dispositivo.
   if(!S.dosiPhotoB64){showToast('Primero toma la Foto 1 (encabezado)','red');return;}
   const btn=document.getElementById('ocr-btn');btn.disabled=true;
   document.getElementById('ocr-status').textContent='⏳ Preparando fotos...';
@@ -2684,23 +2684,22 @@ AGUA: El agua está en LITROS. Valores típicos por bachada: 200-400 L. En total
 RANGOS ESPERADOS por bachada: Cemento 100-250 kg, Agregados 300-3000 kg cada tolva, Agua 150-450 L, Aditivo 0.3-3.0 kg.
 TOTALES: La fila TOTAL al final de cada bloque de 10 bachadas y la fila de TOTALES GENERALES al final de la hoja son los consumos acumulados reales del turno completo.`});
   try{
-    const res=await ocrFetchConReintento({model:'claude-opus-4-6',max_tokens:1200,messages:[{role:'user',content:blocks}]}, key, 3);
-    const d=await res.json();
-    const text=d.content.find(c=>c.type==='text')?.text||'';
-    // Extraer JSON robusto: buscar primer { y último } aunque haya texto extra
-    let jsonStr=text.replace(/```json|```/g,'').trim();
-    const j1=jsonStr.indexOf('{'), j2=jsonStr.lastIndexOf('}');
-    if(j1>=0&&j2>j1) jsonStr=jsonStr.substring(j1,j2+1);
-    let p;
-    try{ p=JSON.parse(jsonStr); }
-    catch(je){
-      // Mostrar qué devolvió el modelo para poder diagnosticar
-      document.getElementById('ocr-status').textContent='❌ OCR no pudo leer la hoja. Intenta con mejor iluminación o ángulo.';
+    // OCR vía SERVIDOR (Opción B): app-api usa la ANTHROPIC_API_KEY del servidor (CON saldo).
+    // Ya NO se llama a Anthropic directo con la key del dispositivo (esa era de otra organización en ceros).
+    const res=await fetch('https://szrcmvlgxxpmvgrfmxak.supabase.co/functions/v1/app-api/ocr/dosificacion',{
+      method:'POST', headers:sbH,
+      body:JSON.stringify({foto1_base64:foto1, foto2_base64:foto2})
+    });
+    let j=null; try{ j=await res.json(); }catch(_){ j=null; }
+    if(!res.ok || !j || !j.ok || !j.datos){
+      const det=(j&&(j.error_message||j.error_code))||res.statusText||('HTTP '+res.status);
+      document.getElementById('ocr-status').textContent='❌ '+traducirErrorOCR(det);
       btn.disabled=false;
-      console.error('OCR raw response:',text);
-      showToast('OCR: respuesta inesperada del modelo','red');
+      console.error('OCR servidor falló:', det);
+      showToast('No se pudo leer la hoja','red');
       return;
     }
+    const p=j.datos;
     const setVal=(id,v)=>{
       if(v==null||v===''||v===0)return;
       const el=document.getElementById(id);if(!el)return;
