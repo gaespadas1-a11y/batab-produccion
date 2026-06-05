@@ -2635,6 +2635,21 @@ async function ocrFetchConReintento(body, key, maxIntentos){
   throw new Error(ultimo||'No se pudo conectar con la IA');
 }
 
+function traducirErrorOCR(msg){
+  const m=(msg||'').toLowerCase();
+  if(m.includes('credit balance')||m.includes('billing')||m.includes('purchase credit'))
+    return 'Se acabó el saldo de la cuenta de IA. Hay que recargar créditos en console.anthropic.com (sección Billing). Mientras tanto, captura los datos a mano.';
+  if(m.includes('rate limit')||m.includes('429')||m.includes('overloaded')||m.includes('529'))
+    return 'La IA está ocupada en este momento. Espera unos segundos e intenta de nuevo.';
+  if(m.includes('authentication')||m.includes('x-api-key')||m.includes('401')||m.includes('api key')||m.includes('api-key'))
+    return 'La clave de la IA no es válida o está mal escrita. Revísala en Ajustes.';
+  if(m.includes('failed to fetch')||m.includes('network')||m.includes('load failed'))
+    return 'Sin conexión a internet o señal muy débil. Revisa la red e intenta otra vez.';
+  if(m.includes('too large')||m.includes('413'))
+    return 'La foto pesa demasiado. Toma la foto otra vez.';
+  return 'No se pudo leer con la IA. Detalle: '+(msg||'desconocido');
+}
+
 async function runOCR(){
   const key=getOcrKey();if(!key){showToast('Configura tu API key en Ajustes','red');return;}
   if(!S.dosiPhotoB64){showToast('Primero toma la Foto 1 (encabezado)','red');return;}
@@ -2750,7 +2765,7 @@ TOTALES: La fila TOTAL al final de cada bloque de 10 bachadas y la fila de TOTAL
     const extras=hasDos?' + totales acumulados':'';
     document.getElementById('ocr-status').textContent=`✅ Datos extraídos${extras} — verifica y corrige si es necesario`;
     showToast('OCR completado ✅','green');
-  }catch(err){document.getElementById('ocr-status').textContent='❌ Error: '+err.message;showToast('Error OCR','red');}
+  }catch(err){document.getElementById('ocr-status').textContent='❌ '+traducirErrorOCR(err.message);showToast('No se pudo leer la hoja','red');}
   btn.disabled=false;
 }
 
