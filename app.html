@@ -1,6 +1,25 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+<!-- ====== CANDADO DE VERSION BATAB (auto-actualizacion) ====== -->
+<!-- Sube APP_VERSION en CADA deploy, igual que el valor "v" de version.json -->
+<script>
+(function () {
+  var APP_VERSION = '2026-06-09-paros';
+  try {
+    fetch('version.json?t=' + Date.now(), { cache: 'no-store' })
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        if (!d || !d.v || d.v === APP_VERSION) return;
+        if (sessionStorage.getItem('batab_vr_try') === d.v) return;
+        sessionStorage.setItem('batab_vr_try', d.v);
+        location.replace(location.pathname + '?v=' + encodeURIComponent(d.v));
+      })
+      .catch(function () {});
+  } catch (e) {}
+})();
+</script>
+<!-- ====== FIN CANDADO DE VERSION BATAB ====== -->
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="mobile-web-app-capable" content="yes">
