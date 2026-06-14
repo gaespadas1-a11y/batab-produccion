@@ -3558,6 +3558,7 @@ async function doApprove(){
       ? '✅ Ya estaba aprobado · CR 1417: '+json.cr1417_id+(json.wo_id?' · WO: '+json.wo_id:'')
       : '✅ Aprobado · WO '+json.wo_id+' · CR 1417: '+json.cr1417_id;
     showToast(msg,'green');
+    if(json.aviso_inventario){ setTimeout(function(){ alert('\u26a0\ufe0f INVENTARIO BAJO\n\nNo hay suficiente cantidad registrada en NetSuite para:\n\u2022 '+json.aviso_inventario+'\n\nEl material ya se proces\u00f3 f\u00edsicamente; esto casi siempre es administrativo (la compra entr\u00f3 pero no se ha recibido en NetSuite).\n\nAvisa al responsable para regularizar la entrada.'); }, 700); }
   }catch(e){
     hideLoading();
     showToast('❌ Error al aprobar: '+e.message,'red');
