@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tablero de Producción · BATAB</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#14171C;--surface:#1E232B;--surface-2:#262C36;--line:#333B47;
+    --text:#D7DBE1;--dim:#8A93A0;--faint:#5C6573;--accent:#E8A33D;--p-cap:#6FA8DC;
+    --p-qc:#E0C341;--p-listo:#4FB286;--p-cerr:#707A88;--alert:#D9534F;--proc:#C9A86A;--radius:10px;}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;font-size:14px;line-height:1.45;
+    -webkit-font-smoothing:antialiased;min-height:100vh;background-image:radial-gradient(circle at 18% -8%,rgba(232,163,61,.06),transparent 42%)}
+  .wrap{max-width:1320px;margin:0 auto;padding:0 22px 70px}
+  .topbar{display:flex;align-items:center;gap:16px;padding:20px 22px 18px;max-width:1320px;margin:0 auto;border-bottom:1px solid var(--line)}
+  .logo{display:flex;align-items:center;gap:13px}
+  .logo .name{font-family:'Space Grotesk';font-weight:700;font-size:19px;letter-spacing:.5px}
+  .logo .sub{font-size:11px;color:var(--dim);letter-spacing:2.5px;text-transform:uppercase}
+  .live{font-family:'IBM Plex Mono';font-size:10px;text-transform:uppercase;letter-spacing:1px;padding:3px 9px;border-radius:20px;display:flex;align-items:center;gap:6px}
+  .live::before{content:"";width:7px;height:7px;border-radius:50%}
+  .live.on{color:var(--p-listo);background:rgba(79,178,134,.12)}.live.on::before{background:var(--p-listo);box-shadow:0 0 6px var(--p-listo)}
+  .live.off{color:var(--p-qc);background:rgba(224,195,65,.12)}.live.off::before{background:var(--p-qc)}
+  .topbar .spacer{flex:1}
+  .updated{font-size:11.5px;color:var(--dim);text-align:right}
+  .updated b{color:var(--text);font-weight:500}
+  .btn-send{background:var(--accent);color:#14171C;border:none;cursor:pointer;font-family:'Space Grotesk';font-weight:600;
+    font-size:13px;padding:10px 16px;border-radius:8px;display:flex;align-items:center;gap:8px;transition:filter .15s}
+  .btn-send:hover{filter:brightness(1.08)}
+  .notice{max-width:1320px;margin:14px auto 0;display:flex;gap:11px;align-items:flex-start;background:rgba(224,195,65,.08);
+    border:1px solid rgba(224,195,65,.28);border-radius:8px;padding:11px 15px;font-size:12.5px;color:#E8DFB8}
+  .notice svg{flex-shrink:0;margin-top:1px}
+  .kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-top:22px}
+  .kpi{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px 16px 15px;position:relative;overflow:hidden}
+  .kpi .bar{position:absolute;left:0;top:0;bottom:0;width:3px}
+  .kpi .v{font-family:'Space Grotesk';font-weight:700;font-size:34px;line-height:1}
+  .kpi .l{font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:.8px;margin-top:8px}
+  .kpi .l small{display:block;color:var(--faint);text-transform:none;letter-spacing:0;font-size:10.5px;margin-top:2px}
+  .sec{margin-top:34px}
+  .sec-h{display:flex;align-items:baseline;gap:12px;margin-bottom:16px}
+  .sec-h h2{font-family:'Space Grotesk';font-weight:600;font-size:16px;letter-spacing:.3px}
+  .sec-h .eyebrow{font-size:10.5px;color:var(--accent);letter-spacing:2.5px;text-transform:uppercase;font-weight:600}
+  .sec-h .note{font-size:11.5px;color:var(--dim);margin-left:auto}
+  .pipe{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;align-items:start}
+  .col{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:12px 12px 14px;min-height:120px}
+  .col-h{display:flex;align-items:center;gap:9px;padding:2px 4px 12px;border-bottom:1px solid var(--line);margin-bottom:12px}
+  .dot{width:9px;height:9px;border-radius:2px;flex-shrink:0}
+  .col-h .t{font-family:'Space Grotesk';font-weight:600;font-size:13px}
+  .col-h .ct{margin-left:auto;font-family:'IBM Plex Mono';font-size:12px;color:var(--dim);background:var(--surface-2);padding:2px 8px;border-radius:6px}
+  .col-h .ph{font-size:10px;color:var(--faint);display:block;margin-top:1px}
+  .cards{display:flex;flex-direction:column;gap:9px}
+  .card{background:var(--surface-2);border:1px solid var(--line);border-left-width:3px;border-radius:7px;padding:11px 12px}
+  .card .top{display:flex;align-items:center;gap:9px;margin-bottom:7px}
+  .card .lote{font-family:'IBM Plex Mono';font-weight:600;font-size:13.5px;letter-spacing:.3px}
+  .card .test{font-size:9px;font-weight:600;letter-spacing:.6px;color:#14171C;background:var(--p-qc);padding:2px 6px;border-radius:4px;margin-left:auto;text-transform:uppercase}
+  .card .art{font-size:12px}
+  .card .meta{display:flex;gap:7px;align-items:center;margin-top:9px;flex-wrap:wrap}
+  .chip{font-family:'IBM Plex Mono';font-size:10.5px;color:var(--dim);background:rgba(255,255,255,.04);border:1px solid var(--line);padding:1.5px 7px;border-radius:5px}
+  .chip.pz{color:var(--text)}
+  .empty{color:var(--faint);font-size:12px;text-align:center;padding:18px 0;font-style:italic}
+  .dec-sum{display:flex;align-items:center;gap:16px;background:rgba(217,83,79,.07);border:1px solid rgba(217,83,79,.26);
+    border-radius:var(--radius);padding:14px 18px;margin-bottom:14px;flex-wrap:wrap}
+  .dec-sum .big{font-family:'Space Grotesk';font-weight:700;font-size:30px;color:var(--alert);line-height:1}
+  .dec-sum .lbl{font-size:12.5px;color:#E6BEBC}
+  .dec-sum .lbl b{color:#fff;font-weight:600}
+  .dec-sum .bruto{margin-left:auto;text-align:right;font-size:11.5px;color:var(--dim)}
+  .dec-sum .bruto b{font-family:'IBM Plex Mono';color:#E6BEBC;font-size:15px;font-weight:500;display:block}
+  .formula{margin:2px 0 10px;font-size:12px;color:var(--dim);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .formula b{color:var(--text);font-weight:500;font-family:'IBM Plex Mono';font-size:11.5px}
+  .formula .eq{color:var(--accent)}
+  .legend{display:flex;gap:18px;flex-wrap:wrap;margin:0 0 16px;font-size:11px;color:var(--dim)}
+  .legend span{display:flex;align-items:center;gap:7px}
+  .legend i{width:16px;height:9px;border-radius:2px;display:inline-block}
+  .legend i.firme{background:var(--p-listo)}
+  .legend i.tent{background:var(--proc);opacity:.5;background-image:repeating-linear-gradient(45deg,rgba(255,255,255,.4) 0 2px,transparent 2px 5px)}
+  .gama{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;margin-top:14px}
+  .gama-head{display:flex;align-items:center;gap:22px;padding:16px 18px 12px;flex-wrap:wrap}
+  .gh-name{display:flex;align-items:center;gap:10px;font-family:'Space Grotesk';font-weight:700;font-size:16px;letter-spacing:1px;text-transform:uppercase}
+  .gh-name .gd{width:11px;height:11px;border-radius:3px;flex-shrink:0}
+  .gh-falta{display:flex;flex-direction:column;gap:3px}
+  .gh-falta .lab{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--dim)}
+  .gh-falta .val{font-family:'Space Grotesk';font-weight:700;font-size:27px;line-height:1}
+  .gh-falta .bru{font-size:10px;color:var(--faint);font-family:'IBM Plex Mono'}
+  .gh-ne{margin-left:auto;display:flex;gap:24px}
+  .gh-ne .st{text-align:right;display:flex;flex-direction:column;gap:3px}
+  .gh-ne .st .lab{font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--dim)}
+  .gh-ne .st b{font-family:'IBM Plex Mono';font-size:14px;color:var(--text);font-weight:500}
+  .gh-ne .st.proc b{color:var(--proc)}
+  .gama-bar{display:flex;height:7px;margin:0 18px 14px;background:rgba(217,83,79,.22);border-radius:4px;overflow:hidden}
+  .gama-bar i{display:block;height:100%}
+  .gama-bar i.tent{opacity:.5;background-image:repeating-linear-gradient(45deg,rgba(255,255,255,.4) 0 2px,transparent 2px 5px)}
+  .prow{display:grid;grid-template-columns:1fr 96px 96px 96px 104px 140px;gap:12px;align-items:center;padding:11px 18px;border-bottom:1px solid var(--line)}
+  .prow:last-child{border-bottom:none}
+  .prow.head{background:var(--surface-2);font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--faint);padding:8px 18px}
+  .prow.head span{white-space:normal;line-height:1.1}
+  .prow.head .num.proc{color:var(--proc)}
+  .prow.cov0{opacity:.55}
+  .prow .sku{display:flex;align-items:center;gap:9px}
+  .prow .sku .ld{width:8px;height:8px;border-radius:2px;flex-shrink:0}
+  .prow .sku .nm{font-family:'IBM Plex Mono';font-size:12.5px;font-weight:500}
+  .prow .num{font-family:'IBM Plex Mono';font-size:12.5px;text-align:right;color:var(--dim)}
+  .prow .num.proc{color:var(--proc)}
+  .prow .falta{font-family:'IBM Plex Mono';font-size:13.5px;font-weight:600;text-align:right}
+  .prow .falta.r{color:var(--alert)} .prow .falta.g{color:var(--p-listo)}
+  .prow .covwrap{display:flex;align-items:center;gap:8px}
+  .prow .covbar{flex:1;display:flex;height:6px;background:rgba(217,83,79,.2);border-radius:3px;overflow:hidden}
+  .prow .covbar i{display:block;height:100%}
+  .prow .covbar i.tent{opacity:.5;background-image:repeating-linear-gradient(45deg,rgba(255,255,255,.4) 0 2px,transparent 2px 5px)}
+  .prow .covpct{font-family:'IBM Plex Mono';font-size:10.5px;color:var(--dim);width:34px;text-align:right}
+  .legacy{margin-top:30px;background:rgba(217,83,79,.07);border:1px solid rgba(217,83,79,.3);border-radius:var(--radius);
+    padding:16px 18px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+  .legacy .big{font-family:'Space Grotesk';font-weight:700;font-size:30px;color:var(--alert)}
+  .legacy .txt{font-size:12.5px;color:#E6BEBC;max-width:760px}
+  .legacy .txt b{color:#fff;font-weight:600}
+  .foot{margin-top:40px;text-align:center;font-size:11px;color:var(--faint)}
+  @media(max-width:1000px){.kpis{grid-template-columns:repeat(2,1fr)}.pipe{grid-template-columns:repeat(2,1fr)}
+    .prow{grid-template-columns:1fr 70px 70px 70px 78px;gap:10px}.prow .covwrap,.prow .c6{display:none}.gh-ne{gap:14px}}
+  @media(max-width:560px){.kpis,.pipe{grid-template-columns:1fr}.topbar{flex-wrap:wrap;gap:10px}
+    .sec-h .note{width:100%;margin-left:0}.prow{grid-template-columns:1fr 48px 48px 50px 56px;gap:6px;padding:10px 11px}
+    .prow .covwrap,.prow .c6{display:none}.prow .num,.prow .falta{font-size:10.5px}.prow .sku .nm{font-size:11px}
+    .prow.head{font-size:8.5px;letter-spacing:.2px}.gh-ne{margin-left:0;width:100%;gap:14px}.gama-head{padding:14px}.dec-sum .bruto{margin-left:0}}
+  @media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <symbol id="block" viewBox="0 0 34 22"><rect x="1" y="1" width="32" height="20" rx="2.5" fill="none" stroke="currentColor" stroke-width="2"/>
+  <rect x="7" y="6" width="8" height="10" rx="1.5" fill="currentColor" opacity=".9"/><rect x="19" y="6" width="8" height="10" rx="1.5" fill="currentColor" opacity=".9"/></symbol>
+</defs></svg>
+
+<header class="topbar">
+  <div class="logo"><svg width="38" height="25" viewBox="0 0 34 22" style="color:var(--accent)"><use href="#block"/></svg>
+    <div><div class="name">BATAB</div><div class="sub">Tablero de Producción</div></div></div>
+  <span id="live" class="live off">conectando…</span>
+  <div class="spacer"></div>
+  <div class="updated">Corte&nbsp; <b id="cut">—</b><br>Planta Teapa · Líneas B1 · B2 · CO</div>
+  <button class="btn-send" id="sendBtn" title="Resumen a Mario Cuevas y al Ing. Elías Hernández">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 11l18-8-8 18-2-7-8-3z"/></svg>
+    Enviar a gerencia</button>
+</header>
+
+<div class="notice">
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#E0C341" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.5"/></svg>
+  <div>Datos <b>en vivo desde NetSuite</b>, refresco cada 5&nbsp;min. <b>Faltante neto = Necesidad − Existencia − En proceso.</b> "En proceso" = piezas ya producidas en el pipeline (capturado / QC / curado, sin Build) — <b>tentativas</b>, sujetas a pasar QC; si se rechazan, el faltante real sube al valor "bruto".</div>
+</div>
+
+<div class="wrap">
+  <div class="kpis" id="kpis"></div>
+
+  <section class="sec">
+    <div class="sec-h"><span class="eyebrow">Operativo · Supervisor</span><h2>Pipeline de producción</h2>
+      <span class="note">Lotes sin Build · piezas ya producidas, pendientes de QC/cierre</span></div>
+    <div class="pipe" id="pipe"></div>
+  </section>
+
+  <section class="sec">
+    <div class="sec-h"><span class="eyebrow">Decisión · Gerencia</span><h2>Qué producir — necesidad vs. existencia vs. en proceso</h2>
+      <span class="note" id="ventNote">Necesidad = año móvil</span></div>
+    <div class="dec-sum"><div class="big" id="faltaTot">—</div>
+      <div class="lbl"><b>Faltante neto a producir</b> (descontando existencia firme y piezas ya en proceso).<br>El detalle por gama y por artículo está abajo.</div>
+      <div class="bruto">Si lo en proceso no pasa QC<b id="brutoTot">—</b></div></div>
+    <div class="formula"><span class="eq">Faltante neto</span> = Necesidad − Existencia − En&nbsp;proceso · ✓ = ya cubierto</div>
+    <div class="legend"><span><i class="firme"></i> Existencia firme (Build en NetSuite)</span><span><i class="tent"></i> En proceso · tentativo (pendiente de QC)</span></div>
+    <div id="gamas"></div>
+  </section>
+
+  <div class="legacy"><div class="big" id="legacyN">—</div>
+    <div class="txt"><b>Órdenes de trabajo legacy (mar–abr) cerradas sin Build.</b> Folios numéricos, operador nulo. Nunca se generó el ensamble por esta vía. Pendiente: confirmar si se posteó por otra ruta o depurar los registros huérfanos.</div></div>
+
+  <div class="foot">BATAB · Bloques y Agregados de Tabasco · Fuente: NetSuite CR1417 + órdenes de venta + existencia en tiempo real · Tablero v2.1 (en vivo · faltante neto)</div>
+</div>
+
+<script>
+const LINE_COLOR={EMBLEMA:"#E8A33D",FORTALEZA:"#C77FB0",AVANCE:"#6FA8DC",VITTA:"#4FB286",PRISMA:"#7FB5C7"};
+const ENDPOINT="https://szrcmvlgxxpmvgrfmxak.supabase.co/functions/v1/panel-produccion";
+const APIKEY="sb_publishable_VOhn9Z2Ev8gYK3nFKr44Sw_VngbAX4N";
+
+/* Respaldo: se usa solo si el endpoint en vivo falla. proceso = piezas en pipeline sin Build */
+const FALLBACK={
+  corte:"respaldo", ventana:"año móvil",
+  kpis:[
+    {v:5,l:"En proceso",sub:"sin Build",c:"var(--accent)"},
+    {v:2,l:"Listos p/ cierre",sub:"QC superada (st 11)",c:"var(--p-listo)"},
+    {v:0,l:"En QC",sub:"compuertas (st 9)",c:"var(--p-qc)"},
+    {v:3,l:"Capturados",sub:"F1 ok, pend. QC (st 5)",c:"var(--p-cap)"},
+    {v:62,l:"Cerrados",sub:"Build creado (st 7)",c:"var(--p-cerr)"}],
+  fases:[
+    {t:"Capturado",ph:"Aprobado supervisor F1 · pendiente QC",color:"var(--p-cap)",lotes:[
+      {lote:"1B26FM13",art:"EMBLEMA BH12",linea:"B1",turno:"M",pz:5037,wo:"168555",test:true},
+      {lote:"1B26FV13",art:"EMBLEMA BH12",linea:"B1",turno:"V",pz:6742,wo:"168655",test:true},
+      {lote:"3C26FM13",art:"EMBLEMA BH10",linea:"CO",turno:"M",pz:7916,wo:"168456",test:true}]},
+    {t:"En QC",ph:"Compuertas de resistencia G1 → G2",color:"var(--p-qc)",lotes:[]},
+    {t:"Listo p/ cierre",ph:"QC G2 OK · espera cierre del director",color:"var(--p-listo)",lotes:[
+      {lote:"3C26FM11",art:"EMBLEMA BH15",linea:"CO",turno:"M",pz:4259,wo:"168355",test:true},
+      {lote:"3C26FM12",art:"EMBLEMA BH15",linea:"CO",turno:"M",pz:6840,wo:"168455",test:true}]},
+    {t:"Cerrado",ph:"Build posteado en NetSuite",color:"var(--p-cerr)",resumen:{n:62,txt:"lotes con Build · histórico"}}],
+  lineas:[
+    {ln:"EMBLEMA",skus:[{sku:"BH15",exist:40337,neces:428245,proceso:11099},{sku:"BH12",exist:23585,neces:157803,proceso:11779},{sku:"BH10",exist:788,neces:17686,proceso:7916},{sku:"BH20",exist:12672,neces:1260,proceso:0},{sku:"BT10",exist:815,neces:0,proceso:0},{sku:"BT12",exist:91,neces:0,proceso:0}]},
+    {ln:"AVANCE",skus:[{sku:"BH12",exist:9719,neces:96410,proceso:0},{sku:"BH15",exist:466,neces:17236,proceso:0},{sku:"BT10",exist:10,neces:0,proceso:0}]},
+    {ln:"FORTALEZA",skus:[{sku:"BS12",exist:584,neces:20510,proceso:0},{sku:"BS15",exist:3665,neces:12773,proceso:0},{sku:"BS10",exist:5184,neces:10496,proceso:0},{sku:"BH15 R-90",exist:4955,neces:10000,proceso:0},{sku:"BH20 R-90",exist:0,neces:9000,proceso:0}]},
+    {ln:"VITTA",skus:[{sku:"BP15 NATURAL",exist:4304,neces:12948,proceso:0},{sku:"BP20 C-800",exist:1250,neces:2364,proceso:0},{sku:"BP12 A-1300",exist:894,neces:1100,proceso:0},{sku:"BP12 NATURAL",exist:1664,neces:0,proceso:0},{sku:"BM12 NATURAL",exist:790,neces:0,proceso:0}]},
+    {ln:"PRISMA",skus:[{sku:"BH12 R-1120",exist:421,neces:4000,proceso:0},{sku:"BH15 R-1120",exist:335,neces:3800,proceso:0},{sku:"BT12 R-1120",exist:340,neces:1000,proceso:0},{sku:"BH12 C-879",exist:1322,neces:1000,proceso:0},{sku:"BH15 C-879",exist:177,neces:700,proceso:0}]}],
+  legacy:37
+};
+
+let DATA=FALLBACK, LIVE=false;
+const $=s=>document.querySelector(s);
+const fmt=n=>Math.round(Number(n)||0).toLocaleString('es-MX');
+const blk=(c,sz=17)=>`<svg width="${sz*1.55}" height="${sz}" viewBox="0 0 34 22" style="color:${c}"><use href="#block"/></svg>`;
+const proc=s=>Number(s.proceso)||0;
+const faltaNeto=s=>Math.max(0,(s.neces||0)-(s.exist||0)-proc(s));
+const faltaBruto=s=>Math.max(0,(s.neces||0)-(s.exist||0));
+
+function covSegs(exist,proceso,neces,c){
+  const e=neces>0?Math.min(100,exist/neces*100):100;
+  const p=neces>0?Math.min(Math.max(0,100-e),proceso/neces*100):0;
+  return `<span class="covbar"><i style="width:${e}%;background:${c}"></i><i class="tent" style="width:${p}%;background:${c}"></i></span>`;
+}
+
+function renderGamas(){
+  $("#gamas").innerHTML=DATA.lineas.map(l=>{
+    const c=LINE_COLOR[l.ln]||"#888";
+    const skus=l.skus.filter(s=>s.exist||s.neces||proc(s)).sort((a,b)=>faltaNeto(b)-faltaNeto(a));
+    const rows=skus.map(s=>{const fa=faltaNeto(s);const cvTot=s.neces>0?Math.min(100,((s.exist||0)+proc(s))/s.neces*100):100;return `
+      <div class="prow ${s.neces===0?'cov0':''}">
+        <span class="sku"><span class="ld" style="background:${c}"></span><span class="nm">${s.sku}</span></span>
+        <span class="num">${fmt(s.neces)}</span>
+        <span class="num">${fmt(s.exist)}</span>
+        <span class="num proc c4">${proc(s)>0?fmt(proc(s)):'—'}</span>
+        <span class="falta ${fa>0?'r':'g'}">${fa>0?fmt(fa):'✓'}</span>
+        <span class="covwrap c6">${covSegs(s.exist||0,proc(s),s.neces,c)}<span class="covpct">${cvTot.toFixed(0)}%</span></span></div>`;}).join("");
+    return `<div class="gama">
+      <div class="gama-head">
+        <div class="gh-name"><span class="gd" style="background:${c}"></span><span style="color:${c}">${l.ln}</span></div>
+        <div class="gh-falta"><span class="lab">Faltante neto a producir</span>
+          <span class="val" style="color:${l.faltante>0?'var(--alert)':'var(--p-listo)'}">${l.faltante>0?fmt(l.faltante)+' pz':'✓ cubierto'}</span>
+          ${l.proceso>0?`<span class="bru">bruto sin proceso: ${fmt(l.bruto)} pz</span>`:''}</div>
+        <div class="gh-ne">
+          <div class="st"><span class="lab">Existencia</span><b>${fmt(l.exist)}</b></div>
+          <div class="st proc"><span class="lab">En proceso</span><b>${l.proceso>0?fmt(l.proceso):'—'}</b></div>
+          <div class="st"><span class="lab">Necesidad</span><b>${fmt(l.neces)}</b></div></div>
+      </div>
+      <div class="gama-bar">${(()=>{const e=l.neces>0?Math.min(100,l.exist/l.neces*100):100;const p=l.neces>0?Math.min(Math.max(0,100-e),l.proceso/l.neces*100):0;return `<i style="width:${e}%;background:${c}"></i><i class="tent" style="width:${p}%;background:${c}"></i>`;})()}</div>
+      <div class="prow head"><span>Artículo</span><span class="num">Nec.</span><span class="num">Exist.</span>
+        <span class="num proc c4">Proc.</span><span class="num">Falta neto</span><span class="c6">Cob.</span></div>
+      ${rows}
+    </div>`;
+  }).join("");
+}
+
+function init(){
+  DATA.lineas.forEach(l=>{
+    l.exist=l.skus.reduce((a,s)=>a+(s.exist||0),0);
+    l.neces=l.skus.reduce((a,s)=>a+(s.neces||0),0);
+    l.proceso=l.skus.reduce((a,s)=>a+proc(s),0);
+    l.faltante=l.skus.reduce((a,s)=>a+faltaNeto(s),0);
+    l.bruto=l.skus.reduce((a,s)=>a+faltaBruto(s),0);
+  });
+  DATA.lineas.sort((a,b)=>b.faltante-a.faltante);
+
+  $("#cut").textContent=DATA.corte;
+  $("#ventNote").textContent="Necesidad = "+DATA.ventana;
+  $("#legacyN").textContent=DATA.legacy;
+  const li=$("#live"); li.textContent=LIVE?"en vivo":"respaldo"; li.className="live "+(LIVE?"on":"off");
+
+  $("#kpis").innerHTML=DATA.kpis.map(k=>`<div class="kpi"><div class="bar" style="background:${k.c}"></div>
+    <div class="v" style="color:${k.c}">${k.v}</div><div class="l">${k.l}<small>${k.sub}</small></div></div>`).join("");
+
+  $("#pipe").innerHTML=DATA.fases.map(f=>{
+    const count=f.lotes?f.lotes.length:(f.resumen?f.resumen.n:0);
+    let body;
+    if(f.resumen) body=`<div class="empty">${f.resumen.n} ${f.resumen.txt}</div>`;
+    else body=f.lotes.length?f.lotes.map(l=>`<div class="card" style="border-left-color:${f.color}">
+      <div class="top">${blk(f.color)}<span class="lote">${l.lote}</span>${l.test?'<span class="test">prueba</span>':''}</div>
+      <div class="art">${l.art}</div><div class="meta"><span class="chip">${l.linea} · ${l.turno}</span>
+      <span class="chip pz">${fmt(l.pz)} pz</span><span class="chip">WO ${l.wo}</span></div></div>`).join(""):'<div class="empty">Sin lotes</div>';
+    return `<div class="col"><div class="col-h"><span class="dot" style="background:${f.color}"></span>
+      <div><span class="t">${f.t}</span><span class="ph">${f.ph}</span></div><span class="ct">${count}</span></div>
+      <div class="cards">${body}</div></div>`;
+  }).join("");
+
+  const faltaTotal=DATA.lineas.reduce((a,l)=>a+l.faltante,0);
+  const brutoTotal=DATA.lineas.reduce((a,l)=>a+l.bruto,0);
+  $("#faltaTot").textContent=fmt(faltaTotal)+" pz";
+  $("#brutoTot").textContent=fmt(brutoTotal)+" pz";
+
+  renderGamas();
+}
+
+async function loadData(){
+  try{
+    const r=await fetch(ENDPOINT,{headers:{apikey:APIKEY,Authorization:"Bearer "+APIKEY}});
+    if(r.ok){const j=await r.json(); if(j && !j.error && Array.isArray(j.lineas) && j.lineas.length){DATA=j;LIVE=true;}}
+  }catch(e){ LIVE=false; }
+  init();
+}
+
+loadData();
+setInterval(loadData,300000);
+
+$("#sendBtn").addEventListener("click",()=>{
+  const b=$("#sendBtn"); const o=b.innerHTML;
+  b.textContent="Correo pendiente de activar";
+  setTimeout(()=>{b.innerHTML=o;},2200);
+});
+</script>
+</body>
+</html>
