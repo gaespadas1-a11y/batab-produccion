@@ -139,3 +139,15 @@ La existencia ya descuenta lo surtido; la necesidad debe ser solo el **back orde
 **Impacto (necesidad mal → correcta):** EMBLEMA BH15 428,245→**192,489**; EMBLEMA BH12 172,940→**91,666**; EMBLEMA BH10 17,686→**13,286**; FORTALEZA BS12 20,510→**2,110**; BS10 10,496→**1,816**; BS15 12,773→**3,133**; **FORTALEZA BH15 R-90 10,000→3,000** (con existencia 4,955 → faltante 0, hay sobrante). SKUs sin surtido parcial no cambian (BH20 R-90 = 9,000).
 
 Desplegado: `panel-produccion` **v3**. El tablero (GitHub Pages) ya consume los números correctos al recargar.
+
+---
+
+## 10. v4 + v5 (15-jun) — Ventana y códigos anteriores
+
+Validación contra reporte NetSuite del director (Cantidad=ordenado, Entregada=surtido, **Por entregar=necesidad**): la fórmula corregida reproduce el total a la pieza (**1,053,967** vs 1,053,968 del reporte).
+
+**v4 — Sin ventana de 12 meses:** la necesidad ahora cuenta TODAS las OV abiertas (B/D/E), sin filtro de fecha. Una orden abierta es demanda real sin importar su antigüedad. Coincidencias exactas tras el cambio: EMBLEMA BH15 195,639 · BH12 95,706 · BH10 14,654 · FORTALEZA BS10 2,116.
+
+**v5 — Grupo "CÓDIGOS ANTERIORES":** el tablero ahora incluye TODOS los bloques (displayname LIKE 'BLOCK %'); los que no caen en los 5 gamas nuevos (códigos viejos BLOCK HUECO/LIGERO/SÓLIDO/PIEDRÍN) se agrupan aparte para darles visibilidad. **Hallazgo:** ~687k pzs (65% de la demanda) estaban en códigos viejos, invisibles. El mayor: **BH12 R-90 = 393,669** (estructural 90, equivalente a FORTALEZA BH12 R-90 que salía en 0). Materias primas (POLVO/GRAVA/PIGMENTO) quedan fuera (no son bloques).
+
+**Pendiente de fondo (decisión futura):** limpieza de datos — migrar las OV abiertas de códigos viejos a SKU nuevos y que ventas deje de facturar en los viejos. Por ahora solo se les dio visibilidad.
