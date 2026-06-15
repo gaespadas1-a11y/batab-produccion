@@ -123,3 +123,19 @@ ORDER BY i.displayname, i.itemid
 - `guardar-bitacora` (guarda bitácora + tablero + QR en OneDrive; ahora jala de GitHub)
 
 Pendiente #3 (hospedaje) → **RESUELTO** con GitHub Pages.
+
+---
+
+## 9. FIX 15-jun — Necesidad = pendiente real por surtir (CRÍTICO)
+
+**Síntoma:** comparando con NetSuite (SOs de FORTALEZA BH15 R-90: SO11999 y SO12129), el tablero inflaba la necesidad.
+
+**Causa raíz (confirmada con signos crudos):** NetSuite guarda en `transactionline` el `quantity` en **NEGATIVO** (−5000) y el `quantityshiprecv` en **POSITIVO** (+3500). La fórmula anterior `ABS(SUM(quantity − quantityshiprecv))` daba `−5000 − 3500 = −8500` → **sumaba lo ya surtido en vez de restarlo**.
+
+**Fórmula correcta (en panel-produccion v3):**
+`SUM(CASE WHEN ABS(tl.quantity)-ABS(NVL(tl.quantityshiprecv,0))>0 THEN ABS(tl.quantity)-ABS(NVL(tl.quantityshiprecv,0)) ELSE 0 END)`
+La existencia ya descuenta lo surtido; la necesidad debe ser solo el **back order** (pendiente por surtir).
+
+**Impacto (necesidad mal → correcta):** EMBLEMA BH15 428,245→**192,489**; EMBLEMA BH12 172,940→**91,666**; EMBLEMA BH10 17,686→**13,286**; FORTALEZA BS12 20,510→**2,110**; BS10 10,496→**1,816**; BS15 12,773→**3,133**; **FORTALEZA BH15 R-90 10,000→3,000** (con existencia 4,955 → faltante 0, hay sobrante). SKUs sin surtido parcial no cambian (BH20 R-90 = 9,000).
+
+Desplegado: `panel-produccion` **v3**. El tablero (GitHub Pages) ya consume los números correctos al recargar.
