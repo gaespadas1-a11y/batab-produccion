@@ -45,7 +45,8 @@
   .clock{font-size:12.5px;color:var(--ink-soft);text-align:right}
   .clock b{display:block;font-size:14px;color:var(--ink)}
 
-  .recon{display:grid;grid-template-columns:repeat(3,1fr) auto;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;margin-bottom:20px;box-shadow:var(--shadow)}
+  .recon{display:grid;grid-template-columns:repeat(4,1fr) auto;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;margin-bottom:20px;box-shadow:var(--shadow)}
+  .recon .cell.hl{background:var(--surface-2)}
   .recon .cell{background:var(--surface);padding:14px 16px}
   .recon .cell.act{display:grid;place-items:center;background:var(--surface-2)}
   .recon .lbl{font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--ink-faint);font-weight:600}
@@ -128,6 +129,17 @@
   .totals .net{background:var(--surface-2);border-radius:9px;padding:9px 11px}
   .totals .lbl{font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-faint);font-weight:600}
   .totals .v{font-size:18px;font-weight:600;margin-top:2px}
+  .muted{font-size:12px;color:var(--ink-soft);margin:12px 0 0;line-height:1.5}
+  .tr-row{display:grid;grid-template-columns:1.1fr .9fr .9fr 1fr;gap:10px;align-items:center;padding:10px 12px;border:1px solid var(--line);border-radius:9px;margin-bottom:8px;background:#fff}
+  .tr-row.head{background:var(--surface-2);border:none;padding:6px 12px;margin-bottom:6px}
+  .tr-row .lote{font-family:var(--mono,monospace);font-weight:700;color:var(--ink)}
+  .tr-row .h{font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-faint);font-weight:600}
+  .tr-row .kg{font-weight:700;text-align:right}
+  .tr-row .pz,.tr-row .li{color:var(--ink-soft)}
+  .tr-row.tot{background:var(--ink);color:#fff;border:none}
+  .tr-row.tot .li,.tr-row.tot .pz{color:rgba(255,255,255,.75)}
+  .tr-row.tot .kg,.tr-row.tot .lote{color:#fff}
+  @media(max-width:560px){.tr-row{grid-template-columns:1fr 1fr;gap:6px}.tr-row .li{display:none}}
   .delta-ok{color:var(--ok)} .delta-bad{color:var(--warn)}
   .panel-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:18px}
 
@@ -159,21 +171,41 @@
   </div>
 
   <div class="recon">
-    <div class="cell"><div class="lbl">Total físico en silos</div><div class="val mono" id="r-fisico">—</div></div>
-    <div class="cell"><div class="lbl">En libro · NetSuite</div><div class="val mono" id="r-libro">—</div></div>
-    <div class="cell"><div class="lbl">Variación</div><div class="val mono" id="r-var">—</div><span class="chip" id="r-chip"></span></div>
-    <div class="cell act"><button class="btn btn-ghost" id="btn-recon">↻ Actualizar libro NetSuite</button></div>
+    <div class="cell"><div class="lbl">Existencia · NetSuite</div><div class="val mono" id="r-libro">—</div></div>
+    <div class="cell"><div class="lbl">(−) Consumo en tránsito</div><div class="val mono" id="r-transito">—</div></div>
+    <div class="cell hl"><div class="lbl">(=) Disponible real</div><div class="val mono" id="r-disp">—</div></div>
+    <div class="cell"><div class="lbl">Físico en silos</div><div class="val mono" id="r-fisico">—</div><span class="chip" id="r-chip"></span></div>
+    <div class="cell act"><button class="btn btn-ghost" id="btn-recon">↻ Actualizar NetSuite</button></div>
   </div>
 
   <div class="section-h"><h2>Silos</h2><div class="rule"></div></div>
   <div class="grid" id="grid"></div>
+
+  <div class="section-h"><h2>Consumo en tránsito · lotes sin Build</h2><div class="rule"></div></div>
+  <div class="panel" style="margin-bottom:22px">
+    <div class="panel-h">
+      <div>
+        <h2>Cemento ya consumido, aún no asentado en NetSuite</h2>
+        <p>Producción ya hecha cuyo Build falta crear. El cemento ya salió del silo; NetSuite lo confirma al cerrar cada lote. Disponible real = Existencia − este consumo.</p>
+      </div>
+    </div>
+    <div class="panel-b">
+      <div id="transito-list"></div>
+      <div class="totals">
+        <div class="net"><div class="lbl">Lotes pendientes</div><div class="v mono" id="tr-n">—</div></div>
+        <div class="net"><div class="lbl">Total piezas</div><div class="v mono" id="tr-pzs">— pz</div></div>
+        <div class="net"><div class="lbl">Cemento en tránsito</div><div class="v mono" id="tr-kg">— kg</div></div>
+      </div>
+      <p class="muted" id="tr-nota"></p>
+    </div>
+  </div>
 
   <div class="section-h"><h2>Inventario inicial (arranque)</h2><div class="rule"></div></div>
   <div class="panel" style="margin-bottom:22px">
     <div class="panel-h">
       <div>
         <h2>Conteo inicial por silo</h2>
-        <p>Lectura física de hoy · la suma debe cuadrar con el on-hand de NetSuite (≈ 39.3 t)</p>
+        <p>Lectura física de hoy · silos en 0 (reset). La entrada de PO6850 los llena.</p>
       </div>
     </div>
     <div class="panel-b">
@@ -270,8 +302,19 @@ const EJ = {
   2:{silo:'SILO-CO-A',gross:'32690', tare:'9310',  de:'669868', al:'669879'},
 };
 
-let NS_LIBRO = 0;                            // baseline limpio (silos en cero). NOTA: NetSuite marca 39,336 kg on-hand con silos vacíos -> revisar (consumo de lotes sin cerrar)
+// SNAPSHOT 22-jun-2026 · cifras reales de NetSuite/Supabase (luego se conecta en vivo)
+let NS_LIBRO = 35207;                        // Existencia NetSuite CPC-40-RS (item 1230) tras ajuste de recuento físico #174328 (+8,112.06 kg)
 let PEND_OC = 0;                             // kg recibidos físicamente, aún sin OC capturada en NetSuite por Compras
+// Consumo en tránsito: lotes producidos SIN Build (su cemento ya salió del silo, falta asentarlo en NetSuite)
+const TRANSITO = [
+  {lote:'1B26FM19', linea:'Besser 1', pzs:10213, kg:8572},
+  {lote:'1B26FM20', linea:'Besser 1', pzs:7588,  kg:6207},
+  {lote:'3C26FM19', linea:'Columbia', pzs:7642,  kg:5724},
+  {lote:'3C26FM20', linea:'Columbia', pzs:10115, kg:7614},
+  {lote:'3C26FM22', linea:'Columbia', pzs:9480,  kg:7090},
+];
+const CONSUMO_TRANSITO = TRANSITO.reduce((a,t)=>a+t.kg,0);   // 35,207 kg
+const AJUSTE_NOTA = 'Ajuste de inventario #174328: +8,112.06 kg CPC-40-RS (cuenta 1360 «Ajustes en recuento físico») para cubrir estos 5 lotes — cemento físico del silo Columbia recibido sin asentar. Conforme cada lote llegue a Build, la existencia y el consumo en tránsito bajan juntos y el disponible no se mueve.';
 const DESTINOS = 'Gerencia de Producción · Gerencia General · Administración';
 
 /* =========================================================== Estado silo */
@@ -377,27 +420,44 @@ function solicitarView(v){
 
 /* =========================================================== Conciliación */
 function recalcRecon(){
-  const fisico=SILOS.reduce((a,s)=>a+s.nivel,0), variacion=fisico-NS_LIBRO;
-  document.getElementById('r-fisico').textContent=FMT(fisico)+' kg';
+  const fisico=SILOS.reduce((a,s)=>a+s.nivel,0);
+  const disp=NS_LIBRO-CONSUMO_TRANSITO;       // disponible real = existencia − consumo en tránsito
   document.getElementById('r-libro').textContent=FMT(NS_LIBRO)+' kg';
-  const v=document.getElementById('r-var');
-  v.textContent=(variacion>=0?'+':'')+FMT(variacion)+' kg';
-  const chip=document.getElementById('r-chip');
-  if(PEND_OC>0){ // hay entradas físicas que Compras aún no captura como OC
-    v.className='val mono var-bad'; chip.className='chip bad';
+  document.getElementById('r-transito').textContent='−'+FMT(CONSUMO_TRANSITO)+' kg';
+  document.getElementById('r-disp').textContent=FMT(disp)+' kg';
+  document.getElementById('r-fisico').textContent=FMT(fisico)+' kg';
+  const chip=document.getElementById('r-chip'); const dif=disp-fisico;
+  if(PEND_OC>0){ // entradas físicas que Compras aún no captura como OC
+    chip.className='chip bad';
     chip.textContent=`● Pendiente de OC en Compras: +${FMT(PEND_OC)} kg`;
   } else {
-    const okTol=Math.abs(variacion)<=NS_LIBRO*0.02;
-    v.className='val mono '+(okTol?'var-ok':'var-bad');
+    const okTol=Math.abs(dif)<=Math.max(NS_LIBRO*0.02,100);
     chip.className='chip '+(okTol?'ok':'bad');
-    chip.textContent=okTol?'● Conciliado con NetSuite':'● Revisar diferencia';
+    chip.textContent=okTol?'● Disponible = físico · conciliado':`● Revisar: Δ ${FMT(dif)} kg`;
   }
 }
-// En real: re-lee el on-hand de NetSuite. En demo: simula que Compras ya capturó las OC pendientes.
+// En real: re-lee el on-hand de NetSuite y los lotes sin Build de Supabase. En demo: snapshot.
 document.getElementById('btn-recon').onclick=()=>{
   if(PEND_OC>0){ NS_LIBRO+=PEND_OC; const k=PEND_OC; PEND_OC=0; recalcRecon(); toast(`Compras capturó la OC · libro NetSuite +${FMT(k)} kg`,'ok'); }
-  else { recalcRecon(); toast('Conciliado con NetSuite · sin pendientes','ok'); }
+  else { recalcRecon(); toast('Snapshot 22-jun · disponible = físico · conciliado','ok'); }
 };
+
+/* ============================================= Consumo en tránsito (lotes sin Build) */
+// >>> en vivo: SuiteQL CR 1417 status<7 sin build_id  ×  consumo de cemento de la WO
+function renderTransito(){
+  const box=document.getElementById('transito-list'); if(!box) return;
+  let h='<div class="tr-row head"><div class="h">Lote</div><div class="h li">Línea</div><div class="h pz">Piezas</div><div class="h kg">Cemento</div></div>';
+  TRANSITO.forEach(t=>{
+    h+=`<div class="tr-row"><div class="lote">${t.lote}</div><div class="li">${t.linea}</div><div class="pz mono">${FMT(t.pzs)} pz</div><div class="kg mono">${FMT(t.kg)} kg</div></div>`;
+  });
+  const pz=TRANSITO.reduce((a,t)=>a+t.pzs,0);
+  h+=`<div class="tr-row tot"><div class="lote">TOTAL</div><div class="li">${TRANSITO.length} lotes</div><div class="pz mono">${FMT(pz)} pz</div><div class="kg mono">${FMT(CONSUMO_TRANSITO)} kg</div></div>`;
+  box.innerHTML=h;
+  document.getElementById('tr-n').textContent=TRANSITO.length;
+  document.getElementById('tr-pzs').textContent=FMT(pz)+' pz';
+  document.getElementById('tr-kg').textContent=FMT(CONSUMO_TRANSITO)+' kg';
+  document.getElementById('tr-nota').textContent=AJUSTE_NOTA;
+}
 
 /* =========================================================== Catálogos */
 function siloOptions(sel){ return SILOS.map(s=>`<option value="${s.codigo}" ${s.codigo===sel?'selected':''}>${s.nombre}</option>`).join(''); }
@@ -555,5 +615,5 @@ document.getElementById('btn-inicial').onclick=()=>{
   render(); toast('Inventario inicial fijado · conciliado con NetSuite','ok');
 };
 
-renderUnits(); renderInicial(); render(); tick(); setInterval(tick,30000);
+renderUnits(); renderInicial(); renderTransito(); render(); tick(); setInterval(tick,30000);
 </script>
