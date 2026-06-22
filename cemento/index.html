@@ -237,13 +237,12 @@
 const FMT = n => Math.round(n).toLocaleString('es-MX');
 const TON = kg => (kg/1000).toFixed(1);
 
-// Arranque real: Besser 1 y Columbia 1 estaban VACÍOS (saldo inicial 0; los siembra la recepción de PO6850).
-// Besser 2 y Columbia 2 YA tienen cemento (lectura física provisional; juntos = on-hand NetSuite ~39,336 kg).
+// RESET 22-jun-2026: los 4 silos físicamente en CERO (baseline limpio). La entrada de PO6850 los llena.
 let SILOS = [
-  {codigo:'SILO-B1',   nombre:'Silo Besser 1', linea:'Besser 1',            cap:50000, nivel:0,     min:15000, consumoDia:6800, ult:'vacío · arranque', notif:false, grupo:null},
-  {codigo:'SILO-B2',   nombre:'Silo Besser 2', linea:'Besser 2 · parado',   cap:50000, nivel:20000, min:15000, consumoDia:7100, ult:'existente (provisional)', notif:false, grupo:null},
-  {codigo:'SILO-CO-A', nombre:'Silo Columbia 1',linea:'Columbia',            cap:45000, nivel:0,     min:15000, consumoDia:5200, ult:'vacío · arranque', notif:false, grupo:'Columbia'},
-  {codigo:'SILO-CO-B', nombre:'Silo Columbia 2',linea:'Columbia',            cap:45000, nivel:19336, min:15000, consumoDia:0,    ult:'existente · reset al rellenar', notif:false, grupo:'Columbia'},
+  {codigo:'SILO-B1',   nombre:'Silo Besser 1', linea:'Besser 1',            cap:50000, nivel:0, min:15000, consumoDia:6800, ult:'vacío · reset', notif:false, grupo:null},
+  {codigo:'SILO-B2',   nombre:'Silo Besser 2', linea:'Besser 2',            cap:50000, nivel:0, min:15000, consumoDia:7100, ult:'vacío · reset', notif:false, grupo:null},
+  {codigo:'SILO-CO-A', nombre:'Silo Columbia 1',linea:'Columbia',           cap:45000, nivel:0, min:15000, consumoDia:5200, ult:'vacío · reset', notif:false, grupo:'Columbia'},
+  {codigo:'SILO-CO-B', nombre:'Silo Columbia 2',linea:'Columbia',           cap:45000, nivel:0, min:15000, consumoDia:0,    ult:'vacío · reset', notif:false, grupo:'Columbia'},
 ];
 const COLUMBIA_MIN = 30000;   // Columbia: los 2 silos se ven como UNO para consumo y alerta (mínimo combinado 30 t)
 
@@ -271,7 +270,7 @@ const EJ = {
   2:{silo:'SILO-CO-A',gross:'32690', tare:'9310',  de:'669868', al:'669879'},
 };
 
-let NS_LIBRO = 39336;                        // >>> NETSUITE: on-hand real cemento (1230=39100.94 + 1232=235.10)
+let NS_LIBRO = 0;                            // baseline limpio (silos en cero). NOTA: NetSuite marca 39,336 kg on-hand con silos vacíos -> revisar (consumo de lotes sin cerrar)
 let PEND_OC = 0;                             // kg recibidos físicamente, aún sin OC capturada en NetSuite por Compras
 const DESTINOS = 'Gerencia de Producción · Gerencia General · Administración';
 
