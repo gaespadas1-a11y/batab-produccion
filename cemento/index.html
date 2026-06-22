@@ -1,0 +1,560 @@
+<!--
+  BATAB · Control de Cemento por Silo  (v3 · calco de remisión + tickets de báscula)
+  App del supervisor · GitHub Pages -> Supabase edge functions -> NetSuite
+  Modelo real: 1 remisión (carta de porte) -> N remolques; cada remolque = 1 ticket de báscula
+  (GROSS/TARE/NET) + rango de sellos + 1 silo destino (campo "PLACAS" escrito a mano).
+  Integración: // >>> SUPABASE   y   // >>> NETSUITE
+-->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BATAB · Control de Cemento por Silo</title>
+<meta name="theme-color" content="#0E5E7D">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Cemento BATAB">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAYAAAA9zQYyAAAfDUlEQVR4nO2deZRc1Xngf9+979XWi6TWLpBkMBIgmc0IAwYs29jGJM54cuJWMmNDFs9wZpKc5CSTDTApGgJOzpn4JLGzORNPMCRnRj2xPePgY5tgIjuObQxiMWIRCAmzCK29d1W99+795o9X1eoWklB3S0j96v3OKWjV8upW1e9977u7cNJRYePtli23OxCduLv3N8qdpcqltlhc5qPoYyK2pN51icj7T36ZcmaNqmIDwblnEZ7FBkZ98iBqdpmOpd8Z+stfHpjy/Go1ADx9ff5kFktO2pGrVcPTTwv9/a51V9cv3LFG0OsQ2aAuep8gKyUsCNosiSqaxCetSDknGgUTINZO/BP1qOpuVf8jgz7mMV8ZuafvB81Hm16sF/o3uaMedhaceKEPK3D3J6s9qvYG8f6jwJUSFkooqIvBJaDqkWbkVhVEzAkvU87JQ1UR8c2/U59sYMQGYAyaJODi5xD5qnNyz9h9fU9NvLZ3sz3RYp9IoYXezaZVwI4bqxdaI/8N5AMShitwrhl9vQMUxSJy8q4QOacQVRCPqgJWglAICmhUbyDmex7/2dG/6/tS88lCtSonKhU5MUJNOtPmf+JTF/kg/HXQj0sQFjSJwDlH6q45Ye+ZM3dQ9YBHJJCwAAjqku8Z5I8G/676f4GWQ55WajJDZivXRFRe0Pu781xH6VdA+iQIA43qgDrAQB6Jc4BUVg+KBAWLDdAk/oqJ49sH7/uDJ4A0ZZ1FtJ65aJPeuOvjt/2khPI5CUtv00YNVBNE7KyOn5NtVD2CSli06pwD7hx+/cAf8vXPNqhWA/r6kpkcdmbC9fZa+vsdvdVCd4f5LbH2LlyCuiQXOWeaqEPFSLlTfFz/urjoV4e/eNeOmVYYpy9eU+YFvb+7Kuko/7UplD6s9dEExeQtFDkzRjWWQin0SXRQvP7H4Xvv/MZE4JwG0xNwYzWgv991/9xvb/CdlUeNtR/W2kgCEuQy58wKkVCjuhPokWL5692f+NTN9Pc7NlaDaR3muJ+5sRqwpS/p/rlbNki5+E2FBSRRgphpvWFOzjFJ+yW8FMuBNuq3DH/xjk+33Duelx9fVK02Zb4hlRlYgItdLnPOCSe90ltt1BIplu7uvvG2W9jSlzS7zt/85W/6jGZy3n3DLRvUFh8wwnx1sQOxsy17Ts4xUMClkbp26/AX77z7eFo/jh2hq1UzIXNQ/GYuc85biDARqct3dd946y30vXmkPnqEbrYzVz5+y/IwLGxDZIHGkceYvPKX81aiKImUO0I3PvSfRu/79N8eK1IfTWiht9ew4AOmq/HqV01QuE6jeoJInjPnvPWoemzgRcwwjfq1Q/9w9+NHa9I7crTdWLX097vu2su/Y0oducw5pxYRg08Ea3s0CP52+U3VCvTCEQLyG4XeONGicZ0Uy3+gtdE4lznn1CNWG7VYiuV3jtSSP6d/k2Nj9Q11ucMMV6F6uyx8udIRudGnRIKV+Fgh7zTJOU1QTaRQDHwSfWTknjvvP7yLfKqoG2+39PX5OB75NVOorCJt0chlzjl9ENIZTip3rv75agn603ubHJK1WjVs6XM9N3zqfExwhzbGfXOgUU7OaYRYjRuJKZUvGVD/m/T3O6qHUo9DQq9fL4Amys0SFkxzUHY+ai7n9EPEalRX4De6P1ntAXxr+lcqdLVq2LTJd37yU+cTBP9Bo5rmFcGc0xjBOS/FyiIS/a/09Xn6+w20hH76aQHURPJ7EhSCZnTOyTmdMcR1Vfi17k9We9i0ydOs8An9/W7ez1fnq5EPkzQ0Hwqac9ojIpokasLiEolJ13KpVq3hppsCUFGvN5hCeYk6l+fOOXMDY1S9V8X9Js35iobly5srGvmPqU80n8+aM4cwJBHY4OLuG3/r7fT1eUNfny/d8LursMEG4jh9Uk7O3EBQdRIUy0rpI9CUt0DwUQkLFdTn6UbOXEPUO4CfoVo1hmrVKHIlmva/nOLC5eRMF4NLEJF1nbvpCQCD8G51sQB5z+AsMSLTqoY4n8eQWSEiuMRLEPZILb4i6NzlLxcbLsUlmq81NztEYDyKiZ1/U6lVU/krxTDP8WaLiGKMQeTDgaqsEmNKmqjPhZ45RoSxKKb30vO47G0rGItizNG+TgVrhNEo4i8f2kojSTAieb43a+ScwMC/S/+W/PucBSIQJ56LVi7l31+yloGxBtYcWWhVCAPDgbFx/mbLY9Tf4rJmEKtxjKDvCQRKp7o0WaGVcgyONxiqvYnQ1jBci/KofMJQECkHKF1o/rWeKIwI1hy6HQltphxHezxnhqhiEL22uQ1E3sKRM+fJewVzMkUudE6myIXOyRS50DmZIp9mNUtafVEi0uz2Pv6WC4GJ10y8TjVvypsFudDHgUg6e/7w3jyvSiNO0lUFreCimEacLrmmqkdtDVVN/5N4z3gUEyUJFsEDgTWE1kJzN1Jp/uVVc9mPg1zoI3AoaoL3SuwcUeKI4wSaj6kqpULIyoXz0u34REi6O1mzfBGKUAiDo3Z9K2lE7+ns4OLVK9i5f4CitYgRDo6Os394DGOkKTGIEcphiLWG0BrSuxWfD2x6A9J94235t0IqsTGC90otimkkCXilWAjp6Sxz1pKFrF2+CIDrLlqDEUN3ucglZ52B9+mcYmsMpTAgStxxDU4KrMGrUm9G+TCw7No3wPbd++gsFfne9h/z4/0DjEcxj+x4ldF6g8HRcTCCNYaOYoHAGlQ1H7XXpK2FFgErqVS1OKZRjwlCy/lnLOEdq5Zx9blv44yebi5evYLOcpGFnWWc1+YGqYLznlp0aG/yVmpgePOB5TLpOcYIpMGYQmAphkFzx2HBilCPEw6MjrNr7wAvvL6fx1/azdadr/LES7sZHqthraWjVCAw6Wfxbdzz27ZCW2OIE8dovU5gLetWLuXnrriQ9SuXccXaVfR0VBBJxyvXo5jEe5I3DAtNo/rUe6ZP6wcQ0hNCJwmppFeP0FrCwFAM0iyxHic8+ePdPLbzNb755PM88OTzjNcbFAohHcUCXn1bjmhoO6FNWsNjaKzOku5ONl15AddddC6XnXMmS7o7aCSO8UZM4tyk1xiQUzs3rZU3t2Q3IpQLIZVCyHgU89TLe3ho2w42f+9Jtu58lc5ykdBanG+vJVbaSmhjhCh2jEcxm664gDt/9kOsWbaIyKUSx4lLm9+MzIlB917TiqExQqUQUiqEjNTqfP7Bh7n7yw8xUmvQXSm1ldRtI7Rp5qKLOivc8bMf4hPXXEIjThhvxHNK4qPRkjuwhgUdZbbufJXfvu9rfOfZnXSVi21TaWwLoUUgcZ7OYoGv/s4vcNk5K9kzOIIxcvRZJXMUBZzzdJYLGDF87DP38Y0nnmtG6sz/1O3RDm2NYWiszs0/fS2XrV3FgdEanZUyWe2mEITYOborBe7++E/wb9tfIvHH1/oy18m80EI6Naqnq8K7Vy/hqedebObKp7pkJxshcY6ezg4uO/sMvvX0i3SXs59PZ17oVkRyiePJbc9y+TvWph0fczpjPh4UYy3PvbCH/fsPEgTBlObArJJ5oSHNob3zzOvu4rKLL2A8irAZD9FelWKhwAvbdzR7MrP9eVu0hdAtvPeM1+vUj7XEQEZodYdHcfzmT84QbSU0HGG4ZoaZ7nDWLJAP8M/JFLnQOZkiFzonU+RC52SKXOicTJELnZMpcqFzMkUudE6myIXOyRS50DmZIhc6J1PkQudkilzonEyRC52TKXKhczJFLnROpsiFzskUudA5mSIXOidT5ELnZIpc6JxMkQudkylyoXMyRS50TqbIhc7JFLnQOZkiFzonU+RC52SKXOicTJELnZMpcqFzMkXbrQ89E1R1Yv37I23qIICY2cUGPWwH2cnHbr1vutRze633PF1yoSfQif22AUTSPaNEBGOP/jWle3YrSdSYzTtjg5AgCI+5D4qqR71PzW6eABN6t9nC5kejrYWeEEIEYwJornivqrgkAgSXRNTHR4D0sfHRQZKoMWllfMGrozY6NItyeIqlTsJiaaqkCB3zejDG4tUThiWK5Q68c9ggwBqbngCqqewtydtY7vYUWhWMwdoAVPE+oTY2RBI3GB8ZQL0yPjoACl49SVSnFYuPhhg74+IIMD46gI7oGxKKoQOvAYKiWBsQhEW8d5Qr3diwQLHUQbHSQVgoExSKWDF471FNZlyeuUxbCm1sgHcxo4P7GR3aR2N8hKhRR71H0cNyYsEG4aFU5CjHnO2WaUaCI2YNk99XVYmjGiCMDO1DvU9TI4EwLBKWKnTOW0RHdw9hsTKr8sxV2ktoBWMsIwOvs++V50niNO8VYxAxSBAcqoRNEnTK3yexcMc6J6bm9iAmQGzzfoUkiYlHBhgfPogYQ/fCFZx51vknrbSnK+3VbCepnPt378QlETYoYGwwIUmrojUnNqhslVOVicqrsRgbYoxlcO/L1MdHMMaS/Q2RD9FeQgOgDAwMUavXAcUYgzFmTlakJp94qdAGEUgSx8GBQaI4RowcM/JnjbZLOUQMURSxf3A/5fIIpVKJUqlIoVDE2lTuKS85QsQ+/N8n6mR445VBpuTVR9pfMa0AKo1GRBQ1GB+vEUURURS1wfbPb6S9hG7SEiOOYxqNBkNDEAQWYyzFYhERoVIpowrWGgqFApAK14rohzPbNOVoJ0UqbNrMHMcJcRxjjFCvN0iShCRJ7/PeN7dAplnG9pMZ2lToFq3LNID3inMxURQBMDw8DKRyBEFAq9JWLBYJAjvpMq6IGMrl8gxLkea/aVSNDxNbqdfreJ8+xzmHc26irbz1GVr/t9bOjfz/JNLWQh/O0bZMjiftlx0fZe/soaGZd6zA0SP85PJMPgHTsjIlP253mSEX+rg4XKr034daiE+ESK3jpj196X1vdtjc3zeSCz0Dpgp84qxqHTcXdea0YbNdTpbJhc7JFLnQOZkiFzonU+RC52SKXOicTJELnZMpcqFzMkUudE6myIXOyRS50DmZIhc6J1PkQudkilzonEyRC52TKXKhczJFWw7wb01lMsZkdtqSanvGqrYSOl2SVnjmmWfY/cqPKRSLmRRaBKIo5pJ3f7A5BzF7n/FotJXQLUZHxxgaGsqw0Okscucd0mY/cXt92iatpQmCIMis0N57BGmj2JzSlkLDoRWRsig0tO+SBu1Zc8jJLLnQOZmi7VKOKYvENJeizR7pZ5yLK6rOlrYRWoxhdGycb33ne3QsOYuVlcXYKWvUZQchXeRx61MvUAlDbBCC1miHC3JbCG3EMNKo8+i+Ud634WIGD+7l3x7/17TZzmtzIfRTXcoTgzGGRn2ct629gLVnv50fvPASzw+MUgzaYyHHthDaq6ezWGTz1ue4as0qrr7wUl7e8Qw7n32CYrkysQztXEcEkshTLJXY8O5raSQJf/YvjxIljkohxLeB0Nm/BjURSS/Fn3ngBwyOjnLNh36ahcvOIIkjjLETiyXO5RuSduVfdd3HWL5kCX/10A955rX9dBYLbSEztJHQXpVyIWTHvkHu/Op36O6ocNk114Nko2vYGEtUG+fciy5n/Xnv4Es//BF///A25ldKJBm5Ah0PbSM0gPOernKBB57ZyZce/hHnnbeO8y6+ktr4aHNznbmJiCFq1FiwZDnvuuoD7Nq7n8899CgFazNwqk6PthIa0spfKQz4iy1beXH3Xt717vezYtUaokZt1vt1nxJE8N4RFkpc/t6P0NVR4c/++fvsHh6jGGaza/9YzMFfcHaoKsXAsndknD/95x/QUS5zxft/ikKxhHduzu2ZLSLEUYN3XLaRdeet5yuPPMU3tu1iXqmIa6NUo0XbCQ3gvDKvXOSBZ3bxjz98krNXr+aCd72PeMoe3qc/YgxRo87yVW9nw+VXs+O11/mLLY9RDNtrb8LJtKXQkEbqUhjwV99+nKdeeoV3XnYVZ6xeQ1SvHXGXq9MR9Y6wUODy9/4kifP86YMPs3tolFJg8e3pc/sK7ZWJ1OOu+79LHMdcc93P0DlvAUl8+G5Upx8ihjiKuOJ9H2X1mau4//Hn+PqPdjRbNdrUZtpYaEhTj85ige17DvLSvgEWzF/Ahquvw7nktE6l097AMd5+/sWcfd4FRI0aSXMPxXarBB5OWwttRBiPYtavWMyqxfMYHh3hrLUXsGb9O6nXxk/L1ENESJKYrnk9XHr1h/BJTCN2XLxyaRqdnW/D/WMPcfr9Ym8xqoo1hkIQoIBLIt551Qfpmr+QOI5Oy9QjiWM2XH0dnZ3zcM6hQDlMRzG0d3zOhUYVVszvBNLo55KEcqWLd73n+ik7tp4OpB0odc698F2sXvuOtO1cDE6VSiFkcVeFxPvTOl062bS10CJpl/hFZy7FiqQj7oyBpMGa8y9i/TuvIqqfHh0uIoY4juhZvJzL3/sTWHV4mnuAO8/CzjJrli6gkbjT8qryVtH2tQhVZSyK0zHEqpSDgCdf3ceP9+xlw5XvZ9HylSRR4zSQWjECl73nerorZT6/ZSuvDIxQDNI2Zzfpc7QzBhu05XcgpK0cXaUC5yxZQOQ8oJQLAU+9tp+/2vIY3ZUyl73nehBJx02fIoyx1GtjnHvxFZy79ny+/fQO7v3+j5pjnJvPQVi/fPEpK+PpgsG5Z8VaUG27flLf7Fw5Y34XifMYMdSThO17DvC1J7bz4LbnOefta9lwzfVEjVPT4dIasL/y7PN419UfYu/gIJ996FEajZjHX95DIbD45sm2euH8vFIo8CTGgkjbfReqSqF5yW59eCNCLUowIvzJg4+wb3CQd1xyBSvPPo/6KehFdM5RLFW49OoP01kq8jfffoztew4iQUA9TrDNfFlVsSIExmRm9s30UTVe6D7VxTgVGCPU4oQLzljMsnmdRIkjsIahWoP9o+OUy0We33uQv96ylUpoufSa6yiVKyRJ8pZVuoxJh4VeePl7Wb1yFVue2UH/I88yr1wElFcHR0i8xxqhniRceOZilnZViJ1rz5YOY8WAfB1VUG3Hr4DYpZmWohSMYd/IOC8dGMKKMK9U5B8ffY5vPbODlSvO5JJ3fxDv3VtSLhFDo1HnbWsuYP3FV7B/cJA/efCRCVGtMTz92n5i79PmRdIoHfs27FhR9WID1PmHDeh2lLbLn1tceOZSaCqggCBYYyZSkDA03PlP32XH7j1cvOEqzll3CY36OCInM/VIewM7u+dzxbU/RTm03HX/d3lh70HKk+YGBjZNLwRwTplXKXHusoXt13QnohiDEXnRjCSV76uLD2KDtmvCU1WWz+tsTvtXikHAIy+9xnCtQWAMXpWCDTgwWuPPvvUIGje46Ipr6Zy/mChq4LzivJ+4zRSvSjLpOE49iXNcdOUHWbZwIV959GkeeGYn3eV0jHOrMrt9z0F27h+gGAYk3lMphCzqLBN7ba8o3cwuPHwzYE19SF/UJ4wNrlWXeGDuzkWaBq0KYTGwExHPSDoKz09qonPe010u8K1nX+LLW5/lF6++mE0fv4k4qqcVRD10vJFGjDI9mVShXAia5WgtEaOIGBb2LGLHnv38xZbHKIfBlMqeQHPchky8X9pjWGi/3jJjRJNkREW+F9DX57nxtu9j7LW0yVCAVu/akq4OLjhjMfUkwVpD7D079w9i7FQlvUIpsHzhu08wOF6H5mLphx5XymHARy5cQ2jTE+R4pFaFYmj51xde5rnXD0yZMuW9UjAv8/2dr3JgtEZnKcRNOtFEhNgl7DowyJqlPc21RZTLz1rB/354W/u0dKh6gtBoHL06erbdno5oEfdPuPhm2qgrXIDIuYkZ0QLEzvHcngPNpq9DRqgqYWAYGK/zpw/+sHXvoQMlnnmdFT5w7ipsISQ5TqGdVzoKJb7x5PPc//A2TEdxytUBhEJg6ShOlRnS5sUocWzfe5DrLzgHbb5n5ByubWwGwIsNDUn0Nfpu1wBg5J7w4e4b4+cJwrUksT/JNZ5TjgCxV5Z1d05ZgCWwhkoYHrGGrArWCAs6ylOP1Yz2CzpKzbUx0hTgeIRu1ds6igWCzgrzK8U3iKuqx1xTo6MQTrxf7JUlXRW6SgXccZ5UGcDgY+dFvgSihptuCqHPo3xNgqJA9ls8RIRG4li7tIf5lRJx4ilYyysHR9h1YIiiPfKyWapMqQROvc08KnrVox73aDKrKqG1PPnKPmpxgjWGRuI4a9ECFndW0vw66y0dabohPo5fGd317R8AGJYvdwBWzRd8XK8h0haVwjRTOCSMNcJoI2JwvI41M1v5vhVNp3ub6algjLB3ZCzN2ZtXhuQYJ0EGUbGBCPwPtmxJqFYDQ1+fB8zAfX1P4d2jEhYB3preg1NEK3248u1nNmVIo/ZoIwKOL104HCFd76M8zVulEBLM8AQyIsTOMx7FWBES51hQLnHp6uXUkwST8QCNiNEkTsSaf2je49NK4ebNwqZNomL+GLga9UK202i8KqE1E8NGC4Hl0ZdepxbFlDrK02pXTiOj8sLeAUphcNwR0ms62m+o1kjHY0+z/IXA8tL+QXbsHeCdq5bRSBxWTNoxlPUoreqkWLa+Uf/S8L13vkhvr6Wvz6VCb9rkqFbNKPy/rhcbj5qwdIkmkSOjbdKtdTmWdncQN+fgCTQHKk2PNNobRhsRv/IP35hReYwIHcXwsBaO439taNNyi4BTz+qF3RODljKLIOpiZyW5C4B16xQmN9OtXy/09XnE3NHsNTw1BT3JiAix9yzqrLC6Zx6NxGOtpRYnPP7yHsJZrKNsjczoNlP3RISGc2z98evNbnAlUc/5yxYR2Gwu5g6AaiLFDqMu+dLgFz/9JJs322bqPEnoTZscvb12pLb+fq2Nfk0KJQuayVzaAPU4IWqOSksH+3sOjNYwcyiytdKlA6O1iRYNA4xHcYZnf6tirfgoOojaT1GtGrZtmzh1pybK/euU/k2OYsevq08cSOY2IRGBhnOsW7GIrmI6NqK164qdo7WoVrlbzZFvWzSPFfM7myfs3PxMR8WTSKFs1cefGbm3bzv/QqthA3hDz2CfZ2M1GP7bW15wUfwHUu4MUE3e6jKfTFrReHFXB6UwwPnmQJ/XD7Jz3yDF4Pgrdacar0oxDHhk126GanUCY0i80tNRprNYmFXb+OmJOimWQt8Ye7JD5/0JG6sBW26fkkW8sSljS5+jd7Md61nyaWpjD0ixFGYt9RARymFA4tI223RLCp2TSwCkPYQOQSbaoH1zWYNstXSoYgJR7wZN4n5xz32/PcaSp7WZRUxwpLY5Zd025bO/3rBOfkmd248JMjPnUBVCY7hmzUoKoaG7XGBhZ4WXD440hZ5bRgfGMDjWYGC8zrLuDkqBZUlXB5effQaN2M2pOsGxkUSC0BBFvzf093dvpVoN6O9/Q6A9+qfduDFgy5ak+xM3f1DKXd/URi0hbcab89+QV+WcJQsohQHnLVvE+hWLeejZXXxj2w66y6U5ta6yiFCPE2665hKWdld4ZNdu9oyMs29kjN1Do+lAq1NdyNmiGkmlq6DjQ/9z+N67f4mbbgr5/OfjIz312HL2brb0b3LdN956ixQ77sqS1I04wU3qfp5XLs7ZZq5Wj+FYI8IagwiE1lKwWZDZJ1LqCDSqfztI5KcORk+P0d+f5ohH4M3F3LzZsmmT677xtlukWM6M1K1LceuKPNcrUAJTVh9VdM6eoBOoT6TYEWjc+M6wG72e+/54DFU51goFb96/nfYiBsNfvPNubdRulWI5IB3rMae/rlZkTqdRzemPAqQ/hptUKcyEzKVU5nJL5mrVvNlyG8cfZTdWA7b0Jd03/v7NUizdrY1ajKrN+tjpnFOBRlKsFDSOvl1ORn5iT0vmSe3NR2N6aUNL6k986mapdN6tjXHw3rXLkNOck4yqIuqk3B1oozZtmWEmeXCzojjvhlv/s7eFPzTW9mhUjxEJp32snJwWqg5jrQQh6tzfDCfDv8E0ZYaZVuyq1YC+vqT7hls2EJY+Jza8XBvjrpmw5ylIzjRQRUmkUAq9dwPi3W3D99zx583H5PCOkzdjZvL19SXcdFM4fO/djwyPuPdoo/Z3EhSsFIoG1SRjXVQ5JwtVhxiRUkeo3m2VxH9o+J47/jydFsi0ZYbZNr1Nuhx03nDbR8WYW02hdJnG9XSVQcHMuZ0sc042CuoBI8UO0STaj7rPDe986Y/Yck/9WJ0mx8OJkE3YWLVs6Uvo7bXdlXW3IvwXCYvLNW6Adw5Fmn3KudztiqpHUBArhRKaxIkY+7+cS+4avafvWUCoVmU6+fKROHGCNSuLAN2frPbgzC+j/lclLCzFezSJmpcYgTTVyeXONtpMPdNoHIQGG6BxHKvI/xHnPzN8b98jwETr2Yl40xMv1aTCdf7izYsN5feB/1WUyyUsFPAOdQk45yc1kufNfllANf1NVQVjjBgLQQFchPd+h8AX1Nh/HPnC7z8HpEFw3TadbVSezMmKkkLvZtOK2ACdn7zjfPH+wwIfQVknYpa1piVrHDPHOx5zALEBSFpt0iQaQ/VlMPd78V8eHX/2+xOj43p7LevWnVCRJ8pwog84FRV6+w39vX5yjbXzpv++iPrBawTzATHBKlzyAYwpzf3+2nZFFWMFrz8AfVXD0pfVR1tHV7GdvkmpxMZqwHvxJ0PkFv8fMI+9hjReptkAAAAASUVORK5CYII=">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --bg:#EAEEF2; --surface:#FFFFFF; --surface-2:#F5F8FA;
+    --ink:#15202E; --ink-soft:#5C6875; --ink-faint:#909AA6;
+    --line:#DBE2E8; --line-strong:#C3CCD5;
+    --steel-1:#EDF1F4; --steel-2:#C5CDD5; --steel-edge:#A9B3BD;
+    --cement-1:#ABA59B; --cement-2:#6E685F; --cement-top:#C9C3B8;
+    --ok:#1E9D58; --ok-bg:#E6F5ED;
+    --warn:#DD8800; --warn-bg:#FBF0DC;
+    --crit:#D43A3A; --crit-bg:#FBE7E7;
+    --accent:#0E5E7D; --accent-2:#0B7FA8; --accent-ink:#FFFFFF;
+    --radius:14px; --shadow:0 1px 2px rgba(20,32,46,.06), 0 8px 24px -12px rgba(20,32,46,.18);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans",system-ui,sans-serif;-webkit-font-smoothing:antialiased;line-height:1.45;padding:18px}
+  .mono{font-family:"IBM Plex Mono",ui-monospace,monospace;font-variant-numeric:tabular-nums}
+  .wrap{max-width:1180px;margin:0 auto}
+
+  .top{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:18px}
+  .brand{display:flex;align-items:center;gap:12px}
+  .mark{width:42px;height:42px;border-radius:10px;background:var(--accent);display:grid;place-items:center;color:#fff;font-weight:700;font-size:18px;letter-spacing:-.5px;box-shadow:var(--shadow)}
+  .brand h1{font-size:19px;margin:0;font-weight:700;letter-spacing:-.2px}
+  .brand p{margin:1px 0 0;font-size:12.5px;color:var(--ink-soft)}
+  .clock{font-size:12.5px;color:var(--ink-soft);text-align:right}
+  .clock b{display:block;font-size:14px;color:var(--ink)}
+
+  .recon{display:grid;grid-template-columns:repeat(3,1fr) auto;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;margin-bottom:20px;box-shadow:var(--shadow)}
+  .recon .cell{background:var(--surface);padding:14px 16px}
+  .recon .cell.act{display:grid;place-items:center;background:var(--surface-2)}
+  .recon .lbl{font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--ink-faint);font-weight:600}
+  .recon .val{font-size:24px;font-weight:600;margin-top:3px}
+  .var-ok{color:var(--ok)} .var-bad{color:var(--crit)}
+  .chip{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;padding:3px 9px;border-radius:999px;margin-top:6px}
+  .chip.ok{background:var(--ok-bg);color:var(--ok)} .chip.bad{background:var(--crit-bg);color:var(--crit)}
+
+  .btn{font-family:inherit;font-size:13.5px;font-weight:600;border:0;cursor:pointer;border-radius:9px;padding:9px 15px;display:inline-flex;align-items:center;gap:7px;transition:transform .08s,filter .15s}
+  .btn:active{transform:translateY(1px)}
+  .btn-primary{background:var(--accent);color:var(--accent-ink)} .btn-primary:hover{filter:brightness(1.08)}
+  .btn-ghost{background:var(--surface);color:var(--accent);border:1px solid var(--line-strong)} .btn-ghost:hover{background:var(--surface-2)}
+  .btn-warn{background:var(--warn);color:#fff} .btn-warn:hover{filter:brightness(1.06)}
+  .btn:focus-visible{outline:2px solid var(--accent-2);outline-offset:2px}
+  .btn[disabled]{opacity:.45;cursor:not-allowed}
+
+  .section-h{display:flex;align-items:center;gap:10px;margin:0 2px 12px}
+  .section-h h2{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-soft);margin:0;font-weight:600}
+  .section-h .rule{height:1px;background:var(--line);flex:1}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(248px,1fr));gap:16px;margin-bottom:26px}
+  .silo-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px 16px 14px;box-shadow:var(--shadow);position:relative;overflow:hidden;transition:border-color .2s}
+  .silo-card[data-st="crit"]{border-color:var(--crit)}
+  .silo-card[data-st="crit"]::before{content:"";position:absolute;inset:0;border-radius:var(--radius);box-shadow:inset 0 0 0 2px var(--crit);animation:pulse 1.8s ease-in-out infinite;pointer-events:none}
+  @keyframes pulse{0%,100%{opacity:.25}50%{opacity:.85}}
+  @media (prefers-reduced-motion:reduce){.silo-card[data-st="crit"]::before{animation:none;opacity:.6}}
+
+  .silo-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px}
+  .silo-name{font-weight:700;font-size:15px;letter-spacing:-.2px}
+  .silo-line{font-size:11.5px;color:var(--ink-soft);margin-top:1px}
+  .badge{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:3px 8px;border-radius:7px;white-space:nowrap}
+  .badge.ok{background:var(--ok-bg);color:var(--ok)} .badge.warn{background:var(--warn-bg);color:var(--warn)} .badge.crit{background:var(--crit-bg);color:var(--crit)}
+
+  .silo-body{display:flex;gap:14px;align-items:center}
+  .silo-svg{flex:0 0 96px}
+  .readout{flex:1;min-width:0}
+  .big{font-size:27px;font-weight:600;line-height:1;letter-spacing:-.5px}
+  .big small{font-size:13px;color:var(--ink-soft);font-weight:500}
+  .pct{font-size:13px;color:var(--ink-soft);margin-top:3px}
+  .meta{margin-top:10px;border-top:1px solid var(--line);padding-top:9px;display:grid;gap:5px}
+  .meta-row{display:flex;justify-content:space-between;font-size:12px}
+  .meta-row span:first-child{color:var(--ink-soft)}
+  .meta-row b{font-weight:600}
+  .silo-foot{margin-top:12px}
+  .silo-foot .btn{width:100%;justify-content:center}
+
+  .panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+  .panel-h{display:flex;align-items:center;justify-content:space-between;padding:15px 18px;border-bottom:1px solid var(--line);background:var(--surface-2)}
+  .panel-h h2{font-size:15px;margin:0;font-weight:700}
+  .panel-h p{margin:2px 0 0;font-size:12px;color:var(--ink-soft)}
+  .panel-b{padding:18px}
+
+  .field{display:flex;flex-direction:column;gap:5px}
+  .field label{font-size:11.5px;font-weight:600;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.04em}
+  .field input,.field select{font-family:inherit;font-size:14px;padding:9px 11px;border:1px solid var(--line-strong);border-radius:8px;background:#fff;color:var(--ink)}
+  .field input:focus,.field select:focus{outline:2px solid var(--accent-2);outline-offset:0;border-color:var(--accent-2)}
+  .field input[readonly]{background:var(--surface-2);color:var(--ink-soft)}
+  .field.inline{flex:1;min-width:170px}
+  .form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:12px;margin-bottom:16px}
+
+  .cfg-toggle{display:inline-flex;border:1px solid var(--line-strong);border-radius:9px;overflow:hidden;margin-bottom:16px}
+  .seg{background:#fff;border:0;padding:9px 16px;font-family:inherit;font-size:13.5px;font-weight:600;color:var(--ink-soft);cursor:pointer}
+  .seg.active{background:var(--accent);color:#fff}
+  .seg:focus-visible{outline:2px solid var(--accent-2);outline-offset:-2px}
+
+  .unit{border:1px solid var(--line);border-radius:11px;padding:14px;margin-bottom:14px;background:var(--surface-2)}
+  .unit-h{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:12px;flex-wrap:wrap}
+  .utag{display:inline-flex;align-items:center;gap:8px;font-weight:700;font-size:13.5px;padding-bottom:6px}
+  .utag::before{content:"";width:10px;height:10px;border-radius:3px;background:var(--accent)}
+  .weigh{display:grid;grid-template-columns:1fr 1fr auto;gap:12px;margin-bottom:12px;align-items:end}
+  .weigh .net{background:#fff;border:1px solid var(--line);border-radius:9px;padding:8px 12px;min-width:118px}
+  .weigh .net .lbl{font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-faint);font-weight:600}
+  .weigh .net .v{font-size:17px;font-weight:600;margin-top:1px}
+  .seals-row{display:grid;grid-template-columns:1fr 1fr auto 1.2fr;gap:12px;align-items:end}
+  .seals-row .net{background:#fff;border:1px solid var(--line);border-radius:9px;padding:8px 12px;min-width:84px}
+  .seals-row .net .lbl{font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-faint);font-weight:600}
+  .seals-row .net .v{font-size:16px;font-weight:600;margin-top:1px}
+
+  .totals{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:8px;padding-top:16px;border-top:1px dashed var(--line-strong)}
+  .totals .net{background:var(--surface-2);border-radius:9px;padding:9px 11px}
+  .totals .lbl{font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-faint);font-weight:600}
+  .totals .v{font-size:18px;font-weight:600;margin-top:2px}
+  .delta-ok{color:var(--ok)} .delta-bad{color:var(--warn)}
+  .panel-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:18px}
+
+  #toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);opacity:0;background:var(--ink);color:#fff;padding:12px 18px;border-radius:11px;font-size:13.5px;font-weight:500;box-shadow:0 12px 32px -8px rgba(0,0,0,.45);transition:opacity .25s,transform .25s;max-width:90vw;z-index:50;display:flex;align-items:center;gap:10px}
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  #toast .dot{width:8px;height:8px;border-radius:50%;background:var(--ok);flex:0 0 auto}
+
+  .foot{margin-top:22px;font-size:11.5px;color:var(--ink-faint);text-align:center;line-height:1.6}
+
+  @media(max-width:560px){
+    .recon{grid-template-columns:1fr 1fr}
+    .recon .cell.act{grid-column:1/-1}
+    .weigh{grid-template-columns:1fr 1fr}
+    .seals-row{grid-template-columns:1fr 1fr}
+    .totals{grid-template-columns:1fr}
+  }
+</style>
+
+<div class="wrap">
+  <div class="top">
+    <div class="brand">
+      <div class="mark">B</div>
+      <div>
+        <h1>Control de Cemento por Silo</h1>
+        <p>App del supervisor · entradas (pipa) − salidas (bachada) = disponible</p>
+      </div>
+    </div>
+    <div class="clock">Última actualización<b id="now">—</b></div>
+  </div>
+
+  <div class="recon">
+    <div class="cell"><div class="lbl">Total físico en silos</div><div class="val mono" id="r-fisico">—</div></div>
+    <div class="cell"><div class="lbl">En libro · NetSuite</div><div class="val mono" id="r-libro">—</div></div>
+    <div class="cell"><div class="lbl">Variación</div><div class="val mono" id="r-var">—</div><span class="chip" id="r-chip"></span></div>
+    <div class="cell act"><button class="btn btn-ghost" id="btn-recon">↻ Actualizar libro NetSuite</button></div>
+  </div>
+
+  <div class="section-h"><h2>Silos</h2><div class="rule"></div></div>
+  <div class="grid" id="grid"></div>
+
+  <div class="section-h"><h2>Inventario inicial (arranque)</h2><div class="rule"></div></div>
+  <div class="panel" style="margin-bottom:22px">
+    <div class="panel-h">
+      <div>
+        <h2>Conteo inicial por silo</h2>
+        <p>Lectura física de hoy · la suma debe cuadrar con el on-hand de NetSuite (≈ 39.3 t)</p>
+      </div>
+    </div>
+    <div class="panel-b">
+      <div class="form-grid" id="inicial-inputs"></div>
+      <div class="totals">
+        <div class="net"><div class="lbl">Suma capturada</div><div class="v mono" id="i-sum">— kg</div></div>
+        <div class="net"><div class="lbl">Libro NetSuite (on-hand)</div><div class="v mono" id="i-libro">— kg</div></div>
+        <div class="net"><div class="lbl">Δ vs. libro</div><div class="v mono" id="i-delta">— kg</div></div>
+      </div>
+      <div class="panel-actions"><button class="btn btn-primary" id="btn-inicial">Fijar inventario inicial</button></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-h">
+      <div>
+        <h2>Registrar entrada de cemento</h2>
+        <p>La OC se lanza estimada en NetSuite; aquí se recibe por la cantidad EXACTA de la remisión y el saldo de la OC se cierra solo</p>
+      </div>
+    </div>
+    <div class="panel-b">
+      <div class="form-grid">
+        <div class="field"><label for="folio">Folio remisión</label><input id="folio" placeholder="Ej. 281958215"></div>
+        <div class="field"><label for="prov">Proveedor</label><select id="prov"></select></div>
+        <div class="field"><label for="tipo">Producto / cemento</label><select id="tipo"></select></div>
+        <div class="field"><label for="pedido">Pedido proveedor</label><input id="pedido" placeholder="Ej. 281955009"></div>
+        <div class="field"><label for="po">Orden de compra (NetSuite)</label><select id="po"></select></div>
+        <div class="field"><label for="cant">Cantidad remisión (t)</label><input id="cant" class="mono" type="number" inputmode="decimal" placeholder="Ej. 48.890" oninput="recalcEntrada()"></div>
+      </div>
+
+      <div class="cfg-toggle" role="tablist" aria-label="Configuración">
+        <button class="seg active" data-cfg="sencillo" role="tab" aria-selected="true">Un remolque</button>
+        <button class="seg" data-cfg="doble" role="tab" aria-selected="false">Doble remolque</button>
+      </div>
+
+      <div id="units"></div>
+
+      <div class="totals">
+        <div class="net"><div class="lbl">Neto total (Σ NET)</div><div class="v mono" id="t-neto">— kg</div></div>
+        <div class="net"><div class="lbl">Cantidad remisión</div><div class="v mono" id="t-cant">— kg</div></div>
+        <div class="net"><div class="lbl">Δ neto vs. remisión</div><div class="v mono" id="t-delta">— kg</div></div>
+      </div>
+
+      <div class="panel-actions">
+        <button class="btn btn-ghost" id="btn-clear">Limpiar</button>
+        <button class="btn btn-primary" id="btn-save">Registrar entrada</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="foot">
+    Prototipo con datos de demostración. Mínimos = 15 t. Proveedores e items de cemento tomados de NetSuite.<br>
+    Pesos y sellos calcados de los tickets de báscula CEMEX. Integración: <span class="mono">// &gt;&gt;&gt; SUPABASE</span> · <span class="mono">// &gt;&gt;&gt; NETSUITE</span>.
+  </div>
+</div>
+
+<div id="toast"><span class="dot"></span><span id="toast-msg"></span></div>
+
+<script>
+/* =========================================================== CONFIG */
+const FMT = n => Math.round(n).toLocaleString('es-MX');
+const TON = kg => (kg/1000).toFixed(1);
+
+// Arranque real: Besser 1 y Columbia 1 estaban VACÍOS (saldo inicial 0; los siembra la recepción de PO6850).
+// Besser 2 y Columbia 2 YA tienen cemento (lectura física provisional; juntos = on-hand NetSuite ~39,336 kg).
+let SILOS = [
+  {codigo:'SILO-B1',   nombre:'Silo Besser 1', linea:'Besser 1',            cap:50000, nivel:0,     min:15000, consumoDia:6800, ult:'vacío · arranque', notif:false, grupo:null},
+  {codigo:'SILO-B2',   nombre:'Silo Besser 2', linea:'Besser 2 · parado',   cap:50000, nivel:20000, min:15000, consumoDia:7100, ult:'existente (provisional)', notif:false, grupo:null},
+  {codigo:'SILO-CO-A', nombre:'Silo Columbia 1',linea:'Columbia',            cap:45000, nivel:0,     min:15000, consumoDia:5200, ult:'vacío · arranque', notif:false, grupo:'Columbia'},
+  {codigo:'SILO-CO-B', nombre:'Silo Columbia 2',linea:'Columbia',            cap:45000, nivel:19336, min:15000, consumoDia:0,    ult:'existente · reset al rellenar', notif:false, grupo:'Columbia'},
+];
+const COLUMBIA_MIN = 30000;   // Columbia: los 2 silos se ven como UNO para consumo y alerta (mínimo combinado 30 t)
+
+const PROVEEDORES = [
+  {id:126,  nombre:'CEMEX MÉXICO S.A.B.', item_id:1230, item:'CPC-40-RS', marca:'Vertua Plus Gris'},
+  {id:7934, nombre:'HOLCIM MÉXICO',       item_id:1232, item:'CPC-40',    marca:''},
+];
+const ITEMS_CEMENTO = [
+  {id:1230,n:'CPC-40-RS'},{id:1232,n:'CPC-40'},{id:1231,n:'CPC-40R'},
+  {id:1233,n:'CPC-30R-RS'},{id:1234,n:'CPC-30'},{id:1229,n:'Portland (genérico)'},
+];
+// DEBE SER: la OC se crea en NetSuite ANTES (cantidad estimada, con precio). La app la lee como solicitud pendiente.
+// >>> NETSUITE: edge function -> SuiteQL OC de cemento status 'Pendiente de recibir' (qty pendiente > 0)
+// Demo (en prod se leen en vivo). Hoy no hay ninguna abierta porque la OC se captura al final;
+// al adoptar el debe-ser, estas OC estimadas aparecerán aquí.
+const OPEN_POS = {
+  126:  [ {po:'PO6850', ord:50000, fecha:'22 jun'} ],   // CEMEX · CPC-40-RS · compra 50 TON = 50,000 kg base · $4.20/kg · aprobada
+  7934: [ {po:'PO6809', ord:30000, fecha:'21 jun'} ],   // HOLCIM · 30 TON = 30,000 kg base
+};
+// NOTA UoM: el cemento se COMPRA en TONELADA y se CONSUME/STOCKEA en KG (1 t = 1000 kg), igual que los agregados.
+// 'ord' está en kg base; al recibir contra la OC, convertir kg de báscula -> toneladas para el Item Receipt.
+// Ejemplos por remolque (placeholders, calcados de los tickets reales)
+const EJ = {
+  1:{silo:'SILO-B1',  gross:'40740', tare:'16850', de:'669857', al:'669867'},
+  2:{silo:'SILO-CO-A',gross:'32690', tare:'9310',  de:'669868', al:'669879'},
+};
+
+let NS_LIBRO = 39336;                        // >>> NETSUITE: on-hand real cemento (1230=39100.94 + 1232=235.10)
+let PEND_OC = 0;                             // kg recibidos físicamente, aún sin OC capturada en NetSuite por Compras
+const DESTINOS = 'Gerencia de Producción · Gerencia General · Administración';
+
+/* =========================================================== Estado silo */
+function estado(s){
+  if (s.nivel <= s.min) return {st:'crit', txt:'Crítico'};
+  if (s.nivel <= s.min*1.4) return {st:'warn', txt:'Precaución'};
+  return {st:'ok', txt:'Operativo'};
+}
+function diasRestantes(s){ if(!s.consumoDia) return '∞'; const d=(s.nivel-s.min)/s.consumoDia; return d<=0?'0':d.toFixed(1); }
+
+/* =========================================================== SVG silo */
+function siloSVG(s, color){
+  const cap=s.cap, lvl=Math.max(0,Math.min(s.nivel,cap)), f=lvl/cap;
+  const topY=45,botY=220,bodyBot=180,H=botY-topY, fillTopY=botY-f*H;
+  const halfAt=y=> y<=bodyBot?45:45*((botY-y)/(botY-bodyBot));
+  const ftHalf=halfAt(fillTopY), minY=botY-(s.min/cap)*H, minHalf=halfAt(minY);
+  const uid=s.codigo.replace(/[^A-Z0-9]/gi,'');
+  return `
+  <svg class="silo-svg" viewBox="0 0 180 250" role="img" aria-label="Nivel ${(f*100).toFixed(0)}%">
+    <defs>
+      <linearGradient id="steel${uid}" x1="0" x2="1"><stop offset="0" stop-color="var(--steel-1)"/><stop offset=".5" stop-color="var(--steel-2)"/><stop offset="1" stop-color="var(--steel-edge)"/></linearGradient>
+      <linearGradient id="cem${uid}" x1="0" x2="1"><stop offset="0" stop-color="var(--cement-1)"/><stop offset="1" stop-color="var(--cement-2)"/></linearGradient>
+      <clipPath id="clip${uid}"><path d="M45 ${topY} H135 V${bodyBot} L100 ${botY} H80 L45 ${bodyBot} Z"/></clipPath>
+    </defs>
+    <line x1="60" y1="190" x2="54" y2="244" stroke="var(--steel-edge)" stroke-width="4" stroke-linecap="round"/>
+    <line x1="120" y1="190" x2="126" y2="244" stroke="var(--steel-edge)" stroke-width="4" stroke-linecap="round"/>
+    <rect x="82" y="22" width="16" height="14" rx="3" fill="var(--steel-2)"/>
+    <ellipse cx="90" cy="45" rx="45" ry="11" fill="url(#steel${uid})"/>
+    <path d="M45 45 H135 V180 L100 220 H80 L45 180 Z" fill="url(#steel${uid})" stroke="var(--steel-edge)" stroke-width="1.2"/>
+    <g clip-path="url(#clip${uid})">
+      <rect x="45" y="${fillTopY}" width="90" height="${botY-fillTopY+2}" fill="url(#cem${uid})"/>
+      <ellipse cx="90" cy="${fillTopY}" rx="${ftHalf}" ry="${Math.max(2,ftHalf*0.22)}" fill="var(--cement-top)" opacity=".85"/>
+    </g>
+    <line x1="${90-minHalf}" y1="${minY}" x2="${90+minHalf}" y2="${minY}" stroke="var(--crit)" stroke-width="1.6" stroke-dasharray="4 3" opacity=".9"/>
+    <text x="${90+minHalf+3}" y="${minY+3}" font-size="8" fill="var(--crit)" font-family="IBM Plex Mono">mín</text>
+    <ellipse cx="90" cy="45" rx="45" ry="11" fill="none" stroke="${color}" stroke-width="2.5" opacity=".9"/>
+  </svg>`;
+}
+
+/* =========================================================== Tarjetas */
+const COLOR={ok:'var(--ok)',warn:'var(--warn)',crit:'var(--crit)'};
+// Vistas: Besser 1 y 2 individuales; Columbia = un pool combinado (los 2 silos como uno)
+function buildViews(){
+  const views=[];
+  SILOS.filter(s=>!s.grupo).forEach(s=>{
+    views.push({codigo:s.codigo,nombre:s.nombre,linea:s.linea,cap:s.cap,nivel:s.nivel,min:s.min,consumoDia:s.consumoDia,ult:s.ult,silos:[s]});
+  });
+  const cols=SILOS.filter(s=>s.grupo==='Columbia');
+  if(cols.length){
+    views.push({
+      codigo:'SILO-CO', nombre:'Columbia (silos 1 + 2)', linea:'Columbia · combinado',
+      cap:cols.reduce((a,s)=>a+s.cap,0), nivel:cols.reduce((a,s)=>a+s.nivel,0),
+      min:COLUMBIA_MIN, consumoDia:cols.reduce((a,s)=>a+s.consumoDia,0),
+      ult:cols.map(s=>s.ult).join(' · '),
+      breakdown: cols.map(s=>`${s.nombre.replace('Silo Columbia ','Silo ')}: ${TON(s.nivel)} t`).join(' · '),
+      silos:cols
+    });
+  }
+  return views;
+}
+function render(){
+  const grid=document.getElementById('grid'); grid.innerHTML='';
+  buildViews().forEach(v=>{
+    const e=estado(v), f=(v.nivel/v.cap*100), anyNotif=v.silos.some(s=>s.notif);
+    const card=document.createElement('div'); card.className='silo-card'; card.dataset.st=e.st;
+    card.innerHTML=`
+      <div class="silo-head">
+        <div><div class="silo-name">${v.nombre}</div><div class="silo-line">${v.linea} · ${v.codigo}</div></div>
+        <span class="badge ${e.st}">${e.txt}</span>
+      </div>
+      <div class="silo-body">
+        ${siloSVG(v,COLOR[e.st])}
+        <div class="readout">
+          <div class="big mono">${TON(v.nivel)}<small> t</small></div>
+          <div class="pct mono">${f.toFixed(0)}% · ${FMT(v.nivel)} kg</div>
+          <div class="meta">
+            <div class="meta-row"><span>Capacidad</span><b class="mono">${TON(v.cap)} t</b></div>
+            <div class="meta-row"><span>Mínimo</span><b class="mono">${TON(v.min)} t</b></div>
+            ${v.breakdown?`<div class="meta-row"><span>Desglose</span><b class="mono">${v.breakdown}</b></div>`:''}
+            <div class="meta-row"><span>Días restantes</span><b class="mono">${diasRestantes(v)}</b></div>
+            <div class="meta-row"><span>Última entrada</span><b>${v.ult}</b></div>
+          </div>
+        </div>
+      </div>
+      <div class="silo-foot">
+        ${e.st==='ok'
+          ? `<button class="btn btn-ghost" disabled>Nivel suficiente</button>`
+          : `<button class="btn btn-warn">⚠ Solicitar pipa${anyNotif?' (enviada)':''}</button>`}
+      </div>`;
+    grid.appendChild(card);
+    const btn=card.querySelector('.btn-warn'); if(btn) btn.onclick=()=>solicitarView(v);
+  });
+  recalcRecon();
+}
+
+/* =========================================================== Solicitud */
+// >>> SUPABASE: insert cemento_notificaciones · edge function "cemento-alertas" -> correo MS Graph
+function solicitarView(v){
+  v.silos.forEach(s=>s.notif=true);
+  toast(`Solicitud de pipa enviada · ${v.nombre} (${TON(v.nivel)} t) → ${DESTINOS}`,'ok');
+  render();
+}
+
+/* =========================================================== Conciliación */
+function recalcRecon(){
+  const fisico=SILOS.reduce((a,s)=>a+s.nivel,0), variacion=fisico-NS_LIBRO;
+  document.getElementById('r-fisico').textContent=FMT(fisico)+' kg';
+  document.getElementById('r-libro').textContent=FMT(NS_LIBRO)+' kg';
+  const v=document.getElementById('r-var');
+  v.textContent=(variacion>=0?'+':'')+FMT(variacion)+' kg';
+  const chip=document.getElementById('r-chip');
+  if(PEND_OC>0){ // hay entradas físicas que Compras aún no captura como OC
+    v.className='val mono var-bad'; chip.className='chip bad';
+    chip.textContent=`● Pendiente de OC en Compras: +${FMT(PEND_OC)} kg`;
+  } else {
+    const okTol=Math.abs(variacion)<=NS_LIBRO*0.02;
+    v.className='val mono '+(okTol?'var-ok':'var-bad');
+    chip.className='chip '+(okTol?'ok':'bad');
+    chip.textContent=okTol?'● Conciliado con NetSuite':'● Revisar diferencia';
+  }
+}
+// En real: re-lee el on-hand de NetSuite. En demo: simula que Compras ya capturó las OC pendientes.
+document.getElementById('btn-recon').onclick=()=>{
+  if(PEND_OC>0){ NS_LIBRO+=PEND_OC; const k=PEND_OC; PEND_OC=0; recalcRecon(); toast(`Compras capturó la OC · libro NetSuite +${FMT(k)} kg`,'ok'); }
+  else { recalcRecon(); toast('Conciliado con NetSuite · sin pendientes','ok'); }
+};
+
+/* =========================================================== Catálogos */
+function siloOptions(sel){ return SILOS.map(s=>`<option value="${s.codigo}" ${s.codigo===sel?'selected':''}>${s.nombre}</option>`).join(''); }
+(function fillCatalogs(){
+  document.getElementById('prov').innerHTML = PROVEEDORES.map(p=>`<option value="${p.id}">${p.nombre}</option>`).join('');
+  document.getElementById('tipo').innerHTML = ITEMS_CEMENTO.map(it=>`<option value="${it.id}">${it.n}</option>`).join('');
+  syncProveedor();
+})();
+function syncProveedor(){
+  const pid=+document.getElementById('prov').value, p=PROVEEDORES.find(x=>x.id===pid);
+  if(p) document.getElementById('tipo').value=p.item_id;
+  const list=OPEN_POS[pid]||[];
+  document.getElementById('po').innerHTML =
+    `<option value="">Sin OC — avisar a Compras</option>` +
+    list.map(o=>`<option value="${o.po}" data-ord="${o.ord}">${o.po} · ${TON(o.ord)} t ordenadas · ${o.fecha}</option>`).join('');
+}
+document.getElementById('prov').onchange=syncProveedor;
+
+/* =========================================================== Remolques */
+let config='sencillo';
+const unitsEl=document.getElementById('units');
+function unitBlock(u){
+  const ej=EJ[u]||EJ[1];
+  return `
+  <div class="unit" data-u="${u}">
+    <div class="unit-h">
+      <span class="utag">${config==='doble'?'Remolque '+u:'Remolque'} · ticket báscula</span>
+      <div class="field inline"><label>Silo destino (campo "PLACAS")</label><select data-k="silo">${siloOptions(ej.silo)}</select></div>
+    </div>
+    <div class="weigh">
+      <div class="field"><label>Bruto · GROSS (kg)</label><input data-k="gross" class="mono" type="number" inputmode="numeric" placeholder="Ej. ${ej.gross}" oninput="recalcEntrada()"></div>
+      <div class="field"><label>Tara · TARE (kg)</label><input data-k="tare" class="mono" type="number" inputmode="numeric" placeholder="Ej. ${ej.tare}" oninput="recalcEntrada()"></div>
+      <div class="net"><div class="lbl">Neto · NET</div><div class="v mono" data-net="${u}">— kg</div></div>
+    </div>
+    <div class="seals-row">
+      <div class="field"><label>Sello inicial</label><input data-k="selloDe" class="mono" type="number" inputmode="numeric" placeholder="Ej. ${ej.de}" oninput="recalcEntrada()"></div>
+      <div class="field"><label>Sello final</label><input data-k="selloA" class="mono" type="number" inputmode="numeric" placeholder="Ej. ${ej.al}" oninput="recalcEntrada()"></div>
+      <div class="net"><div class="lbl">Sellos</div><div class="v mono" data-seals="${u}">—</div></div>
+      <div class="field"><label>Vehículo / placa</label><input data-k="vehiculo" placeholder="Ej. 26BH5G"></div>
+    </div>
+  </div>`;
+}
+function renderUnits(){
+  const n=config==='doble'?2:1; unitsEl.innerHTML='';
+  for(let u=1;u<=n;u++) unitsEl.insertAdjacentHTML('beforeend', unitBlock(u));
+  recalcEntrada();
+}
+function recalcEntrada(){
+  let netoTotal=0;
+  unitsEl.querySelectorAll('.unit').forEach(unit=>{
+    const u=unit.dataset.u;
+    const gross=+unit.querySelector('[data-k="gross"]').value||0;
+    const tare =+unit.querySelector('[data-k="tare"]').value||0;
+    const net=Math.max(0,gross-tare); netoTotal+=net;
+    unit.querySelector(`[data-net="${u}"]`).textContent = net?FMT(net)+' kg':'— kg';
+    const de=+unit.querySelector('[data-k="selloDe"]').value||0, al=+unit.querySelector('[data-k="selloA"]').value||0;
+    const cnt=(de&&al&&al>=de)?(al-de+1):0;
+    unit.querySelector(`[data-seals="${u}"]`).textContent = cnt?cnt:'—';
+  });
+  const cantKg=(+document.getElementById('cant').value||0)*1000;
+  document.getElementById('t-neto').textContent = netoTotal?FMT(netoTotal)+' kg':'— kg';
+  document.getElementById('t-cant').textContent = cantKg?FMT(cantKg)+' kg':'— kg';
+  const d=document.getElementById('t-delta');
+  if(netoTotal&&cantKg){ const dif=netoTotal-cantKg; d.textContent=(dif>=0?'+':'')+FMT(dif)+' kg'; d.className='v mono '+(Math.abs(dif)<=cantKg*0.01?'delta-ok':'delta-bad'); }
+  else { d.textContent='— kg'; d.className='v mono'; }
+}
+window.recalcEntrada=recalcEntrada;
+
+document.querySelectorAll('.seg').forEach(seg=>{
+  seg.onclick=()=>{
+    document.querySelectorAll('.seg').forEach(s=>{s.classList.remove('active');s.setAttribute('aria-selected','false');});
+    seg.classList.add('active'); seg.setAttribute('aria-selected','true'); config=seg.dataset.cfg; renderUnits();
+  };
+});
+
+document.getElementById('btn-save').onclick=()=>{
+  const folio=document.getElementById('folio').value.trim();
+  const prov=PROVEEDORES.find(p=>p.id===+document.getElementById('prov').value);
+  const itemId=+document.getElementById('tipo').value;
+  if(!folio){ toast('Captura el folio de la remisión','bad'); return; }
+  const units=[];
+  unitsEl.querySelectorAll('.unit').forEach(unit=>{
+    const gross=+unit.querySelector('[data-k="gross"]').value||0;
+    const tare =+unit.querySelector('[data-k="tare"]').value||0;
+    units.push({
+      silo:unit.querySelector('[data-k="silo"]').value,
+      gross, tare, net:Math.max(0,gross-tare),
+      selloDe:unit.querySelector('[data-k="selloDe"]').value.trim(),
+      selloA:unit.querySelector('[data-k="selloA"]').value.trim(),
+      vehiculo:unit.querySelector('[data-k="vehiculo"]').value.trim(),
+    });
+  });
+  const totalNet=units.reduce((a,u)=>a+u.net,0);
+  if(!totalNet){ toast('Captura GROSS y TARE de cada remolque','bad'); return; }
+
+  // >>> SUPABASE: insert entregas_cemento (folio, proveedor=prov.id, item=itemId, pedido, cantidad, config, po)
+  // >>> SUPABASE: insert entregas_cemento_unidades (silo, gross, tare, net, sello_de, sello_a, vehiculo) por remolque
+  // >>> SUPABASE: insert cemento_movimientos tipo='entrada' (cantidad=net) por silo  -> sube el FÍSICO
+  units.forEach(u=>{ const s=SILOS.find(x=>x.codigo===u.silo); if(s){ s.nivel=Math.min(s.cap,s.nivel+u.net); s.notif=false; s.ult=hoy()+' · '+TON(u.net)+' t'; } });
+  const destinos=units.map(u=>{const s=SILOS.find(x=>x.codigo===u.silo);return s?s.nombre:'';}).join(' / ');
+
+  const poSel=document.getElementById('po'), po=poSel.value;
+  const ord = po ? (+poSel.selectedOptions[0].dataset.ord||0) : 0;
+  if(po){
+    // >>> NETSUITE (recibir-oc): Item Receipt contra `po` por totalNet (cantidad EXACTA de la remisión)
+    //     si recibido < ordenado y no viene más -> cerrar saldo de la línea (close PO line)
+    //     si recibido > ordenado -> tolerancia de sobre-recepción o ajustar qty de la OC antes de recibir
+    NS_LIBRO += totalNet;                       // recepción inmediata: el libro sube junto con el físico
+    const saldo=totalNet-ord, sTxt = saldo===0?'exacto':((saldo>0?'+':'−')+TON(Math.abs(saldo))+' t');
+    toast(`Recepción en NetSuite · ${po} · ordenado ${TON(ord)} t · recibido ${TON(totalNet)} t · saldo ${sTxt} (cerrado) → ${destinos}`,'ok');
+  } else {
+    // Sin OC: fallback al flujo actual -> avisar a Compras y dejar pendiente de OC
+    PEND_OC += totalNet;
+    toast(`Entrada sin OC · ${prov.nombre} ${prov.item} · ${TON(totalNet)} t → ${destinos} · notificada a Compras`,'ok');
+  }
+  clearForm(); render();
+};
+document.getElementById('btn-clear').onclick=clearForm;
+function clearForm(){
+  ['folio','pedido','cant'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('prov').selectedIndex=0; syncProveedor();
+  document.querySelector('.seg[data-cfg="sencillo"]').click();
+}
+
+/* =========================================================== utilidades */
+function toast(msg,kind){
+  const t=document.getElementById('toast'); document.getElementById('toast-msg').textContent=msg;
+  t.querySelector('.dot').style.background= kind==='bad'?'var(--crit)':'var(--ok)';
+  t.classList.add('show'); clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove('show'),3800);
+}
+function hoy(){const d=new Date();return d.getDate()+' '+['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'][d.getMonth()];}
+function tick(){const d=new Date();document.getElementById('now').textContent=d.toLocaleDateString('es-MX',{day:'2-digit',month:'short'})+' · '+d.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'});}
+
+/* =========================================================== Inventario inicial */
+function renderInicial(){
+  const c=document.getElementById('inicial-inputs'); c.innerHTML='';
+  SILOS.forEach((s,i)=>{
+    c.insertAdjacentHTML('beforeend',
+      `<div class="field"><label>${s.nombre} (t)</label><input class="mono i-inp" data-i="${i}" type="number" inputmode="decimal" value="${(s.nivel/1000).toFixed(2)}" oninput="recalcInicial()"></div>`);
+  });
+  recalcInicial();
+}
+function recalcInicial(){
+  let sum=0; document.querySelectorAll('.i-inp').forEach(e=> sum+=(+e.value||0)*1000);
+  document.getElementById('i-sum').textContent=FMT(sum)+' kg';
+  document.getElementById('i-libro').textContent=FMT(NS_LIBRO)+' kg';
+  const d=document.getElementById('i-delta'), dif=sum-NS_LIBRO;
+  d.textContent=(dif>=0?'+':'')+FMT(dif)+' kg';
+  d.className='v mono '+(Math.abs(dif)<=NS_LIBRO*0.02?'delta-ok':'delta-bad');
+}
+window.recalcInicial=recalcInicial;
+document.getElementById('btn-inicial').onclick=()=>{
+  // >>> SUPABASE: cemento_movimientos tipo='ajuste' origen='inventario_inicial' por silo; set silos.nivel
+  document.querySelectorAll('.i-inp').forEach(e=>{ const s=SILOS[+e.dataset.i]; if(s){ s.nivel=Math.min(s.cap,(+e.value||0)*1000); s.notif=false; s.ult=hoy()+' · inicial'; } });
+  render(); toast('Inventario inicial fijado · conciliado con NetSuite','ok');
+};
+
+renderUnits(); renderInicial(); render(); tick(); setInterval(tick,30000);
+</script>
