@@ -306,16 +306,34 @@ const EJ = {
 let NS_LIBRO = 35207;                        // Existencia NetSuite CPC-40-RS (item 1230) tras ajuste de recuento físico #174328 (+8,112.06 kg)
 let PEND_OC = 0;                             // kg recibidos físicamente, aún sin OC capturada en NetSuite por Compras
 // Consumo en tránsito: lotes producidos SIN Build (su cemento ya salió del silo, falta asentarlo en NetSuite)
-const TRANSITO = [
+let TRANSITO = [
   {lote:'1B26FM19', linea:'Besser 1', pzs:10213, kg:8572},
   {lote:'1B26FM20', linea:'Besser 1', pzs:7588,  kg:6207},
   {lote:'3C26FM19', linea:'Columbia', pzs:7642,  kg:5724},
   {lote:'3C26FM20', linea:'Columbia', pzs:10115, kg:7614},
   {lote:'3C26FM22', linea:'Columbia', pzs:9480,  kg:7090},
 ];
-const CONSUMO_TRANSITO = TRANSITO.reduce((a,t)=>a+t.kg,0);   // 35,207 kg
+let CONSUMO_TRANSITO = TRANSITO.reduce((a,t)=>a+t.kg,0);   // 35,207 kg
 const AJUSTE_NOTA = 'Ajuste de inventario #174328: +8,112.06 kg CPC-40-RS (cuenta 1360 «Ajustes en recuento físico») para cubrir estos 5 lotes — cemento físico del silo Columbia recibido sin asentar. Conforme cada lote llegue a Build, la existencia y el consumo en tránsito bajan juntos y el disponible no se mueve.';
 const DESTINOS = 'Gerencia de Producción · Gerencia General · Administración';
+const CEMENTO_API = 'https://szrcmvlgxxpmvgrfmxak.supabase.co/functions/v1/cemento-api';
+// Lee el estado real (silos Supabase + existencia NetSuite + tránsito) y refresca el tablero
+async function loadEstado(){
+  try{
+    const r = await fetch(CEMENTO_API, {method:'GET'});
+    const e = await r.json();
+    if(!e || !e.ok) throw new Error('estado');
+    SILOS = (e.silos||[]).map(s=>({codigo:s.codigo,nombre:s.nombre,linea:s.linea,cap:+s.cap,nivel:+s.nivel,min:+s.minimo,consumoDia:+s.consumo_dia||0,ult:s.ult||'',notif:false,grupo:s.grupo}));
+    TRANSITO = (e.transito||[]).map(t=>({lote:t.lote,linea:t.linea,pzs:+t.pzs,kg:+t.kg}));
+    CONSUMO_TRANSITO = (e.transito_kg!=null)? +e.transito_kg : TRANSITO.reduce((a,t)=>a+t.kg,0);
+    if(e.existencia_kg!=null) NS_LIBRO = +e.existencia_kg;
+    const c=document.getElementById('now'); if(c) c.textContent=' · EN VIVO';
+    renderInicial(); renderTransito(); render();
+  }catch(err){
+    const c=document.getElementById('now'); if(c) c.textContent=' · snapshot (sin conexión)';
+    renderInicial(); renderTransito(); render();
+  }
+}
 
 /* =========================================================== Estado silo */
 function estado(s){
@@ -436,10 +454,12 @@ function recalcRecon(){
     chip.textContent=okTol?'● Disponible = físico · conciliado':`● Revisar: Δ ${FMT(dif)} kg`;
   }
 }
-// En real: re-lee el on-hand de NetSuite y los lotes sin Build de Supabase. En demo: snapshot.
-document.getElementById('btn-recon').onclick=()=>{
-  if(PEND_OC>0){ NS_LIBRO+=PEND_OC; const k=PEND_OC; PEND_OC=0; recalcRecon(); toast(`Compras capturó la OC · libro NetSuite +${FMT(k)} kg`,'ok'); }
-  else { recalcRecon(); toast('Snapshot 22-jun · disponible = físico · conciliado','ok'); }
+// Recarga el estado real (silos + existencia NetSuite + tránsito)
+document.getElementById('btn-recon').onclick=async()=>{
+  const btn=document.getElementById('btn-recon'), t=btn.textContent; btn.disabled=true; btn.textContent='Actualizando…';
+  await loadEstado();
+  toast('Actualizado en vivo desde NetSuite','ok');
+  btn.disabled=false; btn.textContent=t;
 };
 
 /* ============================================= Consumo en tránsito (lotes sin Build) */
@@ -533,7 +553,7 @@ document.querySelectorAll('.seg').forEach(seg=>{
   };
 });
 
-document.getElementById('btn-save').onclick=()=>{
+document.getElementById('btn-save').onclick=async()=>{
   const folio=document.getElementById('folio').value.trim();
   const prov=PROVEEDORES.find(p=>p.id===+document.getElementById('prov').value);
   const itemId=+document.getElementById('tipo').value;
@@ -552,28 +572,27 @@ document.getElementById('btn-save').onclick=()=>{
   });
   const totalNet=units.reduce((a,u)=>a+u.net,0);
   if(!totalNet){ toast('Captura GROSS y TARE de cada remolque','bad'); return; }
+  const destinos=units.map(u=>{const s=SILOS.find(x=>x.codigo===u.silo);return s?s.nombre:u.silo;}).join(' / ');
+  const cantTon=+document.getElementById('cant').value||0;
 
-  // >>> SUPABASE: insert entregas_cemento (folio, proveedor=prov.id, item=itemId, pedido, cantidad, config, po)
-  // >>> SUPABASE: insert entregas_cemento_unidades (silo, gross, tare, net, sello_de, sello_a, vehiculo) por remolque
-  // >>> SUPABASE: insert cemento_movimientos tipo='entrada' (cantidad=net) por silo  -> sube el FÍSICO
-  units.forEach(u=>{ const s=SILOS.find(x=>x.codigo===u.silo); if(s){ s.nivel=Math.min(s.cap,s.nivel+u.net); s.notif=false; s.ult=hoy()+' · '+TON(u.net)+' t'; } });
-  const destinos=units.map(u=>{const s=SILOS.find(x=>x.codigo===u.silo);return s?s.nombre:'';}).join(' / ');
-
-  const poSel=document.getElementById('po'), po=poSel.value;
-  const ord = po ? (+poSel.selectedOptions[0].dataset.ord||0) : 0;
-  if(po){
-    // >>> NETSUITE (recibir-oc): Item Receipt contra `po` por totalNet (cantidad EXACTA de la remisión)
-    //     si recibido < ordenado y no viene más -> cerrar saldo de la línea (close PO line)
-    //     si recibido > ordenado -> tolerancia de sobre-recepción o ajustar qty de la OC antes de recibir
-    NS_LIBRO += totalNet;                       // recepción inmediata: el libro sube junto con el físico
-    const saldo=totalNet-ord, sTxt = saldo===0?'exacto':((saldo>0?'+':'−')+TON(Math.abs(saldo))+' t');
-    toast(`Recepción en NetSuite · ${po} · ordenado ${TON(ord)} t · recibido ${TON(totalNet)} t · saldo ${sTxt} (cerrado) → ${destinos}`,'ok');
-  } else {
-    // Sin OC: fallback al flujo actual -> avisar a Compras y dejar pendiente de OC
-    PEND_OC += totalNet;
-    toast(`Entrada sin OC · ${prov.nombre} ${prov.item} · ${TON(totalNet)} t → ${destinos} · notificada a Compras`,'ok');
-  }
-  clearForm(); render();
+  // EN VIVO: cemento-api -> Supabase (entrega/unidades/movimientos) + sube silo + recibo PO6850 en NetSuite
+  const btn=document.getElementById('btn-save'), prevTxt=btn.textContent; btn.disabled=true; btn.textContent='Registrando…';
+  try{
+    const r=await fetch(CEMENTO_API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+      action:'entrada', folio, proveedor_id:prov?prov.id:null, proveedor_nombre:prov?prov.nombre:null,
+      item_id:itemId, item_nombre:prov?prov.item:'CPC-40-RS', pedido:document.getElementById('pedido').value.trim(),
+      cantidad_kg: cantTon>0?cantTon*1000:totalNet, config, registrado_por:'supervisor',
+      units:units.map(u=>({silo:u.silo,gross:u.gross,tare:u.tare,net:u.net,selloDe:u.selloDe,selloA:u.selloA,vehiculo:u.vehiculo}))
+    })});
+    const res=await r.json();
+    if(!res.ok) throw new Error(res.error||'Error al registrar');
+    const ns=res.netsuite_recibo||{};
+    if(ns.ok) toast(`Entrada registrada · ${TON(totalNet)} t a ${destinos} · recibo NetSuite #${ns.recordId} contra PO6850`,'ok');
+    else toast(`Silos actualizados (+${TON(totalNet)} t a ${destinos}). El recibo NetSuite quedó pendiente — revisar.`,'bad');
+    clearForm();
+    await loadEstado();
+  }catch(err){ toast('No se pudo registrar: '+(err.message||err),'bad'); }
+  finally{ btn.disabled=false; btn.textContent=prevTxt; }
 };
 document.getElementById('btn-clear').onclick=clearForm;
 function clearForm(){
@@ -615,5 +634,5 @@ document.getElementById('btn-inicial').onclick=()=>{
   render(); toast('Inventario inicial fijado · conciliado con NetSuite','ok');
 };
 
-renderUnits(); renderInicial(); renderTransito(); render(); tick(); setInterval(tick,30000);
+renderUnits(); renderInicial(); renderTransito(); render(); loadEstado(); tick(); setInterval(tick,30000); setInterval(loadEstado,60000);
 </script>
