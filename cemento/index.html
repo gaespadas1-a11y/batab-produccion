@@ -140,6 +140,18 @@
   .tr-row.tot .li,.tr-row.tot .pz{color:rgba(255,255,255,.75)}
   .tr-row.tot .kg,.tr-row.tot .lote{color:#fff}
   @media(max-width:560px){.tr-row{grid-template-columns:1fr 1fr;gap:6px}.tr-row .li{display:none}}
+  .ov{position:fixed;inset:0;background:rgba(15,32,46,.5);display:none;align-items:center;justify-content:center;z-index:60;padding:20px}
+  .ov.show{display:flex}
+  .mdl{background:var(--surface);border-radius:16px;max-width:360px;width:100%;padding:20px;box-shadow:var(--shadow)}
+  .mdl h3{margin:0 0 3px;font-size:17px;color:var(--ink);font-weight:700}
+  .mdl .msub{font-size:13px;color:var(--ink-soft);margin:0 0 14px}
+  .mdl .lb{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-faint);font-weight:600;margin:14px 0 6px}
+  .opts{display:flex;gap:8px}
+  .opt{flex:1;padding:11px 8px;border:1.5px solid var(--line);border-radius:11px;text-align:center;cursor:pointer;font-weight:600;font-size:14px;background:var(--surface);color:var(--ink)}
+  .opt small{display:block;font-weight:400;font-size:11px;color:var(--ink-faint);margin-top:2px}
+  .opt.sel{border-color:var(--accent);background:#E9F2F6;color:var(--accent)}
+  .mdl-actions{display:flex;gap:8px;margin-top:18px}
+  .mdl-actions .btn{flex:1}
   .delta-ok{color:var(--ok)} .delta-bad{color:var(--warn)}
   .panel-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:18px}
 
@@ -262,6 +274,26 @@
   </div>
 </div>
 
+<div class="ov" id="solic-ov">
+  <div class="mdl">
+    <h3>Solicitar cemento</h3>
+    <p class="msub" id="solic-sub">—</p>
+    <div class="lb">Proveedor</div>
+    <div class="opts" id="solic-prov">
+      <div class="opt sel" data-prov="CEMEX">CEMEX</div>
+      <div class="opt" data-prov="HOLCIM">HOLCIM</div>
+    </div>
+    <div class="lb">Cantidad</div>
+    <div class="opts" id="solic-cant">
+      <div class="opt sel" data-cant="30">30 t<small>sencilla</small></div>
+      <div class="opt" data-cant="50">50 t<small>doble remolque</small></div>
+    </div>
+    <div class="mdl-actions">
+      <button class="btn btn-ghost" id="solic-cancel">Cancelar</button>
+      <button class="btn btn-primary" id="solic-go">Solicitar OC</button>
+    </div>
+  </div>
+</div>
 <div id="toast"><span class="dot"></span><span id="toast-msg"></span></div>
 
 <script>
@@ -429,12 +461,33 @@ function render(){
 }
 
 /* =========================================================== Solicitud */
-// >>> SUPABASE: insert cemento_notificaciones · edge function "cemento-alertas" -> correo MS Graph
+const SOLICITAR_API = 'https://szrcmvlgxxpmvgrfmxak.supabase.co/functions/v1/solicitar-cemento';
+let SOLIC_CTX = null;
 function solicitarView(v){
-  v.silos.forEach(s=>s.notif=true);
-  toast(`Solicitud de pipa enviada · ${v.nombre} (${TON(v.nivel)} t) → ${DESTINOS}`,'ok');
-  render();
+  SOLIC_CTX = v;
+  document.getElementById('solic-sub').textContent = v.nombre + ' · nivel ' + TON(v.nivel) + ' t';
+  document.querySelectorAll('#solic-prov .opt').forEach(o=>o.classList.toggle('sel', o.dataset.prov==='CEMEX'));
+  document.querySelectorAll('#solic-cant .opt').forEach(o=>o.classList.toggle('sel', o.dataset.cant==='30'));
+  document.getElementById('solic-ov').classList.add('show');
 }
+document.querySelectorAll('#solic-prov .opt').forEach(o=>o.onclick=()=>{document.querySelectorAll('#solic-prov .opt').forEach(x=>x.classList.remove('sel'));o.classList.add('sel');});
+document.querySelectorAll('#solic-cant .opt').forEach(o=>o.onclick=()=>{document.querySelectorAll('#solic-cant .opt').forEach(x=>x.classList.remove('sel'));o.classList.add('sel');});
+document.getElementById('solic-cancel').onclick=()=>document.getElementById('solic-ov').classList.remove('show');
+document.getElementById('solic-go').onclick=async()=>{
+  const prov=document.querySelector('#solic-prov .opt.sel').dataset.prov;
+  const cant=+document.querySelector('#solic-cant .opt.sel').dataset.cant;
+  const btn=document.getElementById('solic-go'), prev=btn.textContent; btn.disabled=true; btn.textContent='Solicitando…';
+  try{
+    const r=await fetch(SOLICITAR_API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({proveedor:prov,cantidad:cant,silo:SOLIC_CTX?SOLIC_CTX.nombre:'',solicitado_por:'supervisor'})});
+    const res=await r.json();
+    if(!res.ok) throw new Error(res.error||'No se pudo crear la OC');
+    document.getElementById('solic-ov').classList.remove('show');
+    if(SOLIC_CTX&&SOLIC_CTX.silos) SOLIC_CTX.silos.forEach(s=>s.notif=true);
+    render();
+    toast(`OC creada · ${prov} ${res.toneladas} t · $${FMT(res.monto)} · pendiente de aprobación de Dirección`,'ok');
+  }catch(err){ toast('No se pudo solicitar: '+(err.message||err),'bad'); }
+  finally{ btn.disabled=false; btn.textContent=prev; }
+};
 
 /* =========================================================== Conciliación */
 function recalcRecon(){
