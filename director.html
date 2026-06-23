@@ -90,6 +90,11 @@
   <button data-filter="falta-build">Falta Build</button>
 </div>
 <div id="contenido"><div class="loading"><div class="spinner"></div><div style="margin-top: 12px;">Cargando lotes pendientes...</div></div></div>
+<div style="margin-top:26px;display:flex;align-items:center;gap:10px;">
+  <h2 style="font-size:14px;text-transform:uppercase;letter-spacing:.06em;color:#0a3d62;margin:0;font-weight:700;">Órdenes de compra pendientes</h2>
+  <div style="flex:1;height:1px;background:#e5e7eb;"></div>
+</div>
+<div id="ocs" style="margin-top:14px;"><div class="loading"><div class="spinner"></div><div style="margin-top:12px;">Cargando órdenes...</div></div></div>
 <div class="version-tag">v3.8.4 - GitHub Pages - backend director-cerrar-lote v1.4.0</div>
 <div class="modal-overlay" id="modal-confirm"><div class="modal"><h2>Confirmar cierre del lote</h2><div id="modal-body"></div></div></div>
 <div class="modal-overlay" id="modal-resultado"><div class="modal"><h2 id="resultado-title">Resultado</h2><div id="resultado-body"></div><div class="actions"><button class="btn-secondary" onclick="document.getElementById('modal-resultado').classList.remove('show'); cargarLotes();">Cerrar</button></div></div></div>
@@ -202,9 +207,56 @@ async function ejecutarCierre(c,b,n,a,r,d,h,p,s){
     document.getElementById('modal-resultado').classList.add('show');
   }catch(e){alert('Error: '+e.message);document.getElementById('btn-ejecutar').disabled=false;document.getElementById('btn-ejecutar').textContent='CONFIRMAR Y EJECUTAR';}
 }
-document.getElementById('btn-refresh').onclick=cargarLotes;
+const APROBAR_OC=SB+'/functions/v1/aprobar-oc';
+async function cargarOCs(){
+  const box=document.getElementById('ocs');
+  const sql="SELECT t.id, t.tranid, BUILTIN.DF(t.entity) AS proveedor, ABS(t.total) AS total, t.memo, TO_CHAR(t.trandate,'DD/MM/YYYY') AS fecha, (SELECT NVL(SUM(tl.quantity),0) FROM transactionline tl WHERE tl.transaction=t.id AND tl.item IN (1230,1232)) AS cem_kg FROM transaction t WHERE t.recordtype='purchaseorder' AND t.approvalstatus='1' ORDER BY t.trandate DESC, t.id DESC";
+  try{
+    const r=await suiteql(sql);
+    if(!r.success||!r.data){box.innerHTML='<div class="empty"><div>Error consultando ordenes</div></div>';return;}
+    renderOCs(r.data.items||[]);
+  }catch(e){box.innerHTML='<div class="empty"><div>Error de conexion</div></div>';}
+}
+function renderOCs(items){
+  const box=document.getElementById('ocs');
+  if(!items.length){box.innerHTML='<div class="empty" style="padding:34px 20px;"><div class="icon">OK</div><div>No hay ordenes pendientes</div></div>';return;}
+  let h='';
+  for(const o of items){
+    const cem=Number(o.cem_kg||0)>0;
+    const ton=cem?(Math.round(Number(o.cem_kg)/1000*10)/10+' t'):'';
+    const total=Number(o.total||0).toLocaleString('es-MX',{minimumFractionDigits:2});
+    h+='<div style="background:#fff;border-radius:12px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,.06);border-left:4px solid '+(cem?'#0a3d62':'#9ca3af')+';margin-bottom:12px;">'
+      +'<h3 style="font-size:16px;color:#0a3d62;margin:0;">'+o.tranid+(cem?' <span style="font-size:11px;background:#dbeafe;color:#1e40af;padding:2px 8px;border-radius:10px;font-weight:600;">CEMENTO '+ton+'</span>':'')+'</h3>'
+      +'<div style="font-size:13px;color:#6b7280;margin-top:4px;">'+(o.proveedor||'')+'</div>'
+      +'<div style="font-size:12px;color:#9ca3af;margin-top:2px;">'+(o.fecha||'')+' &middot; $'+total+' MXN</div>'
+      +(o.memo?'<div style="font-size:11px;color:#9ca3af;margin-top:5px;">'+o.memo+'</div>':'')
+      +'<div style="margin-top:13px;display:flex;gap:8px;">'
+      +'<button style="padding:10px 18px;border:none;border-radius:8px;font-weight:600;cursor:pointer;font-size:14px;background:#10b981;color:#fff;" onclick="aprobarOC('+o.id+',\''+o.tranid+'\','+(cem?'true':'false')+',this)">APROBAR</button>'
+      +'<button style="padding:10px 16px;border:none;border-radius:8px;font-weight:600;cursor:pointer;font-size:14px;background:#f3f4f6;color:#374151;" onclick="window.open(\'https://7905968.app.netsuite.com/app/accounting/transactions/purchord.nl?id='+o.id+'\',\'_blank\')">Ver OC</button>'
+      +'</div></div>';
+  }
+  box.innerHTML=h;
+}
+async function aprobarOC(id,tranid,cem,btn){
+  if(!confirm('Aprobar la orden '+tranid+'?'+(cem?' Se notificara por correo a los gerentes.':''))) return;
+  if(btn){btn.disabled=true;btn.textContent='Aprobando...';}
+  try{
+    const res=await fetch(APROBAR_OC,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({poId:String(id)})});
+    const j=await res.json();
+    const aprobOk=j.ok&&j.aprobacion&&j.aprobacion.ok!==false;
+    if(aprobOk){
+      let msg='Orden '+tranid+' aprobada.';
+      if(j.correo&&j.correo.enviado) msg+=' Correo enviado a '+((j.correo.destinatarios||[]).length)+' destinatarios.';
+      alert(msg);
+    }else{
+      alert('No se pudo aprobar: '+JSON.stringify((j.aprobacion&&j.aprobacion.error)||j.error||j));
+    }
+  }catch(e){alert('Error: '+e.message);}
+  cargarOCs();
+}
+document.getElementById('btn-refresh').onclick=()=>{cargarLotes();cargarOCs();};
 document.querySelectorAll('[data-filter]').forEach(b=>{b.onclick=()=>{document.querySelectorAll('[data-filter]').forEach(x=>x.classList.remove('active'));b.classList.add('active');currentFilter=b.dataset.filter;renderLotes();};});
-cargarLotes();
+cargarLotes(); cargarOCs();
 </script>
 </body>
 </html>
