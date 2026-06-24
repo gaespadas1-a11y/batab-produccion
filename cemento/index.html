@@ -193,7 +193,7 @@
       <div class="mark">B</div>
       <div>
         <h1>Control de Cemento por Silo</h1>
-        <p>App del supervisor · entradas (pipa) − salidas (bachada) = disponible · <b>v2026.06.24b</b></p>
+        <p>App del supervisor · entradas (pipa) − salidas (bachada) = disponible · <b>v2026.06.24c</b></p>
       </div>
     </div>
     <div>
@@ -358,6 +358,7 @@ const OPEN_POS = {
   126:  [ {po:'PO6850', ord:50000, fecha:'22 jun'} ],   // CEMEX · CPC-40-RS · compra 50 TON = 50,000 kg base · $4.20/kg · aprobada
   7934: [ {po:'PO6809', ord:30000, fecha:'21 jun'} ],   // HOLCIM · 30 TON = 30,000 kg base
 };
+let OPEN_PO_LIVE = null;   // PO de cemento abierta EN VIVO (la trae cemento-api en estado.po)
 // NOTA UoM: el cemento se COMPRA en TONELADA y se CONSUME/STOCKEA en KG (1 t = 1000 kg), igual que los agregados.
 // 'ord' está en kg base; al recibir contra la OC, convertir kg de báscula -> toneladas para el Item Receipt.
 // Ejemplos por remolque (placeholders, calcados de los tickets reales)
@@ -391,6 +392,7 @@ async function loadEstado(){
     TRANSITO = (e.transito||[]).map(t=>({lote:t.lote,linea:t.linea,pzs:+t.pzs,kg:+t.kg}));
     CONSUMO_TRANSITO = (e.transito_kg!=null)? +e.transito_kg : TRANSITO.reduce((a,t)=>a+t.kg,0);
     if(e.existencia_kg!=null) NS_LIBRO = +e.existencia_kg;
+    OPEN_PO_LIVE = e.po || null; fillPOSelect();
     const c=document.getElementById('now'); if(c) c.textContent=' · EN VIVO';
     renderTransito(); render();
   }catch(err){
@@ -608,13 +610,20 @@ function siloOptions(sel){ return SILOS.map(s=>`<option value="${s.codigo}" ${s.
   document.getElementById('tipo').innerHTML = ITEMS_CEMENTO.map(it=>`<option value="${it.id}">${it.n}</option>`).join('');
   syncProveedor();
 })();
+function fillPOSelect(){
+  const sel=document.getElementById('po'); if(!sel) return;
+  if(OPEN_PO_LIVE && OPEN_PO_LIVE.id){
+    sel.innerHTML =
+      `<option value="${OPEN_PO_LIVE.id}" selected>${OPEN_PO_LIVE.tranid} · ${TON(OPEN_PO_LIVE.total_kg)} t · saldo ${TON(OPEN_PO_LIVE.pendiente_kg)} t</option>`+
+      `<option value="">Sin OC — avisar a Compras</option>`;
+  } else {
+    sel.innerHTML = `<option value="">Sin OC — avisar a Compras</option>`;
+  }
+}
 function syncProveedor(){
   const pid=+document.getElementById('prov').value, p=PROVEEDORES.find(x=>x.id===pid);
   if(p) document.getElementById('tipo').value=p.item_id;
-  const list=OPEN_POS[pid]||[];
-  document.getElementById('po').innerHTML =
-    `<option value="">Sin OC — avisar a Compras</option>` +
-    list.map(o=>`<option value="${o.po}" data-ord="${o.ord}">${o.po} · ${TON(o.ord)} t ordenadas · ${o.fecha}</option>`).join('');
+  fillPOSelect();
 }
 document.getElementById('prov').onchange=syncProveedor;
 
@@ -703,13 +712,13 @@ document.getElementById('btn-save').onclick=async()=>{
     const r=await fetch(CEMENTO_API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
       action:'entrada', folio, proveedor_id:prov?prov.id:null, proveedor_nombre:prov?prov.nombre:null,
       item_id:itemId, item_nombre:prov?prov.item:'CPC-40-RS', pedido:document.getElementById('pedido').value.trim(),
-      cantidad_kg: cantTon>0?cantTon*1000:totalNet, config, registrado_por:'supervisor',
+      cantidad_kg: cantTon>0?cantTon*1000:totalNet, config, registrado_por:'supervisor', po_id:(document.getElementById('po').value||null),
       units:units.map(u=>({silo:u.silo,gross:u.gross,tare:u.tare,net:u.net,selloDe:u.selloDe,selloA:u.selloA,vehiculo:u.vehiculo}))
     })});
     const res=await r.json();
     if(!res.ok) throw new Error(res.error||'Error al registrar');
     const ns=res.netsuite_recibo||{};
-    if(ns.ok) toast(`Entrada registrada · ${TON(totalNet)} t a ${destinos} · recibo NetSuite #${ns.recordId} contra PO6850`,'ok');
+    if(ns.ok){ const poTxt=ns.po_tranid||'la PO'; const bumpTxt=ns.bumped?` · PO subida a ${TON(ns.recibido_kg||totalNet)} t`:(ns.saldo_cerrado?` · saldo cerrado`:''); toast(`Entrada registrada · ${TON(totalNet)} t a ${destinos} · recibo #${ns.recordId} contra ${poTxt}${bumpTxt}`,'ok'); }
     else toast(`Silos actualizados (+${TON(totalNet)} t a ${destinos}). El recibo NetSuite quedó pendiente — revisar.`,'bad');
     clearForm();
     await loadEstado();
