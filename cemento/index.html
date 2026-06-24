@@ -152,6 +152,20 @@
   .opt.sel{border-color:var(--accent);background:#E9F2F6;color:var(--accent)}
   .mdl-actions{display:flex;gap:8px;margin-top:18px}
   .mdl-actions .btn{flex:1}
+  .gate{position:fixed;inset:0;background:linear-gradient(160deg,#0E5E7D,#0B3D52);display:flex;align-items:center;justify-content:center;z-index:100;padding:24px}
+  .gate.hide{display:none}
+  .gate-card{background:var(--surface);border-radius:18px;max-width:340px;width:100%;padding:28px 22px;box-shadow:0 20px 60px rgba(0,0,0,.35);text-align:center}
+  .gate-card .gmark{width:52px;height:52px;border-radius:14px;background:linear-gradient(160deg,#0E5E7D,#0B7FA8);color:#fff;font-weight:800;font-size:24px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px}
+  .gate-card h2{margin:0 0 4px;color:var(--ink);font-size:20px;font-weight:700}
+  .gate-card .gsub{margin:0 0 18px;color:var(--ink-soft);font-size:13px}
+  .gate-card input{width:100%;box-sizing:border-box;padding:13px;border:1.5px solid var(--line);border-radius:10px;font-size:16px;margin-bottom:10px;text-align:center;background:var(--surface-2)}
+  .gate-card input:focus{outline:none;border-color:var(--accent);background:var(--surface)}
+  .gate-btn{width:100%;padding:13px;border:none;border-radius:10px;background:var(--accent);color:#fff;font-weight:700;font-size:15px;cursor:pointer;margin-top:4px}
+  .gate-btn:disabled{opacity:.6}
+  .gate-err{color:var(--crit);font-size:13px;min-height:18px;margin-top:10px;font-weight:600}
+  .gate-foot{margin-top:16px;font-size:11px;color:var(--ink-faint)}
+  .userbox{font-size:11px;color:var(--ink-faint);text-align:right;margin-top:4px}
+  .userbox a{color:var(--accent);text-decoration:none;font-weight:600}
   .delta-ok{color:var(--ok)} .delta-bad{color:var(--warn)}
   .panel-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:18px}
 
@@ -179,7 +193,10 @@
         <p>App del supervisor · entradas (pipa) − salidas (bachada) = disponible</p>
       </div>
     </div>
-    <div class="clock">Última actualización<b id="now">—</b></div>
+    <div>
+      <div class="clock">Última actualización<b id="now">—</b></div>
+      <div class="userbox"><span id="user-badge">—</span> · <a href="#" onclick="cerrarSesion();return false;">Salir</a></div>
+    </div>
   </div>
 
   <div class="recon">
@@ -274,6 +291,18 @@
   </div>
 </div>
 
+<div class="gate hide" id="gate">
+  <div class="gate-card">
+    <div class="gmark">B</div>
+    <h2>Control de Cemento</h2>
+    <p class="gsub">Acceso restringido · ingresa tu código y PIN</p>
+    <input id="gate-cod" type="text" placeholder="Código (ej. GEH)" autocapitalize="characters" autocomplete="off" autocorrect="off" spellcheck="false">
+    <input id="gate-pin" type="password" placeholder="PIN" inputmode="numeric" autocomplete="off" onkeydown="if(event.key==='Enter')hacerLogin()">
+    <button class="gate-btn" id="gate-btn" onclick="hacerLogin()">Entrar</button>
+    <div class="gate-err" id="gate-err"></div>
+    <div class="gate-foot">BATAB · Solo personal autorizado</div>
+  </div>
+</div>
 <div class="ov" id="solic-ov">
   <div class="mdl">
     <h3>Solicitar cemento</h3>
@@ -687,5 +716,33 @@ document.getElementById('btn-inicial').onclick=()=>{
   render(); toast('Inventario inicial fijado · conciliado con NetSuite','ok');
 };
 
-renderUnits(); renderInicial(); renderTransito(); render(); loadEstado(); tick(); setInterval(tick,30000); setInterval(loadEstado,60000);
+/* ===== Control de acceso ===== */
+const VALIDAR_ACCESO='https://szrcmvlgxxpmvgrfmxak.supabase.co/functions/v1/validar-acceso';
+let APP_INICIADA=false;
+function iniciarApp(){
+  if(APP_INICIADA) return; APP_INICIADA=true;
+  renderUnits(); renderInicial(); renderTransito(); render(); loadEstado(); tick(); setInterval(tick,30000); setInterval(loadEstado,60000);
+}
+function sesionActiva(){ try{ const s=JSON.parse(sessionStorage.getItem('cemento_sesion')||'null'); return (s&&s.codigo)?s:null; }catch(e){ return null; } }
+function mostrarApp(s){
+  document.getElementById('gate').classList.add('hide');
+  const b=document.getElementById('user-badge'); if(b) b.textContent=(s.nombre||s.codigo)+' · '+s.rol;
+  iniciarApp();
+}
+async function hacerLogin(){
+  const codigo=document.getElementById('gate-cod').value.trim();
+  const pin=document.getElementById('gate-pin').value.trim();
+  const err=document.getElementById('gate-err'); const btn=document.getElementById('gate-btn');
+  err.textContent=''; if(!codigo||!pin){ err.textContent='Ingresa tu código y PIN'; return; }
+  btn.disabled=true; btn.textContent='Validando…';
+  try{
+    const r=await fetch(VALIDAR_ACCESO,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({codigo,pin})});
+    const j=await r.json();
+    if(j.ok){ const s={codigo:j.codigo,nombre:j.nombre,rol:j.rol,ts:Date.now()}; sessionStorage.setItem('cemento_sesion',JSON.stringify(s)); mostrarApp(s); }
+    else{ err.textContent=j.error||'Acceso denegado'; }
+  }catch(e){ err.textContent='Error de conexión, intenta de nuevo'; }
+  finally{ btn.disabled=false; btn.textContent='Entrar'; }
+}
+function cerrarSesion(){ sessionStorage.removeItem('cemento_sesion'); location.reload(); }
+(function(){ const s=sesionActiva(); if(s){ mostrarApp(s); } else { const g=document.getElementById('gate'); g.classList.remove('hide'); const c=document.getElementById('gate-cod'); if(c) c.focus(); } })();
 </script>
