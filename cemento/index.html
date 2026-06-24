@@ -323,6 +323,25 @@
     </div>
   </div>
 </div>
+<div class="ov" id="ajuste-ov">
+  <div class="mdl">
+    <h3>Ajustar silo</h3>
+    <p class="msub" id="ajuste-sub">—</p>
+    <div class="lb">Silo</div>
+    <select id="ajuste-silo" style="width:100%;box-sizing:border-box;padding:11px;border:1.5px solid var(--line);border-radius:10px;font-size:15px;background:var(--surface-2)"></select>
+    <div class="lb">Acción</div>
+    <div class="opts" id="ajuste-modo">
+      <div class="opt sel" data-modo="consumo">Registrar consumo<small>resta kilos</small></div>
+      <div class="opt" data-modo="lectura">Lectura física<small>nivel real</small></div>
+    </div>
+    <div class="lb" id="ajuste-lbl">Kilos consumidos</div>
+    <input id="ajuste-kg" type="number" inputmode="numeric" placeholder="kg" style="width:100%;box-sizing:border-box;padding:12px;border:1.5px solid var(--line);border-radius:10px;font-size:16px;text-align:center;background:var(--surface-2)">
+    <div class="mdl-actions">
+      <button class="btn btn-ghost" id="ajuste-cancel">Cancelar</button>
+      <button class="btn btn-primary" id="ajuste-go">Aplicar</button>
+    </div>
+  </div>
+</div>
 <div id="toast"><span class="dot"></span><span id="toast-msg"></span></div>
 
 <script>
@@ -478,13 +497,15 @@ function render(){
           </div>
         </div>
       </div>
-      <div class="silo-foot">
+      <div class="silo-foot" style="display:flex;gap:8px">
         ${e.st==='ok'
           ? `<button class="btn btn-ghost" disabled>Nivel suficiente</button>`
           : `<button class="btn btn-warn">⚠ Solicitar pipa${anyNotif?' (enviada)':''}</button>`}
+        <button class="btn btn-ghost btn-ajuste">Ajustar</button>
       </div>`;
     grid.appendChild(card);
     const btn=card.querySelector('.btn-warn'); if(btn) btn.onclick=()=>solicitarView(v);
+    const ba=card.querySelector('.btn-ajuste'); if(ba) ba.onclick=()=>abrirAjuste(v);
   });
   recalcRecon();
 }
@@ -515,6 +536,41 @@ document.getElementById('solic-go').onclick=async()=>{
     render();
     toast(`OC creada · ${prov} ${res.toneladas} t · $${FMT(res.monto)} · pendiente de aprobación de Dirección`,'ok');
   }catch(err){ toast('No se pudo solicitar: '+(err.message||err),'bad'); }
+  finally{ btn.disabled=false; btn.textContent=prev; }
+};
+
+/* ===== Ajuste de silo: consumo / lectura física ===== */
+let AJUSTE_CTX=null;
+function abrirAjuste(v){
+  AJUSTE_CTX=v;
+  document.getElementById('ajuste-sub').textContent=v.nombre;
+  document.getElementById('ajuste-silo').innerHTML=v.silos.map(s=>`<option value="${s.codigo}">${s.nombre} · ${TON(s.nivel)} t</option>`).join('');
+  document.querySelectorAll('#ajuste-modo .opt').forEach(o=>o.classList.toggle('sel',o.dataset.modo==='consumo'));
+  document.getElementById('ajuste-lbl').textContent='Kilos consumidos';
+  document.getElementById('ajuste-kg').value='';
+  document.getElementById('ajuste-ov').classList.add('show');
+}
+document.querySelectorAll('#ajuste-modo .opt').forEach(o=>o.onclick=()=>{
+  document.querySelectorAll('#ajuste-modo .opt').forEach(x=>x.classList.remove('sel')); o.classList.add('sel');
+  document.getElementById('ajuste-lbl').textContent = o.dataset.modo==='lectura' ? 'Nivel real en el silo (kg)' : 'Kilos consumidos';
+});
+document.getElementById('ajuste-cancel').onclick=()=>document.getElementById('ajuste-ov').classList.remove('show');
+document.getElementById('ajuste-go').onclick=async()=>{
+  const silo=document.getElementById('ajuste-silo').value;
+  const modo=document.querySelector('#ajuste-modo .opt.sel').dataset.modo;
+  const val=Number(document.getElementById('ajuste-kg').value);
+  if(!silo||isNaN(val)||val<0){ toast('Ingresa un valor válido','bad'); return; }
+  if(modo==='consumo' && !(val>0)){ toast('El consumo debe ser mayor a 0','bad'); return; }
+  const btn=document.getElementById('ajuste-go'), prev=btn.textContent; btn.disabled=true; btn.textContent='Aplicando…';
+  try{
+    const payload = modo==='lectura' ? {action:'lectura',silo,nivel:val,ref:'app'} : {action:'consumo',silo,kg:val,ref:'app'};
+    const r=await fetch(CEMENTO_API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    const res=await r.json();
+    if(!res.ok) throw new Error(res.error||'No se pudo aplicar');
+    document.getElementById('ajuste-ov').classList.remove('show');
+    await loadEstado(); render();
+    toast(modo==='lectura' ? `Lectura aplicada · ${res.silo} = ${TON(res.nivel)} t` : `Consumo registrado · −${TON(val)} t → ${TON(res.nivel)} t`,'ok');
+  }catch(err){ toast('No se pudo: '+(err.message||err),'bad'); }
   finally{ btn.disabled=false; btn.textContent=prev; }
 };
 
