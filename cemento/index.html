@@ -193,7 +193,7 @@
       <div class="mark">B</div>
       <div>
         <h1>Control de Cemento por Silo</h1>
-        <p>App del supervisor · entradas (pipa) − salidas (bachada) = disponible · <b>v2026.06.24c</b></p>
+        <p>App del supervisor · entradas (pipa) − salidas (bachada) = disponible · <b>v2026.06.24d</b></p>
       </div>
     </div>
     <div>
@@ -249,9 +249,12 @@
         <div class="field"><label for="cant">Cantidad remisión (t)</label><input id="cant" class="mono" type="number" inputmode="decimal" placeholder="Ej. 48.890" oninput="recalcEntrada()"></div>
       </div>
 
-      <div class="cfg-toggle" role="tablist" aria-label="Configuración">
-        <button class="seg active" data-cfg="sencillo" role="tab" aria-selected="true">Un remolque</button>
-        <button class="seg" data-cfg="doble" role="tab" aria-selected="false">Doble remolque</button>
+      <label style="display:block;font-size:11.5px;font-weight:600;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px">¿En cuántos silos se descargó esta pipa?</label>
+      <div class="cfg-toggle" role="tablist" aria-label="En cuántos silos se repartió">
+        <button class="seg active" data-n="1" role="tab" aria-selected="true">1 silo</button>
+        <button class="seg" data-n="2" role="tab" aria-selected="false">2 silos</button>
+        <button class="seg" data-n="3" role="tab" aria-selected="false">3 silos</button>
+        <button class="seg" data-n="4" role="tab" aria-selected="false">4 silos</button>
       </div>
 
       <div id="units"></div>
@@ -628,14 +631,14 @@ function syncProveedor(){
 document.getElementById('prov').onchange=syncProveedor;
 
 /* =========================================================== Remolques */
-let config='sencillo';
+let nSilos=1;
 const unitsEl=document.getElementById('units');
 function unitBlock(u){
   const ej=EJ[u]||EJ[1];
   return `
   <div class="unit" data-u="${u}">
     <div class="unit-h">
-      <span class="utag">${config==='doble'?'Remolque '+u:'Remolque'} · ticket báscula</span>
+      <span class="utag">Descarga ${u} · ticket báscula</span>
       <div class="field inline"><label>Silo destino (campo "PLACAS")</label><select data-k="silo">${siloOptions(ej.silo)}</select></div>
     </div>
     <div class="weigh">
@@ -652,7 +655,7 @@ function unitBlock(u){
   </div>`;
 }
 function renderUnits(){
-  const n=config==='doble'?2:1; unitsEl.innerHTML='';
+  const n=nSilos; unitsEl.innerHTML='';
   for(let u=1;u<=n;u++) unitsEl.insertAdjacentHTML('beforeend', unitBlock(u));
   recalcEntrada();
 }
@@ -680,7 +683,7 @@ window.recalcEntrada=recalcEntrada;
 document.querySelectorAll('.seg').forEach(seg=>{
   seg.onclick=()=>{
     document.querySelectorAll('.seg').forEach(s=>{s.classList.remove('active');s.setAttribute('aria-selected','false');});
-    seg.classList.add('active'); seg.setAttribute('aria-selected','true'); config=seg.dataset.cfg; renderUnits();
+    seg.classList.add('active'); seg.setAttribute('aria-selected','true'); nSilos=+seg.dataset.n||1; renderUnits();
   };
 });
 
@@ -712,7 +715,7 @@ document.getElementById('btn-save').onclick=async()=>{
     const r=await fetch(CEMENTO_API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
       action:'entrada', folio, proveedor_id:prov?prov.id:null, proveedor_nombre:prov?prov.nombre:null,
       item_id:itemId, item_nombre:prov?prov.item:'CPC-40-RS', pedido:document.getElementById('pedido').value.trim(),
-      cantidad_kg: cantTon>0?cantTon*1000:totalNet, config, registrado_por:'supervisor', po_id:(document.getElementById('po').value||null),
+      cantidad_kg: cantTon>0?cantTon*1000:totalNet, config: nSilos+' silo(s)', registrado_por:'supervisor', po_id:(document.getElementById('po').value||null),
       units:units.map(u=>({silo:u.silo,gross:u.gross,tare:u.tare,net:u.net,selloDe:u.selloDe,selloA:u.selloA,vehiculo:u.vehiculo}))
     })});
     const res=await r.json();
@@ -729,7 +732,7 @@ document.getElementById('btn-clear').onclick=clearForm;
 function clearForm(){
   ['folio','pedido','cant'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('prov').selectedIndex=0; syncProveedor();
-  document.querySelector('.seg[data-cfg="sencillo"]').click();
+  document.querySelector('.seg[data-n="1"]').click();
 }
 
 /* =========================================================== utilidades */
