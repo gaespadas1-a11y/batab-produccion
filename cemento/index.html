@@ -193,7 +193,7 @@
       <div class="mark">B</div>
       <div>
         <h1>Control de Cemento por Silo</h1>
-        <p>App del supervisor · entradas (pipa) − salidas (bachada) = disponible · <b>v2026.06.24d</b></p>
+        <p>App del supervisor · entradas (pipa) − salidas (bachada) = disponible · <b>v2026.06.24e</b></p>
       </div>
     </div>
     <div>
@@ -257,12 +257,31 @@
         <button class="seg" data-n="4" role="tab" aria-selected="false">4 silos</button>
       </div>
 
-      <div id="units"></div>
+      <div class="unit">
+        <div class="unit-h">
+          <span class="utag">Ticket de báscula · hoja CEMEX (uno por pipa)</span>
+          <div class="field inline"><label>Vehículo / placa</label><input id="tk-veh" placeholder="Ej. 30AL1H"></div>
+        </div>
+        <div class="weigh">
+          <div class="field"><label>Bruto · GROSS (kg)</label><input id="tk-gross" class="mono" type="number" inputmode="numeric" placeholder="Ej. 53660" oninput="recalcEntrada()"></div>
+          <div class="field"><label>Tara · TARE (kg)</label><input id="tk-tare" class="mono" type="number" inputmode="numeric" placeholder="Ej. 17480" oninput="recalcEntrada()"></div>
+          <div class="net"><div class="lbl">Neto · NET</div><div class="v mono" id="tk-net">— kg</div></div>
+        </div>
+        <div class="seals-row">
+          <div class="field"><label>Sello inicial</label><input id="tk-selloDe" class="mono" type="number" inputmode="numeric" placeholder="Ej. 670385" oninput="recalcEntrada()"></div>
+          <div class="field"><label>Sello final</label><input id="tk-selloA" class="mono" type="number" inputmode="numeric" placeholder="Ej. 670396" oninput="recalcEntrada()"></div>
+          <div class="net"><div class="lbl">Sellos</div><div class="v mono" id="tk-sellos">—</div></div>
+          <div class="field"></div>
+        </div>
+      </div>
+
+      <label style="display:block;font-size:11.5px;font-weight:600;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.04em;margin:4px 0 8px">¿Cuánto del neto se descargó en cada silo?</label>
+      <div id="reparto"></div>
 
       <div class="totals">
-        <div class="net"><div class="lbl">Neto total (Σ NET)</div><div class="v mono" id="t-neto">— kg</div></div>
-        <div class="net"><div class="lbl">Cantidad remisión</div><div class="v mono" id="t-cant">— kg</div></div>
-        <div class="net"><div class="lbl">Δ neto vs. remisión</div><div class="v mono" id="t-delta">— kg</div></div>
+        <div class="net"><div class="lbl">Neto báscula</div><div class="v mono" id="t-neto">— kg</div></div>
+        <div class="net"><div class="lbl">Repartido a silos</div><div class="v mono" id="t-reparto">— kg</div></div>
+        <div class="net"><div class="lbl">Δ reparto vs. neto</div><div class="v mono" id="t-delta">— kg</div></div>
       </div>
 
       <div class="panel-actions">
@@ -632,50 +651,36 @@ document.getElementById('prov').onchange=syncProveedor;
 
 /* =========================================================== Remolques */
 let nSilos=1;
-const unitsEl=document.getElementById('units');
-function unitBlock(u){
-  const ej=EJ[u]||EJ[1];
+const repartoEl=document.getElementById('reparto');
+function repartoRow(i){
+  const ej=(i===1)?'SILO-CO-A':(i===2)?'SILO-B1':'SILO-CO-A';
   return `
-  <div class="unit" data-u="${u}">
-    <div class="unit-h">
-      <span class="utag">Descarga ${u} · ticket báscula</span>
-      <div class="field inline"><label>Silo destino (campo "PLACAS")</label><select data-k="silo">${siloOptions(ej.silo)}</select></div>
-    </div>
-    <div class="weigh">
-      <div class="field"><label>Bruto · GROSS (kg)</label><input data-k="gross" class="mono" type="number" inputmode="numeric" placeholder="Ej. ${ej.gross}" oninput="recalcEntrada()"></div>
-      <div class="field"><label>Tara · TARE (kg)</label><input data-k="tare" class="mono" type="number" inputmode="numeric" placeholder="Ej. ${ej.tare}" oninput="recalcEntrada()"></div>
-      <div class="net"><div class="lbl">Neto · NET</div><div class="v mono" data-net="${u}">— kg</div></div>
-    </div>
-    <div class="seals-row">
-      <div class="field"><label>Sello inicial</label><input data-k="selloDe" class="mono" type="number" inputmode="numeric" placeholder="Ej. ${ej.de}" oninput="recalcEntrada()"></div>
-      <div class="field"><label>Sello final</label><input data-k="selloA" class="mono" type="number" inputmode="numeric" placeholder="Ej. ${ej.al}" oninput="recalcEntrada()"></div>
-      <div class="net"><div class="lbl">Sellos</div><div class="v mono" data-seals="${u}">—</div></div>
-      <div class="field"><label>Vehículo / placa</label><input data-k="vehiculo" placeholder="Ej. 26BH5G"></div>
-    </div>
+  <div class="comp" data-r="${i}">
+    <span class="n">${i}</span>
+    <select data-k="silo">${siloOptions(ej)}</select>
+    <input data-k="kg" class="mono" type="number" inputmode="numeric" placeholder="kg a este silo" oninput="recalcEntrada()">
+    <span></span>
   </div>`;
 }
-function renderUnits(){
-  const n=nSilos; unitsEl.innerHTML='';
-  for(let u=1;u<=n;u++) unitsEl.insertAdjacentHTML('beforeend', unitBlock(u));
+function renderReparto(){
+  repartoEl.innerHTML='';
+  for(let i=1;i<=nSilos;i++) repartoEl.insertAdjacentHTML('beforeend', repartoRow(i));
   recalcEntrada();
 }
 function recalcEntrada(){
-  let netoTotal=0;
-  unitsEl.querySelectorAll('.unit').forEach(unit=>{
-    const u=unit.dataset.u;
-    const gross=+unit.querySelector('[data-k="gross"]').value||0;
-    const tare =+unit.querySelector('[data-k="tare"]').value||0;
-    const net=Math.max(0,gross-tare); netoTotal+=net;
-    unit.querySelector(`[data-net="${u}"]`).textContent = net?FMT(net)+' kg':'— kg';
-    const de=+unit.querySelector('[data-k="selloDe"]').value||0, al=+unit.querySelector('[data-k="selloA"]').value||0;
-    const cnt=(de&&al&&al>=de)?(al-de+1):0;
-    unit.querySelector(`[data-seals="${u}"]`).textContent = cnt?cnt:'—';
-  });
-  const cantKg=(+document.getElementById('cant').value||0)*1000;
-  document.getElementById('t-neto').textContent = netoTotal?FMT(netoTotal)+' kg':'— kg';
-  document.getElementById('t-cant').textContent = cantKg?FMT(cantKg)+' kg':'— kg';
-  const d=document.getElementById('t-delta');
-  if(netoTotal&&cantKg){ const dif=netoTotal-cantKg; d.textContent=(dif>=0?'+':'')+FMT(dif)+' kg'; d.className='v mono '+(Math.abs(dif)<=cantKg*0.01?'delta-ok':'delta-bad'); }
+  const gross=+document.getElementById('tk-gross').value||0;
+  const tare =+document.getElementById('tk-tare').value||0;
+  const net=Math.max(0,gross-tare);
+  const tn=document.getElementById('tk-net'); if(tn) tn.textContent = net?FMT(net)+' kg':'— kg';
+  const de=+document.getElementById('tk-selloDe').value||0, al=+document.getElementById('tk-selloA').value||0;
+  const cnt=(de&&al&&al>=de)?(al-de+1):0;
+  const ts=document.getElementById('tk-sellos'); if(ts) ts.textContent = cnt?cnt:'—';
+  if(nSilos===1){ const only=repartoEl.querySelector('[data-k="kg"]'); if(only) only.value = net||''; }
+  let rep=0; repartoEl.querySelectorAll('[data-k="kg"]').forEach(e=>rep+=(+e.value||0));
+  document.getElementById('t-neto').textContent = net?FMT(net)+' kg':'— kg';
+  document.getElementById('t-reparto').textContent = rep?FMT(rep)+' kg':'— kg';
+  const d=document.getElementById('t-delta'), dif=rep-net;
+  if(net||rep){ d.textContent=(dif>=0?'+':'')+FMT(dif)+' kg'; d.className='v mono '+(Math.abs(dif)<=2?'delta-ok':'delta-bad'); }
   else { d.textContent='— kg'; d.className='v mono'; }
 }
 window.recalcEntrada=recalcEntrada;
@@ -683,7 +688,7 @@ window.recalcEntrada=recalcEntrada;
 document.querySelectorAll('.seg').forEach(seg=>{
   seg.onclick=()=>{
     document.querySelectorAll('.seg').forEach(s=>{s.classList.remove('active');s.setAttribute('aria-selected','false');});
-    seg.classList.add('active'); seg.setAttribute('aria-selected','true'); nSilos=+seg.dataset.n||1; renderUnits();
+    seg.classList.add('active'); seg.setAttribute('aria-selected','true'); nSilos=+seg.dataset.n||1; renderReparto();
   };
 });
 
@@ -692,20 +697,17 @@ document.getElementById('btn-save').onclick=async()=>{
   const prov=PROVEEDORES.find(p=>p.id===+document.getElementById('prov').value);
   const itemId=+document.getElementById('tipo').value;
   if(!folio){ toast('Captura el folio de la remisión','bad'); return; }
-  const units=[];
-  unitsEl.querySelectorAll('.unit').forEach(unit=>{
-    const gross=+unit.querySelector('[data-k="gross"]').value||0;
-    const tare =+unit.querySelector('[data-k="tare"]').value||0;
-    units.push({
-      silo:unit.querySelector('[data-k="silo"]').value,
-      gross, tare, net:Math.max(0,gross-tare),
-      selloDe:unit.querySelector('[data-k="selloDe"]').value.trim(),
-      selloA:unit.querySelector('[data-k="selloA"]').value.trim(),
-      vehiculo:unit.querySelector('[data-k="vehiculo"]').value.trim(),
-    });
-  });
-  const totalNet=units.reduce((a,u)=>a+u.net,0);
-  if(!totalNet){ toast('Captura GROSS y TARE de cada remolque','bad'); return; }
+  const tkGross=+document.getElementById('tk-gross').value||0, tkTare=+document.getElementById('tk-tare').value||0;
+  const net=Math.max(0,tkGross-tkTare);
+  const tkVeh=document.getElementById('tk-veh').value.trim();
+  const tkDe=document.getElementById('tk-selloDe').value.trim(), tkA=document.getElementById('tk-selloA').value.trim();
+  const rows=[...repartoEl.querySelectorAll('.comp')].map(r=>({silo:r.querySelector('[data-k="silo"]').value, kg:+r.querySelector('[data-k="kg"]').value||0})).filter(x=>x.kg>0);
+  const rep=rows.reduce((a,x)=>a+x.kg,0);
+  if(!net){ toast('Captura bruto y tara del ticket de báscula','bad'); return; }
+  if(!rows.length){ toast('Indica cuánto se descargó en cada silo','bad'); return; }
+  if(Math.abs(rep-net)>2){ toast(`El reparto (${FMT(rep)} kg) no cuadra con el neto del ticket (${FMT(net)} kg)`,'bad'); return; }
+  const units=rows.map((x,idx)=>({ silo:x.silo, net:x.kg, gross: idx===0?tkGross:null, tare: idx===0?tkTare:null, selloDe: idx===0?tkDe:null, selloA: idx===0?tkA:null, vehiculo: idx===0?tkVeh:null }));
+  const totalNet=rep;
   const destinos=units.map(u=>{const s=SILOS.find(x=>x.codigo===u.silo);return s?s.nombre:u.silo;}).join(' / ');
   const cantTon=+document.getElementById('cant').value||0;
 
@@ -730,7 +732,7 @@ document.getElementById('btn-save').onclick=async()=>{
 };
 document.getElementById('btn-clear').onclick=clearForm;
 function clearForm(){
-  ['folio','pedido','cant'].forEach(id=>document.getElementById(id).value='');
+  ['folio','pedido','cant','tk-gross','tk-tare','tk-selloDe','tk-selloA','tk-veh'].forEach(id=>{const el=document.getElementById(id); if(el) el.value='';});
   document.getElementById('prov').selectedIndex=0; syncProveedor();
   document.querySelector('.seg[data-n="1"]').click();
 }
@@ -751,7 +753,7 @@ const VALIDAR_ACCESO='https://szrcmvlgxxpmvgrfmxak.supabase.co/functions/v1/vali
 let APP_INICIADA=false;
 function iniciarApp(){
   if(APP_INICIADA) return; APP_INICIADA=true;
-  renderUnits(); renderTransito(); render(); loadEstado(); tick(); setInterval(tick,30000); setInterval(loadEstado,60000);
+  renderReparto(); renderTransito(); render(); loadEstado(); tick(); setInterval(tick,30000); setInterval(loadEstado,60000);
 }
 function sesionActiva(){ try{ const s=JSON.parse(sessionStorage.getItem('cemento_sesion')||'null'); return (s&&s.codigo)?s:null; }catch(e){ return null; } }
 function mostrarApp(s){
