@@ -193,7 +193,7 @@
       <div class="mark">B</div>
       <div>
         <h1>Control de Cemento por Silo</h1>
-        <p>App del supervisor · entradas (pipa) − salidas (bachada) = disponible · <b>v2026.06.24</b></p>
+        <p>App del supervisor · entradas (pipa) − salidas (bachada) = disponible · <b>v2026.06.24b</b></p>
       </div>
     </div>
     <div>
@@ -229,25 +229,6 @@
         <div class="net"><div class="lbl">Cemento en tránsito</div><div class="v mono" id="tr-kg">— kg</div></div>
       </div>
       <p class="muted" id="tr-nota"></p>
-    </div>
-  </div>
-
-  <div class="section-h"><h2>Inventario inicial (arranque)</h2><div class="rule"></div></div>
-  <div class="panel" style="margin-bottom:22px">
-    <div class="panel-h">
-      <div>
-        <h2>Conteo inicial por silo</h2>
-        <p>Lectura física de hoy · silos en 0 (reset). La entrada de PO6850 los llena.</p>
-      </div>
-    </div>
-    <div class="panel-b">
-      <div class="form-grid" id="inicial-inputs"></div>
-      <div class="totals">
-        <div class="net"><div class="lbl">Suma capturada</div><div class="v mono" id="i-sum">— kg</div></div>
-        <div class="net"><div class="lbl">Libro NetSuite (on-hand)</div><div class="v mono" id="i-libro">— kg</div></div>
-        <div class="net"><div class="lbl">Δ vs. libro</div><div class="v mono" id="i-delta">— kg</div></div>
-      </div>
-      <div class="panel-actions"><button class="btn btn-primary" id="btn-inicial">Fijar inventario inicial</button></div>
     </div>
   </div>
 
@@ -411,10 +392,10 @@ async function loadEstado(){
     CONSUMO_TRANSITO = (e.transito_kg!=null)? +e.transito_kg : TRANSITO.reduce((a,t)=>a+t.kg,0);
     if(e.existencia_kg!=null) NS_LIBRO = +e.existencia_kg;
     const c=document.getElementById('now'); if(c) c.textContent=' · EN VIVO';
-    renderInicial(); renderTransito(); render();
+    renderTransito(); render();
   }catch(err){
     const c=document.getElementById('now'); if(c) c.textContent=' · snapshot (sin conexión)';
-    renderInicial(); renderTransito(); render();
+    renderTransito(); render();
   }
 }
 
@@ -751,36 +732,14 @@ function toast(msg,kind){
 function hoy(){const d=new Date();return d.getDate()+' '+['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'][d.getMonth()];}
 function tick(){const d=new Date();document.getElementById('now').textContent=d.toLocaleDateString('es-MX',{day:'2-digit',month:'short'})+' · '+d.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'});}
 
-/* =========================================================== Inventario inicial */
-function renderInicial(){
-  const c=document.getElementById('inicial-inputs'); c.innerHTML='';
-  SILOS.forEach((s,i)=>{
-    c.insertAdjacentHTML('beforeend',
-      `<div class="field"><label>${s.nombre} (t)</label><input class="mono i-inp" data-i="${i}" type="number" inputmode="decimal" value="${(s.nivel/1000).toFixed(2)}" oninput="recalcInicial()"></div>`);
-  });
-  recalcInicial();
-}
-function recalcInicial(){
-  let sum=0; document.querySelectorAll('.i-inp').forEach(e=> sum+=(+e.value||0)*1000);
-  document.getElementById('i-sum').textContent=FMT(sum)+' kg';
-  document.getElementById('i-libro').textContent=FMT(NS_LIBRO)+' kg';
-  const d=document.getElementById('i-delta'), dif=sum-NS_LIBRO;
-  d.textContent=(dif>=0?'+':'')+FMT(dif)+' kg';
-  d.className='v mono '+(Math.abs(dif)<=NS_LIBRO*0.02?'delta-ok':'delta-bad');
-}
-window.recalcInicial=recalcInicial;
-document.getElementById('btn-inicial').onclick=()=>{
-  // >>> SUPABASE: cemento_movimientos tipo='ajuste' origen='inventario_inicial' por silo; set silos.nivel
-  document.querySelectorAll('.i-inp').forEach(e=>{ const s=SILOS[+e.dataset.i]; if(s){ s.nivel=Math.min(s.cap,(+e.value||0)*1000); s.notif=false; s.ult=hoy()+' · inicial'; } });
-  render(); toast('Inventario inicial fijado · conciliado con NetSuite','ok');
-};
+
 
 /* ===== Control de acceso ===== */
 const VALIDAR_ACCESO='https://szrcmvlgxxpmvgrfmxak.supabase.co/functions/v1/validar-acceso';
 let APP_INICIADA=false;
 function iniciarApp(){
   if(APP_INICIADA) return; APP_INICIADA=true;
-  renderUnits(); renderInicial(); renderTransito(); render(); loadEstado(); tick(); setInterval(tick,30000); setInterval(loadEstado,60000);
+  renderUnits(); renderTransito(); render(); loadEstado(); tick(); setInterval(tick,30000); setInterval(loadEstado,60000);
 }
 function sesionActiva(){ try{ const s=JSON.parse(sessionStorage.getItem('cemento_sesion')||'null'); return (s&&s.codigo)?s:null; }catch(e){ return null; } }
 function mostrarApp(s){
