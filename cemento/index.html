@@ -193,7 +193,7 @@
       <div class="mark">B</div>
       <div>
         <h1>Control de Cemento por Silo</h1>
-        <p>App del supervisor · entradas (pipa) − salidas (bachada) = disponible · <b>v2026.06.24e</b></p>
+        <p>App del supervisor · entradas (pipa) − salidas (bachada) = disponible · <b>v2026.06.24f</b></p>
       </div>
     </div>
     <div>
@@ -210,7 +210,7 @@
     <div class="cell act"><button class="btn btn-ghost" id="btn-recon">↻ Actualizar NetSuite</button></div>
   </div>
 
-  <div class="section-h"><h2>Silos</h2><div class="rule"></div></div>
+  <div class="section-h"><h2>Silos</h2><div class="rule"></div><button class="btn btn-warn" id="btn-solicitar-global" style="white-space:nowrap;padding:8px 14px">⚠ Solicitar cemento</button></div>
   <div class="grid" id="grid"></div>
 
   <div class="section-h"><h2>Consumo en tránsito · lotes sin Build</h2><div class="rule"></div></div>
@@ -505,15 +505,8 @@ function render(){
           </div>
         </div>
       </div>
-      <div class="silo-foot" style="display:flex;gap:8px">
-        ${e.st==='ok'
-          ? `<button class="btn btn-ghost" disabled>Nivel suficiente</button>`
-          : `<button class="btn btn-warn">⚠ Solicitar pipa${anyNotif?' (enviada)':''}</button>`}
-        <button class="btn btn-ghost btn-ajuste">Ajustar</button>
-      </div>`;
+      `;
     grid.appendChild(card);
-    const btn=card.querySelector('.btn-warn'); if(btn) btn.onclick=()=>solicitarView(v);
-    const ba=card.querySelector('.btn-ajuste'); if(ba) ba.onclick=()=>abrirAjuste(v);
   });
   recalcRecon();
 }
@@ -528,6 +521,14 @@ function solicitarView(v){
   document.querySelectorAll('#solic-cant .opt').forEach(o=>o.classList.toggle('sel', o.dataset.cant==='30'));
   document.getElementById('solic-ov').classList.add('show');
 }
+function solicitarViewGlobal(){
+  SOLIC_CTX = null;
+  document.getElementById('solic-sub').textContent = 'El silo se determina al recibir la pipa';
+  document.querySelectorAll('#solic-prov .opt').forEach(o=>o.classList.toggle('sel', o.dataset.prov==='CEMEX'));
+  document.querySelectorAll('#solic-cant .opt').forEach(o=>o.classList.toggle('sel', o.dataset.cant==='30'));
+  document.getElementById('solic-ov').classList.add('show');
+}
+document.getElementById('btn-solicitar-global').onclick=solicitarViewGlobal;
 document.querySelectorAll('#solic-prov .opt').forEach(o=>o.onclick=()=>{document.querySelectorAll('#solic-prov .opt').forEach(x=>x.classList.remove('sel'));o.classList.add('sel');});
 document.querySelectorAll('#solic-cant .opt').forEach(o=>o.onclick=()=>{document.querySelectorAll('#solic-cant .opt').forEach(x=>x.classList.remove('sel'));o.classList.add('sel');});
 document.getElementById('solic-cancel').onclick=()=>document.getElementById('solic-ov').classList.remove('show');
