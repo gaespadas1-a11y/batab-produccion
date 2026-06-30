@@ -161,7 +161,7 @@
     <div class="dec-sum"><div class="big" id="faltaTot">—</div>
       <div class="lbl"><b>Faltante neto a producir</b> (descontando existencia firme y piezas ya en proceso).<br>El detalle por gama y por artículo está abajo.</div>
       <div class="bruto">Si lo en proceso no pasa QC<b id="brutoTot">—</b></div></div>
-    <div class="formula"><span class="eq">Faltante neto</span> = Necesidad − Existencia − En&nbsp;proceso · ✓ = ya cubierto</div>
+    <div class="formula"><span class="eq">Faltante neto</span> = Necesidad − Existencia − En&nbsp;proceso · <b style="color:var(--p-listo)">+n</b> = disponible (Exist + Proc − Nec) · ✓ = cubierto exacto</div>
     <div class="legend"><span><i class="firme"></i> Existencia firme (Build en NetSuite)</span><span><i class="tent"></i> En proceso · tentativo (pendiente de QC)</span></div>
     <div id="gamas"></div>
   </section>
@@ -169,7 +169,7 @@
   <div class="legacy"><div class="big" id="legacyN">—</div>
     <div class="txt"><b>Órdenes de trabajo legacy (mar–abr) cerradas sin Build.</b> Folios numéricos, operador nulo. Nunca se generó el ensamble por esta vía. Pendiente: confirmar si se posteó por otra ruta o depurar los registros huérfanos.</div></div>
 
-  <div class="foot">BATAB · Bloques y Agregados de Tabasco · Fuente: NetSuite CR1417 + órdenes de venta + existencia en tiempo real · Tablero v2.1 (en vivo · faltante neto)</div>
+  <div class="foot">BATAB · Bloques y Agregados de Tabasco · Fuente: NetSuite CR1417 + órdenes de venta + existencia en tiempo real · Tablero v2.2 (en vivo · faltante neto + disponible)</div>
 </div>
 
 <script>
@@ -212,6 +212,8 @@ const blk=(c,sz=17)=>`<svg width="${sz*1.55}" height="${sz}" viewBox="0 0 34 22"
 const proc=s=>Number(s.proceso)||0;
 const faltaNeto=s=>Math.max(0,(s.neces||0)-(s.exist||0)-proc(s));
 const faltaBruto=s=>Math.max(0,(s.neces||0)-(s.exist||0));
+/* Opcion B - excedente proyectado: Exist + Proc - Nec. >0 disponible, <0 faltante, =0 cubierto exacto */
+const excedente=s=>((s.exist||0)+proc(s)-(s.neces||0));
 
 function covSegs(exist,proceso,neces,c){
   const e=neces>0?Math.min(100,exist/neces*100):100;
@@ -223,13 +225,13 @@ function renderGamas(){
   $("#gamas").innerHTML=DATA.lineas.map(l=>{
     const c=LINE_COLOR[l.ln]||"#888";
     const skus=l.skus.filter(s=>s.exist||s.neces||proc(s)).sort((a,b)=>faltaNeto(b)-faltaNeto(a));
-    const rows=skus.map(s=>{const fa=faltaNeto(s);const cvTot=s.neces>0?Math.min(100,((s.exist||0)+proc(s))/s.neces*100):100;return `
+    const rows=skus.map(s=>{const fa=faltaNeto(s);const ex=excedente(s);const cvTot=s.neces>0?Math.min(100,((s.exist||0)+proc(s))/s.neces*100):100;return `
       <div class="prow ${s.neces===0?'cov0':''}">
         <span class="sku"><span class="ld" style="background:${c}"></span><span class="nm">${s.sku}</span></span>
         <span class="num">${fmt(s.neces)}</span>
         <span class="num">${fmt(s.exist)}</span>
         <span class="num proc c4">${proc(s)>0?fmt(proc(s)):'—'}</span>
-        <span class="falta ${fa>0?'r':'g'}">${fa>0?fmt(fa):'✓'}</span>
+        <span class="falta ${ex<0?'r':'g'}">${ex<0?fmt(-ex):(ex>0?'+'+fmt(ex):'✓')}</span>
         <span class="covwrap c6">${covSegs(s.exist||0,proc(s),s.neces,c)}<span class="covpct">${cvTot.toFixed(0)}%</span></span></div>`;}).join("");
     return `<div class="gama">
       <div class="gama-head">
@@ -244,7 +246,7 @@ function renderGamas(){
       </div>
       <div class="gama-bar">${(()=>{const e=l.neces>0?Math.min(100,l.exist/l.neces*100):100;const p=l.neces>0?Math.min(Math.max(0,100-e),l.proceso/l.neces*100):0;return `<i style="width:${e}%;background:${c}"></i><i class="tent" style="width:${p}%;background:${c}"></i>`;})()}</div>
       <div class="prow head"><span>Artículo</span><span class="num">Nec.</span><span class="num">Exist.</span>
-        <span class="num proc c4">Proc.</span><span class="num">Falta neto</span><span class="c6">Cob.</span></div>
+        <span class="num proc c4">Proc.</span><span class="num">Falta / disp.</span><span class="c6">Cob.</span></div>
       ${rows}
     </div>`;
   }).join("");
