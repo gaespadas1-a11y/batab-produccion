@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Acta de ensaye · BATAB</title>
+<style>
+  :root{
+    --bg:#0d1117;--panel:#161b22;--panel2:#1c232c;--line:#2d333b;
+    --txt:#e6edf3;--muted:#8b949e;--green:#3fb950;--amber:#d4a72c;--red:#f85149;--blue:#58a6ff;
+    --mono:ui-monospace,"SF Mono","JetBrains Mono",Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Inter,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--sans);line-height:1.5;
+    -webkit-font-smoothing:antialiased;padding:0 0 90px}
+  .wrap{max-width:920px;margin:0 auto;padding:0 16px}
+  a{color:inherit}
+  .state{padding:80px 20px;text-align:center;color:var(--muted);font-family:var(--mono);font-size:14px}
+  .spin{width:26px;height:26px;border:3px solid var(--line);border-top-color:var(--green);
+    border-radius:50%;animation:s .8s linear infinite;margin:0 auto 16px}
+  @keyframes s{to{transform:rotate(360deg)}}
+
+  header{border-bottom:1px solid var(--line);padding:24px 0 18px;margin-bottom:8px}
+  .brand{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:12px;
+    letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
+  .brand .mk{width:22px;height:22px;border-radius:5px;background:var(--green);color:#062;
+    display:grid;place-items:center;font-weight:800;font-family:var(--sans);font-size:13px}
+  .lote{font-family:var(--mono);font-size:32px;font-weight:700;letter-spacing:.02em;line-height:1.05;
+    display:flex;align-items:center;gap:13px;flex-wrap:wrap}
+  .etapa{font-family:var(--sans);font-size:11px;font-weight:700;letter-spacing:.08em;
+    padding:4px 11px;border-radius:6px;border:1px solid var(--line);color:var(--muted)}
+  .etapa.cerrado,.etapa.transferido,.etapa.embarcado{background:rgba(63,185,80,.12);color:var(--green);border-color:rgba(63,185,80,.4)}
+  .etapa.q2{background:rgba(212,167,44,.12);color:var(--amber);border-color:rgba(212,167,44,.4)}
+  .prod{font-size:19px;font-weight:600;margin:8px 0 15px}
+  .meta{display:flex;flex-wrap:wrap;gap:8px}
+  .chip{font-family:var(--mono);font-size:12px;color:var(--muted);background:var(--panel);
+    border:1px solid var(--line);border-radius:7px;padding:6px 11px}
+  .chip b{color:var(--txt);font-weight:600}
+
+  .gate{margin-top:26px;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--panel)}
+  .gate-head{display:flex;align-items:center;justify-content:space-between;gap:12px;
+    padding:15px 18px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .gate-name{display:flex;align-items:baseline;gap:11px;flex-wrap:wrap}
+  .gate-tag{font-family:var(--mono);font-size:21px;font-weight:700}
+  .gate-sub{font-size:13px;color:var(--muted)}
+  .verdict{font-weight:700;letter-spacing:.05em;font-size:13px;padding:7px 15px;border-radius:8px;
+    display:inline-flex;align-items:center;gap:8px}
+  .verdict.pasa{background:rgba(63,185,80,.14);color:var(--green);border:1px solid rgba(63,185,80,.4)}
+  .verdict.no{background:rgba(248,81,73,.14);color:var(--red);border:1px solid rgba(248,81,73,.4)}
+  .dot{width:8px;height:8px;border-radius:50%;background:currentColor;box-shadow:0 0 8px currentColor}
+
+  .summary{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--line)}
+  .kpi{background:var(--panel2);padding:13px 10px;text-align:center}
+  .kpi .lab{font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+  .kpi .val{font-family:var(--mono);font-size:19px;font-weight:700}
+  .kpi .u{font-size:11px;color:var(--muted);font-weight:400}
+  .kpi.lead{background:#12261a}.kpi.lead .val{color:var(--green)}.kpi.lead .lab{color:#6fce89}
+
+  .tbl-scroll{overflow-x:auto}
+  table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:13px;min-width:520px}
+  th,td{padding:10px 12px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
+  th{font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);font-weight:600;background:var(--panel2)}
+  td:first-child,th:first-child{text-align:left}
+  tbody tr:last-child td{border-bottom:none}
+  .pos{color:var(--txt);font-weight:600}
+  .src{font-family:var(--sans);font-size:10px;padding:2px 7px;border-radius:5px;font-weight:600}
+  .src.v{background:rgba(88,166,255,.14);color:var(--blue)}.src.m{background:rgba(139,148,158,.16);color:var(--muted)}
+  .weak td{background:rgba(212,167,44,.06)}.weak .rz{color:var(--amber)}
+
+  .ph-block{padding:16px 18px 20px}
+  .ph-title{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:2px 0 14px}
+  .ph-row{margin-bottom:18px}.ph-row:last-child{margin-bottom:0}
+  .ph-lab{font-size:13px;font-weight:600;margin-bottom:9px;display:flex;gap:9px;align-items:center}
+  .ph-lab .n{font-family:var(--mono);font-size:11px;color:var(--muted);font-weight:400}
+  .trip{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+  .ph{position:relative;display:block;aspect-ratio:3/4;border-radius:9px;overflow:hidden;
+    background:var(--panel2);border:1px solid var(--line);text-decoration:none}
+  .ph img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .3s}
+  .ph:hover img{transform:scale(1.04)}
+  .ph .cap{position:absolute;left:0;right:0;bottom:0;font-family:var(--mono);font-size:10px;
+    letter-spacing:.05em;text-transform:uppercase;color:#d9e2ec;padding:14px 8px 6px;
+    background:linear-gradient(transparent,rgba(0,0,0,.82));font-weight:600}
+  .ph.err{display:flex;align-items:center;justify-content:center}.ph.err img{display:none}
+  .ph.err::after{content:"⚠ Abrir";font-family:var(--mono);font-size:11px;color:var(--amber)}
+
+  footer{margin-top:30px;padding-top:16px;border-top:1px solid var(--line);
+    font-size:12px;color:var(--muted);font-family:var(--mono);line-height:1.7}
+
+  .sharebar{position:fixed;left:0;right:0;bottom:0;background:rgba(13,17,23,.92);
+    backdrop-filter:blur(10px);border-top:1px solid var(--line);padding:12px 16px;z-index:20}
+  .sharebar .inner{max-width:920px;margin:0 auto;display:flex;gap:10px;align-items:center}
+  .btn{flex:1;text-align:center;padding:13px;border-radius:10px;font-weight:700;font-size:14px;
+    text-decoration:none;border:1px solid var(--line);color:var(--txt);background:var(--panel2);cursor:pointer}
+  .btn.wa{background:#25d366;color:#062d14;border-color:#25d366}
+  .btn.ghost{flex:0 0 auto;padding:13px 15px}
+
+  @media(max-width:640px){
+    .lote{font-size:26px}.summary{grid-template-columns:repeat(2,1fr)}.trip{gap:6px}
+  }
+  /* modo cliente: oculta lo interno */
+  body.cliente .only-int{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div id="app"><div class="state"><div class="spin"></div>Cargando acta…</div></div>
+</div>
+
+<div class="sharebar" id="sharebar" style="display:none">
+  <div class="inner">
+    <a class="btn wa" id="waBtn">Compartir por WhatsApp</a>
+    <button class="btn ghost" id="copyBtn" title="Copiar enlace">🔗</button>
+    <a class="btn ghost only-int" id="modeBtn" title="Ver como cliente">👁</a>
+  </div>
+</div>
+
+<script>
+const FN = "https://szrcmvlgxxpmvgrfmxak.supabase.co/functions/v1/actas";
+const KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN6cmNtdmxneHhwbXZncmZteGFrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1MzYxMTAsImV4cCI6MjA5MjExMjExMH0.ztJ5YzeFe9Ta-6ORZBnGYNpg7gN9fwAWZMnD33N80PM";
+
+const qs = new URLSearchParams(location.search);
+const LOTE = (qs.get("lote")||"").trim();
+const MODO = (qs.get("modo")||"interno").toLowerCase();
+if(MODO==="cliente") document.body.classList.add("cliente");
+
+const esc = s => (s==null?"":String(s)).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const nf = (n,d=0)=> n==null||isNaN(n) ? "—" : Number(n).toLocaleString("es-MX",{minimumFractionDigits:d,maximumFractionDigits:d});
+
+async function jget(u){
+  const c=new AbortController(); const to=setTimeout(()=>c.abort(),60000);
+  try{
+    const r=await fetch(u,{headers:{apikey:KEY,Authorization:"Bearer "+KEY},signal:c.signal});
+    clearTimeout(to);
+    let j; try{ j=await r.json(); }catch(_){ return {ok:false,error:"Respuesta no válida (HTTP "+r.status+")"}; }
+    if(j.ok===undefined && !r.ok) j={ok:false,error:(j.error||j.message||("HTTP "+r.status))};
+    return j;
+  }catch(e){ clearTimeout(to); return {ok:false,error: e.name==="AbortError" ? "Tardó demasiado (timeout ~60 s). NetSuite puede estar lento — reintenta." : "Error de red: "+e.message}; }
+}
+async function load(){
+  if(!LOTE){ noLote(); return; }
+  document.getElementById("app").innerHTML=`<div class="state"><div class="spin"></div>Consultando NetSuite… (puede tardar ~15 s)</div>`;
+  const j = await jget(`${FN}?action=acta&lote=${encodeURIComponent(LOTE)}`);
+  if(!j.ok){ fail(j.error||"No se pudo cargar el acta"); return; }
+  render(j);
+}
+function fail(msg){
+  document.getElementById("app").innerHTML =
+    `<div class="state">⚠️ ${esc(msg)}<br><span style="font-size:12px">Lote: ${esc(LOTE)||"—"}</span><br><br><button class="btn" style="max-width:200px;margin:0 auto" onclick="load()">Reintentar</button></div>`;
+}
+function noLote(){
+  document.getElementById("app").innerHTML =
+    `<div class="state">Escribe un lote para ver su acta:<br><br>
+      <input id="loteIn" placeholder="1B26FV30" style="background:var(--panel);border:1px solid var(--line);border-radius:9px;color:var(--txt);padding:11px 13px;font-family:var(--mono);font-size:15px;text-align:center;text-transform:uppercase">
+      <br><br><button class="btn" style="max-width:200px;margin:0 auto" onclick="var v=document.getElementById('loteIn').value.trim().toUpperCase(); if(v) location.search='?lote='+encodeURIComponent(v)">Ver acta</button></div>`;
+}
+
+function render(j){
+  const L = j.lote, gates = j.gates||[];
+  const etapaCls = L.etapa||"";
+  let html = `<header>
+    <div class="brand"><span class="mk">B</span> BATAB · ${MODO==="cliente"?"Certificado de calidad":"Acta de ensaye"}</div>
+    <div class="lote">${esc(L.lote)} <span class="etapa ${etapaCls}">${esc(L.etapa_label||"")}</span></div>
+    <div class="prod">${esc(L.articulo||"")}</div>
+    <div class="meta">
+      <span class="chip">Línea <b>${esc(L.linea||"—")}</b></span>
+      <span class="chip">Turno <b>${esc(L.turno||"—")}</b></span>
+      ${L.cantidad?`<span class="chip">Cantidad <b>${nf(L.cantidad)} pz</b></span>`:""}
+      <span class="chip">Fecha <b>${esc(L.fecha||"—")}</b></span>
+      <span class="chip only-int">Folio <b>${esc(L.folio||"—")}</b></span>
+      <span class="chip only-int">Lote CR1417 <b>#${esc(L.id)}</b></span>
+    </div></header>`;
+
+  if(!gates.length){
+    html += `<div class="state">Este lote todavía no tiene ensayes de calidad capturados.</div>`;
+  }
+  for(const g of gates){
+    const pasa = (g.resultado||"").toLowerCase()==="pasa";
+    const s = g.resumen||{};
+    // probeta más baja del gate (menor resistencia)
+    let minR = Math.min(...(g.probetas||[]).map(p=>p.resistencia==null?Infinity:p.resistencia));
+    html += `<section class="gate">
+      <div class="gate-head">
+        <div class="gate-name"><span class="gate-tag">G${g.gate}</span><span class="gate-sub">${esc((g.gate_txt||"").replace(/^G\d+\s*/,""))}</span></div>
+        <span class="verdict ${pasa?"pasa":"no"}"><span class="dot"></span>${esc((g.resultado||"—").toUpperCase())}</span>
+      </div>
+      <div class="summary">
+        <div class="kpi"><div class="lab">Resist. prom.</div><div class="val">${nf(s.prom_resist,2)}<span class="u"> kg/cm²</span></div></div>
+        <div class="kpi"><div class="lab">Mín. individual</div><div class="val">${nf(s.min_resist,2)}<span class="u"> kg/cm²</span></div></div>
+        <div class="kpi lead"><div class="lab">Peso seco prom.</div><div class="val">${nf(s.prom_seco_kg,2)}<span class="u"> kg</span></div></div>
+        <div class="kpi"><div class="lab">Masa vol. prom.</div><div class="val">${nf(s.prom_vol,0)}<span class="u"> kg/m³</span></div></div>
+        <div class="kpi"><div class="lab">Absorción prom.</div><div class="val">${nf(s.prom_absorcion,2)}<span class="u"> %</span></div></div>
+      </div>
+      <div class="tbl-scroll"><table><thead><tr>
+        <th>Probeta</th><th>Carga kgf</th><th>Resist. kg/cm²</th><th>Peso seco g</th><th>Masa vol</th><th>Absorc. %</th><th class="only-int">Lectura</th>
+      </tr></thead><tbody>
+        ${(g.probetas||[]).map(p=>{
+          const weak = p.resistencia===minR;
+          const isV = (p.origen||"").toLowerCase().includes("vision");
+          return `<tr class="${weak?"weak":""}">
+            <td class="pos">${esc(p.pos||"")}</td>
+            <td>${nf(p.carga)}</td>
+            <td class="${weak?"rz":""}">${nf(p.resistencia,2)}</td>
+            <td>${nf(p.masa_seco)}</td>
+            <td>${nf(p.masa_vol,1)}</td>
+            <td>${nf(p.absorcion_pct,2)}</td>
+            <td class="only-int"><span class="src ${isV?"v":"m"}">${isV?("Visión"+(p.confianza?" "+p.confianza+"%":"")):"Manual"}</span></td>
+          </tr>`;}).join("")}
+      </tbody></table></div>
+      <div class="ph-block"><div class="ph-title">Fotografías · Húmedo → Seco → Prensa</div>
+        ${(g.probetas||[]).map(p=>`
+          <div class="ph-row">
+            <div class="ph-lab">Probeta ${esc(p.pos||"")} <span class="n only-int">· ${esc(p.consec||"")}</span></div>
+            <div class="trip">
+              ${photo(p.foto_humedo,"Húmedo")}
+              ${photo(p.foto_seco,"Seco")}
+              ${photo(p.foto_prensa,"Prensa")}
+            </div>
+          </div>`).join("")}
+      </div>
+    </section>`;
+  }
+
+  html += `<footer>
+    Resistencia = carga (kgf) / área bruta · Absorción = diferencia (g) / peso seco (g)<br>
+    <span class="only-int">Fuente: NetSuite CR933 “Registro de calidad”. </span>Fotos verificadas · BATAB · ${esc(L.fecha||"")}
+  </footer>`;
+
+  document.getElementById("app").innerHTML = html;
+  setupShare(L);
+}
+
+function photo(url,cap){
+  if(!url) return `<div class="ph err"><span class="cap">${cap}</span></div>`;
+  return `<a class="ph" target="_blank" rel="noopener" href="${esc(url)}">
+    <img loading="lazy" src="${esc(url)}" onerror="this.parentElement.classList.add('err')"><span class="cap">${cap}</span></a>`;
+}
+
+function setupShare(L){
+  const bar = document.getElementById("sharebar"); bar.style.display="block";
+  // enlace que se comparte: siempre modo cliente
+  const clientUrl = `${location.origin}${location.pathname}?lote=${encodeURIComponent(L.lote)}&modo=cliente`;
+  const msg = `BATAB · Certificado de calidad\nLote ${L.lote} — ${L.articulo}\nConsulta el acta con fotos aquí:\n${clientUrl}`;
+  document.getElementById("waBtn").href = `https://wa.me/?text=${encodeURIComponent(msg)}`;
+  document.getElementById("copyBtn").onclick = async ()=>{
+    try{ await navigator.clipboard.writeText(clientUrl); document.getElementById("copyBtn").textContent="✓"; setTimeout(()=>document.getElementById("copyBtn").textContent="🔗",1500);}catch(_){}
+  };
+  const mb = document.getElementById("modeBtn");
+  if(mb) mb.href = clientUrl;
+}
+load();
+</script>
+</body>
+</html>
