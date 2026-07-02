@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lotes · Calidad BATAB</title>
+<style>
+  :root{
+    --bg:#0d1117;--panel:#161b22;--panel2:#1c232c;--line:#2d333b;
+    --txt:#e6edf3;--muted:#8b949e;--green:#3fb950;--amber:#d4a72c;--red:#f85149;--blue:#58a6ff;
+    --mono:ui-monospace,"SF Mono","JetBrains Mono",Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Inter,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--sans);line-height:1.5;
+    -webkit-font-smoothing:antialiased;padding-bottom:40px}
+  .wrap{max-width:920px;margin:0 auto;padding:0 16px}
+  a{color:inherit;text-decoration:none}
+
+  header{padding:22px 0 14px}
+  .brand{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:12px;
+    letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
+  .brand .mk{width:22px;height:22px;border-radius:5px;background:var(--green);color:#062;
+    display:grid;place-items:center;font-weight:800;font-family:var(--sans);font-size:13px}
+  h1{font-size:22px;margin:0 0 4px;font-weight:700}
+  .sub{color:var(--muted);font-size:13px;font-family:var(--mono)}
+
+  .toolbar{position:sticky;top:0;background:rgba(13,17,23,.94);backdrop-filter:blur(8px);
+    padding:12px 0;z-index:10;border-bottom:1px solid var(--line)}
+  .search{width:100%;background:var(--panel);border:1px solid var(--line);border-radius:10px;
+    color:var(--txt);font-size:15px;padding:12px 14px;font-family:var(--sans)}
+  .search::placeholder{color:var(--muted)}
+  .filters{display:flex;gap:7px;margin-top:10px;overflow-x:auto;padding-bottom:2px}
+  .fchip{flex:0 0 auto;font-size:12px;font-family:var(--mono);color:var(--muted);background:var(--panel);
+    border:1px solid var(--line);border-radius:20px;padding:6px 13px;cursor:pointer;white-space:nowrap}
+  .fchip.on{background:var(--txt);color:var(--bg);border-color:var(--txt);font-weight:600}
+
+  .list{margin-top:14px;display:flex;flex-direction:column;gap:10px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:14px 15px}
+  .card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+  .lote{font-family:var(--mono);font-size:19px;font-weight:700;letter-spacing:.02em}
+  .prod{font-size:13px;color:var(--muted);margin-top:2px}
+  .qty{font-family:var(--mono);font-size:12px;color:var(--muted);text-align:right;white-space:nowrap}
+  .qty b{color:var(--txt);font-size:15px;display:block}
+  .facts{display:flex;gap:7px;flex-wrap:wrap;margin:9px 0 4px}
+  .tag{font-family:var(--mono);font-size:11px;color:var(--muted);background:var(--panel2);
+    border:1px solid var(--line);border-radius:6px;padding:3px 8px}
+  .gpill{font-family:var(--sans);font-size:11px;font-weight:700;padding:3px 9px;border-radius:6px}
+  .gpill.ok{background:rgba(63,185,80,.14);color:var(--green)}
+  .gpill.no{background:rgba(248,81,73,.14);color:var(--red)}
+  .gpill.na{background:var(--panel2);color:var(--muted);border:1px solid var(--line)}
+
+  /* barra de avance */
+  .prog{display:flex;gap:3px;margin:11px 0 3px}
+  .seg{flex:1;height:6px;border-radius:3px;background:var(--panel2)}
+  .seg.done{background:var(--green)}
+  .seg.done.amber{background:var(--amber)}
+  .prog-lab{display:flex;justify-content:space-between;font-family:var(--mono);font-size:9.5px;
+    letter-spacing:.02em;color:var(--muted);text-transform:uppercase}
+  .prog-lab span{flex:1;text-align:center}
+  .prog-lab span:first-child{text-align:left}.prog-lab span:last-child{text-align:right}
+  .prog-lab span.cur{color:var(--txt);font-weight:700}
+
+  .actions{display:flex;gap:8px;margin-top:12px}
+  .btn{flex:1;text-align:center;padding:10px;border-radius:9px;font-weight:600;font-size:13px;
+    border:1px solid var(--line);color:var(--txt);background:var(--panel2);cursor:pointer}
+  .btn.wa{background:#25d366;color:#062d14;border-color:#25d366}
+  .btn[disabled],.btn.off{opacity:.4;pointer-events:none}
+
+  .state{padding:70px 20px;text-align:center;color:var(--muted);font-family:var(--mono);font-size:14px}
+  .spin{width:26px;height:26px;border:3px solid var(--line);border-top-color:var(--green);
+    border-radius:50%;animation:s .8s linear infinite;margin:0 auto 16px}
+  @keyframes s{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand"><span class="mk">B</span> BATAB · Control de calidad</div>
+    <h1>Lotes de producción</h1>
+    <div class="sub" id="sub">Cargando…</div>
+  </header>
+
+  <div class="toolbar">
+    <input class="search" id="search" placeholder="Buscar lote, producto, folio…" autocomplete="off">
+    <div class="filters" id="filters">
+      <span class="fchip on" data-f="all">Todos</span>
+      <span class="fchip" data-f="q2">Q2 aprobado</span>
+      <span class="fchip" data-f="qc">En QC</span>
+      <span class="fchip" data-f="producido">Producido</span>
+      <span class="fchip" data-f="cerrado">Cerrado</span>
+      <span class="fchip" data-f="acta">Con acta</span>
+    </div>
+  </div>
+
+  <div class="list" id="list"><div class="state"><div class="spin"></div>Cargando lotes…</div></div>
+</div>
+
+<script>
+const FN = "https://szrcmvlgxxpmvgrfmxak.supabase.co/functions/v1/actas";
+const KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN6cmNtdmxneHhwbXZncmZteGFrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1MzYxMTAsImV4cCI6MjA5MjExMjExMH0.ztJ5YzeFe9Ta-6ORZBnGYNpg7gN9fwAWZMnD33N80PM";
+const ACTA_URL = "acta.html";
+const STAGES = [["Prod.",1],["QC",2],["Q2",3],["Cerr.",4],["Teapa",5]];
+
+let DATA=[], filter="all", term="";
+const esc=s=>(s==null?"":String(s)).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const nf=n=>n==null?"—":Number(n).toLocaleString("es-MX");
+
+async function jget(u){
+  const c=new AbortController(); const to=setTimeout(()=>c.abort(),60000);
+  try{
+    const r=await fetch(u,{headers:{apikey:KEY,Authorization:"Bearer "+KEY},signal:c.signal});
+    clearTimeout(to);
+    let j; try{ j=await r.json(); }catch(_){ return {ok:false,error:"Respuesta no válida (HTTP "+r.status+")"}; }
+    if(j.ok===undefined && !r.ok) j={ok:false,error:(j.error||j.message||("HTTP "+r.status))};
+    return j;
+  }catch(e){ clearTimeout(to); return {ok:false,error: e.name==="AbortError" ? "Tardó demasiado (timeout ~60 s). Reintenta." : "Error de red: "+e.message}; }
+}
+async function load(){
+  document.getElementById("list").innerHTML=`<div class="state"><div class="spin"></div>Consultando NetSuite… (puede tardar ~15 s)</div>`;
+  const j=await jget(`${FN}?action=list&dias=90`);
+  if(!j.ok){ document.getElementById("list").innerHTML=`<div class="state">⚠️ ${esc(j.error||"Error")}<br><br><button class="btn" style="max-width:220px;margin:0 auto" onclick="load()">Reintentar</button></div>`; return; }
+  DATA=j.lotes||[];
+  document.getElementById("sub").textContent=`${DATA.length} lotes · últimos 90 días`;
+  render();
+}
+
+function match(l){
+  if(filter==="acta" && !l.tiene_acta) return false;
+  if(["q2","qc","producido","cerrado"].includes(filter)){
+    if(filter==="cerrado"){ if(!l.cerrado) return false; }
+    else if(l.etapa!==filter) return false;
+  }
+  if(term){
+    const hay=`${l.lote} ${l.articulo} ${l.folio} ${l.linea}`.toLowerCase();
+    if(!hay.includes(term)) return false;
+  }
+  return true;
+}
+
+function waLink(l){
+  const url=`${location.origin}${location.pathname.replace(/actas\.html$/,"")}${ACTA_URL}?lote=${encodeURIComponent(l.lote)}&modo=cliente`;
+  const msg=`BATAB · Certificado de calidad\nLote ${l.lote} — ${l.articulo}\nConsulta el acta con fotos aquí:\n${url}`;
+  return `https://wa.me/?text=${encodeURIComponent(msg)}`;
+}
+
+function gpill(label,res){
+  if(!res) return `<span class="gpill na">${label} —</span>`;
+  const ok=(res||"").toLowerCase()==="pasa";
+  return `<span class="gpill ${ok?"ok":"no"}">${label} ${ok?"✓":"✕"}</span>`;
+}
+
+function progress(l){
+  const cur=l.etapa_orden||1;
+  const amber=l.etapa==="q2";
+  let segs=STAGES.map(([_,o])=>`<div class="seg ${o<=cur?"done":""} ${o<=cur&&amber?"amber":""}"></div>`).join("");
+  let labs=STAGES.map(([lab,o])=>`<span class="${o===cur?"cur":""}">${lab}</span>`).join("");
+  return `<div class="prog">${segs}</div><div class="prog-lab">${labs}</div>`;
+}
+
+function card(l){
+  const acta=l.tiene_acta;
+  return `<div class="card">
+    <div class="card-top">
+      <div><div class="lote">${esc(l.lote)}</div><div class="prod">${esc(l.articulo||"")}</div></div>
+      <div class="qty">${l.cantidad?`<b>${nf(l.cantidad)}</b>pz`:""}</div>
+    </div>
+    <div class="facts">
+      <span class="tag">${esc(l.linea||"")} · ${esc(l.turno||"")}</span>
+      <span class="tag">${esc(l.fecha||"")}</span>
+      ${gpill("G1",l.g1)} ${gpill("G2",l.g2)}
+    </div>
+    ${progress(l)}
+    <div class="actions">
+      <a class="btn ${acta?"":"off"}" href="${acta?`${ACTA_URL}?lote=${encodeURIComponent(l.lote)}`:"#"}">${acta?"Ver acta":"Sin ensaye"}</a>
+      <a class="btn wa ${acta?"":"off"}" ${acta?`href="${waLink(l)}" target="_blank" rel="noopener"`:""}>Compartir</a>
+    </div>
+  </div>`;
+}
+
+function render(){
+  const rows=DATA.filter(match);
+  const el=document.getElementById("list");
+  if(!rows.length){ el.innerHTML=`<div class="state">Sin resultados.</div>`; return; }
+  el.innerHTML=rows.map(card).join("");
+}
+
+document.getElementById("search").addEventListener("input",e=>{term=e.target.value.trim().toLowerCase();render();});
+document.getElementById("filters").addEventListener("click",e=>{
+  const c=e.target.closest(".fchip"); if(!c) return;
+  document.querySelectorAll(".fchip").forEach(x=>x.classList.remove("on"));
+  c.classList.add("on"); filter=c.dataset.f; render();
+});
+load();
+</script>
+</body>
+</html>
