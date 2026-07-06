@@ -83,6 +83,27 @@
     border-radius:50%;animation:s .8s linear infinite;margin:0 auto 16px}
   @keyframes s{to{transform:rotate(360deg)}}
 
+  /* ===== ACCESO: tarjeta código + PIN (misma forma que los otros módulos) ===== */
+  .calov{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:22px;
+    background:linear-gradient(180deg,#0f5f7d 0%,#0a4257 100%);overflow:auto}
+  .calcard{background:#fff;border-radius:22px;box-shadow:0 20px 50px rgba(0,0,0,.30);
+    width:100%;max-width:360px;padding:34px 26px;text-align:center;font-family:var(--sans)}
+  .callogo{width:64px;height:64px;border-radius:16px;margin:0 auto 14px;display:block;object-fit:cover;
+    box-shadow:0 4px 12px rgba(13,90,122,.35)}
+  .caltitle{color:#0f2b3a;font-size:22px;font-weight:800;margin:0}
+  .calsub{color:#7a8a93;font-size:13px;margin:6px 0 22px}
+  .calinput{width:100%;box-sizing:border-box;padding:15px 16px;margin-bottom:12px;border-radius:12px;
+    font-size:16px;font-family:var(--sans);outline:none;transition:.15s}
+  .calinput.cod{background:#fff;border:2px solid #cfe0e7;color:#0f2b3a;text-align:center;text-transform:uppercase;letter-spacing:2px;font-weight:600}
+  .calinput.cod:focus{border-color:#0d5a7a}
+  .calinput.pin{background:#eef2f4;border:2px solid #eef2f4;color:#0f2b3a;text-align:center;letter-spacing:6px}
+  .calinput.pin:focus{border-color:#0d5a7a;background:#fff}
+  .calbtn{width:100%;padding:15px;border:0;border-radius:12px;background:#0d5a7a;color:#fff;
+    font-size:16px;font-weight:700;font-family:var(--sans);cursor:pointer;margin-top:4px}
+  .calbtn:active{background:#0a4257}
+  .calbtn[disabled]{opacity:.6;pointer-events:none}
+  .calerr{color:#C0392B;font-size:13px;font-weight:600;height:18px;margin:12px 0 0}
+  .calfoot{color:#9fb0b8;font-size:12px;margin-top:22px}
 </style>
 </head>
 <body>
@@ -118,6 +139,62 @@ let DATA=[], filter="all", term="";
 const esc=s=>(s==null?"":String(s)).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const nf=n=>n==null?"—":Number(n).toLocaleString("es-MX");
 
+// ═══════ ACCESO: CÓDIGO + PIN (misma forma y usuarios que los otros módulos) ═══════
+const SB_URL="https://szrcmvlgxxpmvgrfmxak.supabase.co";
+const SB_KEY="sb_publishable_VOhn9Z2Ev8gYK3nFKr44Sw_VngbAX4N";
+async function sbRpc(fn,params){
+  const r=await fetch(SB_URL+"/rest/v1/rpc/"+fn,{method:"POST",headers:{apikey:SB_KEY,Authorization:"Bearer "+SB_KEY,"Content-Type":"application/json",Prefer:"return=representation"},body:JSON.stringify(params||{})});
+  if(!r.ok) throw new Error("RPC "+fn+": "+await r.text());
+  return r.json();
+}
+const SESS_KEY="batab_calidad_sesion";
+const ROLES_OK=["supervisor","director"];
+function sesionActiva(){
+  try{
+    const s=sessionStorage.getItem("batab_session"); if(s){const o=JSON.parse(s); if(o&&ROLES_OK.includes(o.rol)) return o;}
+    const l=localStorage.getItem(SESS_KEY); if(l){const o=JSON.parse(l); if(o.exp>Date.now()&&ROLES_OK.includes(o.op&&o.op.rol)) return o.op; localStorage.removeItem(SESS_KEY);}
+  }catch(_){}
+  return null;
+}
+function guardarSesion(op){ try{ sessionStorage.setItem("batab_session",JSON.stringify(op)); localStorage.setItem(SESS_KEY,JSON.stringify({op,exp:Date.now()+12*3600*1000})); }catch(_){}}
+function cerrarSesion(){ try{ sessionStorage.removeItem("batab_session"); localStorage.removeItem(SESS_KEY); }catch(_){}; mostrarLogin(); }
+
+async function entrar(){
+  const codigo=(document.getElementById("cal-codigo")?.value||"").trim().toUpperCase();
+  const pin=(document.getElementById("cal-pin")?.value||"").trim();
+  const err=document.getElementById("cal-err");
+  const btn=document.getElementById("cal-btn");
+  if(!codigo||!pin){ err.textContent="Ingresa tu código y PIN"; return; }
+  err.textContent=""; btn.disabled=true; btn.textContent="Validando…";
+  try{
+    const rows=await sbRpc("validar_operador_pin",{p_codigo:codigo,p_pin:pin});
+    const row=Array.isArray(rows)?rows[0]:rows;
+    if(!row||!row.exito){ err.textContent=(row&&row.mensaje)||"Código o PIN incorrecto"; btn.disabled=false; btn.textContent="Entrar"; return; }
+    if(!ROLES_OK.includes(row.rol)){ err.textContent="Acceso denegado: solo supervisor o director"; btn.disabled=false; btn.textContent="Entrar"; return; }
+    const op={id:row.operador_id,codigo:row.codigo,nombre:row.nombre,rol:row.rol,email:row.email};
+    guardarSesion(op);
+    const ov=document.getElementById("calov"); if(ov)ov.remove();
+    load();
+  }catch(e){ console.error(e); err.textContent="Error de conexión. Intenta de nuevo."; btn.disabled=false; btn.textContent="Entrar"; }
+}
+function mostrarLogin(){
+  if(document.getElementById("calov")) return;
+  document.body.insertAdjacentHTML("beforeend",'<div id="calov" class="calov"><div class="calcard">'
+    +'<img src="icons/icon-calidad-180.png" alt="" class="callogo">'
+    +'<h1 class="caltitle">Control de Calidad</h1>'
+    +'<div class="calsub">Acceso restringido · ingresa tu código y PIN</div>'
+    +'<input id="cal-codigo" class="calinput cod" maxlength="10" placeholder="Código (ej. GEH)" autocomplete="off" autocapitalize="characters" spellcheck="false">'
+    +'<input id="cal-pin" class="calinput pin" type="tel" inputmode="numeric" maxlength="6" placeholder="PIN">'
+    +'<div class="calerr" id="cal-err"></div>'
+    +'<button id="cal-btn" class="calbtn" onclick="entrar()">Entrar</button>'
+    +'<div class="calfoot">BATAB · Solo personal autorizado</div>'
+    +'</div></div>');
+  const cod=document.getElementById("cal-codigo"), pin=document.getElementById("cal-pin");
+  setTimeout(()=>{try{cod.focus()}catch(_){}}, 100);
+  pin.addEventListener("keydown",e=>{if(e.key==="Enter")entrar();});
+  cod.addEventListener("keydown",e=>{if(e.key==="Enter")pin.focus();});
+}
+
 async function jget(u){
   const c=new AbortController(); const to=setTimeout(()=>c.abort(),60000);
   try{
@@ -129,6 +206,7 @@ async function jget(u){
   }catch(e){ clearTimeout(to); return {ok:false,error: e.name==="AbortError" ? "Tardó demasiado (timeout ~60 s). Reintenta." : "Error de red: "+e.message}; }
 }
 async function load(){
+  if(!sesionActiva()){ mostrarLogin(); return; }
   document.getElementById("list").innerHTML=`<div class="state"><div class="spin"></div>Consultando NetSuite… (puede tardar ~15 s)</div>`;
   const j=await jget(`${FN}?action=list&dias=90`);
   if(!j.ok){ document.getElementById("list").innerHTML=`<div class="state">⚠️ ${esc(j.error||"Error")}<br><br><button class="btn" style="max-width:220px;margin:0 auto" onclick="load()">Reintentar</button></div>`; return; }
