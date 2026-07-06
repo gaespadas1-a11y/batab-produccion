@@ -117,6 +117,27 @@ let DATA=[], filter="all", term="";
 const esc=s=>(s==null?"":String(s)).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const nf=n=>n==null?"—":Number(n).toLocaleString("es-MX");
 
+let TOK = localStorage.getItem('actas_tok')||'';
+function pinGate(msg){
+  if(document.getElementById('pinov'))return;
+  document.body.insertAdjacentHTML('beforeend',`<div id="pinov" style="position:fixed;inset:0;background:#0d1117;z-index:9999;display:flex;align-items:center;justify-content:center;padding:24px"><div style="max-width:320px;width:100%;text-align:center;font-family:-apple-system,Segoe UI,Roboto,sans-serif"><img src="icons/icon-calidad-180.png" style="width:72px;height:72px;border-radius:16px;margin-bottom:14px"><div style="color:#e6edf3;font-size:18px;font-weight:700">Control de Calidad · BATAB</div><div style="color:#8b949e;font-size:13px;margin:4px 0 18px">${msg||'Ingresa tu clave de acceso'}</div><input id="pinin" type="tel" inputmode="numeric" maxlength="8" placeholder="••••" style="width:100%;box-sizing:border-box;text-align:center;letter-spacing:.4em;font-size:24px;padding:12px;border-radius:10px;border:1px solid #2d333b;background:#161b22;color:#e6edf3;font-family:ui-monospace,monospace"><div id="pinerr" style="color:#f85149;font-size:12px;height:16px;margin:8px 0"></div><button id="pinbtn" style="width:100%;padding:13px;border:0;border-radius:10px;background:#d4a72c;color:#1a1400;font-weight:700;font-size:15px">Entrar</button></div></div>`);
+  const i=document.getElementById('pinin'); i.focus();
+  i.addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});
+  document.getElementById('pinbtn').addEventListener('click',doLogin);
+}
+async function doLogin(){
+  const pin=(document.getElementById('pinin').value||'').trim();
+  const err=document.getElementById('pinerr'); err.textContent='…';
+  try{
+    const r=await fetch(FN,{method:'POST',headers:{'Content-Type':'application/json',apikey:KEY,Authorization:'Bearer '+KEY},body:JSON.stringify({action:'login',pin})});
+    const j=await r.json();
+    if(!j.ok){ err.textContent=j.error||'PIN incorrecto'; return; }
+    TOK=j.token; try{localStorage.setItem('actas_tok',TOK);}catch(_){}
+    const ov=document.getElementById('pinov'); if(ov)ov.remove();
+    load();
+  }catch(e){ err.textContent='Error de conexión'; }
+}
+
 async function jget(u){
   const c=new AbortController(); const to=setTimeout(()=>c.abort(),60000);
   try{
@@ -128,8 +149,10 @@ async function jget(u){
   }catch(e){ clearTimeout(to); return {ok:false,error: e.name==="AbortError" ? "Tardó demasiado (timeout ~60 s). Reintenta." : "Error de red: "+e.message}; }
 }
 async function load(){
+  if(!TOK){ pinGate(); return; }
   document.getElementById("list").innerHTML=`<div class="state"><div class="spin"></div>Consultando NetSuite… (puede tardar ~15 s)</div>`;
-  const j=await jget(`${FN}?action=list&dias=90`);
+  const j=await jget(`${FN}?action=list&dias=90&stoken=${encodeURIComponent(TOK)}`);
+  if(j.auth){ TOK=''; try{localStorage.removeItem('actas_tok');}catch(_){}; pinGate('Sesión expirada, ingresa de nuevo'); return; }
   if(!j.ok){ document.getElementById("list").innerHTML=`<div class="state">⚠️ ${esc(j.error||"Error")}<br><br><button class="btn" style="max-width:220px;margin:0 auto" onclick="load()">Reintentar</button></div>`; return; }
   DATA=j.lotes||[];
   document.getElementById("sub").textContent=`${DATA.length} lotes · últimos 90 días`;
