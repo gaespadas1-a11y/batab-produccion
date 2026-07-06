@@ -3,6 +3,18 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/icon-calidad-32.png">
+<link rel="apple-touch-icon" href="icons/icon-calidad-180.png">
+<link rel="apple-touch-icon" sizes="152x152" href="icons/icon-calidad-152.png">
+<link rel="apple-touch-icon" sizes="167x167" href="icons/icon-calidad-167.png">
+<link rel="apple-touch-icon" sizes="180x180" href="icons/icon-calidad-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Calidad">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="application-name" content="Calidad">
+<meta name="theme-color" content="#0d1117">
+<link rel="manifest" href="calidad.webmanifest">
 <title>Lotes · Calidad BATAB</title>
 <style>
   :root{
@@ -20,8 +32,7 @@
   header{padding:22px 0 14px}
   .brand{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:12px;
     letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
-  .brand .mk{width:22px;height:22px;border-radius:5px;background:var(--green);color:#062;
-    display:grid;place-items:center;font-weight:800;font-family:var(--sans);font-size:13px}
+  .brand .mk{width:28px;height:28px;border-radius:6px;object-fit:cover;display:inline-block;vertical-align:middle}
   h1{font-size:22px;margin:0 0 4px;font-weight:700}
   .sub{color:var(--muted);font-size:13px;font-family:var(--mono)}
 
@@ -76,7 +87,7 @@
 <body>
 <div class="wrap">
   <header>
-    <div class="brand"><span class="mk">B</span> BATAB · Control de calidad</div>
+    <div class="brand"><img class="mk" src="icons/icon-calidad-120.png" alt="Sello de Calidad BATAB"> BATAB · Control de calidad</div>
     <h1>Lotes de producción</h1>
     <div class="sub" id="sub">Cargando…</div>
   </header>
