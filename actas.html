@@ -148,11 +148,12 @@ async function sbRpc(fn,params){
   return r.json();
 }
 const SESS_KEY="batab_calidad_sesion";
-const ROLES_OK=["supervisor","director"];
+const CODIGOS_OK=["GEH","JRC","AAC"]; // Gerardo (director), Capetillo (supervisor), Ana (calidad)
+const okUser = o => !!(o && CODIGOS_OK.includes(String(o.codigo||"").toUpperCase()));
 function sesionActiva(){
   try{
-    const s=sessionStorage.getItem("batab_session"); if(s){const o=JSON.parse(s); if(o&&ROLES_OK.includes(o.rol)) return o;}
-    const l=localStorage.getItem(SESS_KEY); if(l){const o=JSON.parse(l); if(o.exp>Date.now()&&ROLES_OK.includes(o.op&&o.op.rol)) return o.op; localStorage.removeItem(SESS_KEY);}
+    const s=sessionStorage.getItem("batab_session"); if(s){const o=JSON.parse(s); if(okUser(o)) return o;}
+    const l=localStorage.getItem(SESS_KEY); if(l){const o=JSON.parse(l); if(o.exp>Date.now()&&okUser(o.op)) return o.op; localStorage.removeItem(SESS_KEY);}
   }catch(_){}
   return null;
 }
@@ -170,7 +171,7 @@ async function entrar(){
     const rows=await sbRpc("validar_operador_pin",{p_codigo:codigo,p_pin:pin});
     const row=Array.isArray(rows)?rows[0]:rows;
     if(!row||!row.exito){ err.textContent=(row&&row.mensaje)||"Código o PIN incorrecto"; btn.disabled=false; btn.textContent="Entrar"; return; }
-    if(!ROLES_OK.includes(row.rol)){ err.textContent="Acceso denegado: solo supervisor o director"; btn.disabled=false; btn.textContent="Entrar"; return; }
+    if(!CODIGOS_OK.includes(String(row.codigo||"").toUpperCase())){ err.textContent="Acceso solo para Calidad: Capetillo, Ana o Gerardo"; btn.disabled=false; btn.textContent="Entrar"; return; }
     const op={id:row.operador_id,codigo:row.codigo,nombre:row.nombre,rol:row.rol,email:row.email};
     guardarSesion(op);
     const ov=document.getElementById("calov"); if(ov)ov.remove();
