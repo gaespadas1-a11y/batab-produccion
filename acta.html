@@ -121,8 +121,30 @@ const KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZi
 
 const qs = new URLSearchParams(location.search);
 const LOTE = (qs.get("lote")||"").trim();
-const MODO = (qs.get("modo")||"interno").toLowerCase();
+const T = (qs.get("t")||"").trim();                 // token de cliente (enlace)
+let TOK = localStorage.getItem('actas_tok')||'';    // token de sesion (interno)
+const MODO = (T || (qs.get("modo")||"").toLowerCase()==="cliente") ? "cliente" : "interno";
 if(MODO==="cliente") document.body.classList.add("cliente");
+
+function pinGate(msg){
+  if(document.getElementById('pinov'))return;
+  document.body.insertAdjacentHTML('beforeend',`<div id="pinov" style="position:fixed;inset:0;background:#0d1117;z-index:9999;display:flex;align-items:center;justify-content:center;padding:24px"><div style="max-width:320px;width:100%;text-align:center;font-family:-apple-system,Segoe UI,Roboto,sans-serif"><img src="icons/icon-calidad-180.png" style="width:72px;height:72px;border-radius:16px;margin-bottom:14px"><div style="color:#e6edf3;font-size:18px;font-weight:700">Control de Calidad · BATAB</div><div style="color:#8b949e;font-size:13px;margin:4px 0 18px">${msg||'Ingresa tu clave de acceso'}</div><input id="pinin" type="tel" inputmode="numeric" maxlength="8" placeholder="••••" style="width:100%;box-sizing:border-box;text-align:center;letter-spacing:.4em;font-size:24px;padding:12px;border-radius:10px;border:1px solid #2d333b;background:#161b22;color:#e6edf3;font-family:ui-monospace,monospace"><div id="pinerr" style="color:#f85149;font-size:12px;height:16px;margin:8px 0"></div><button id="pinbtn" style="width:100%;padding:13px;border:0;border-radius:10px;background:#d4a72c;color:#1a1400;font-weight:700;font-size:15px">Entrar</button></div></div>`);
+  const i=document.getElementById('pinin'); i.focus();
+  i.addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});
+  document.getElementById('pinbtn').addEventListener('click',doLogin);
+}
+async function doLogin(){
+  const pin=(document.getElementById('pinin').value||'').trim();
+  const err=document.getElementById('pinerr'); err.textContent='…';
+  try{
+    const r=await fetch(FN,{method:'POST',headers:{'Content-Type':'application/json',apikey:KEY,Authorization:'Bearer '+KEY},body:JSON.stringify({action:'login',pin})});
+    const j=await r.json();
+    if(!j.ok){ err.textContent=j.error||'PIN incorrecto'; return; }
+    TOK=j.token; try{localStorage.setItem('actas_tok',TOK);}catch(_){}
+    const ov=document.getElementById('pinov'); if(ov)ov.remove();
+    load();
+  }catch(e){ err.textContent='Error de conexión'; }
+}
 
 const esc = s => (s==null?"":String(s)).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const nf = (n,d=0)=> n==null||isNaN(n) ? "—" : Number(n).toLocaleString("es-MX",{minimumFractionDigits:d,maximumFractionDigits:d});
@@ -139,8 +161,15 @@ async function jget(u){
 }
 async function load(){
   if(!LOTE){ noLote(); return; }
+  if(!T && !TOK){ pinGate(); return; }
   document.getElementById("app").innerHTML=`<div class="state"><div class="spin"></div>Consultando NetSuite… (puede tardar ~15 s)</div>`;
-  const j = await jget(`${FN}?action=acta&lote=${encodeURIComponent(LOTE)}`);
+  let u=`${FN}?action=acta&lote=${encodeURIComponent(LOTE)}`;
+  u += T ? `&t=${encodeURIComponent(T)}` : `&stoken=${encodeURIComponent(TOK)}`;
+  const j = await jget(u);
+  if(j.auth){
+    if(T){ fail("El enlace no es válido o expiró. Solicita uno nuevo a BATAB."); return; }
+    TOK=''; try{localStorage.removeItem('actas_tok');}catch(_){}; pinGate('Sesión expirada, ingresa de nuevo'); return;
+  }
   if(!j.ok){ fail(j.error||"No se pudo cargar el acta"); return; }
   render(j);
 }
@@ -236,12 +265,19 @@ function photo(url,cap){
     <img loading="lazy" src="${esc(url)}" onerror="this.parentElement.classList.add('err')"><span class="cap">${cap}</span></a>`;
 }
 
-function setupShare(L){
+async function setupShare(L){
+  if(!TOK) return; // solo el personal interno (con PIN) genera enlaces de cliente
   const bar = document.getElementById("sharebar"); bar.style.display="block";
-  // enlace que se comparte: siempre modo cliente
-  const clientUrl = `${location.origin}${location.pathname}?lote=${encodeURIComponent(L.lote)}&modo=cliente`;
+  const wa = document.getElementById("waBtn"); wa.textContent="Generando enlace…";
+  let clientUrl="";
+  try{
+    const r=await fetch(`${FN}?action=share&lote=${encodeURIComponent(L.lote)}&stoken=${encodeURIComponent(TOK)}`,{headers:{apikey:KEY,Authorization:"Bearer "+KEY}});
+    const j=await r.json(); if(j.ok) clientUrl=j.url;
+  }catch(_){}
+  if(!clientUrl){ wa.textContent="No se pudo generar el enlace"; return; }
+  wa.textContent="Compartir por WhatsApp";
   const msg = `BATAB · Certificado de calidad\nLote ${L.lote} — ${L.articulo}\nConsulta el acta con fotos aquí:\n${clientUrl}`;
-  document.getElementById("waBtn").href = `https://wa.me/?text=${encodeURIComponent(msg)}`;
+  wa.href = `https://wa.me/?text=${encodeURIComponent(msg)}`;
   document.getElementById("copyBtn").onclick = async ()=>{
     try{ await navigator.clipboard.writeText(clientUrl); document.getElementById("copyBtn").textContent="✓"; setTimeout(()=>document.getElementById("copyBtn").textContent="🔗",1500);}catch(_){}
   };
