@@ -234,10 +234,17 @@ function match(l){
   return true;
 }
 
-function waLink(l){
-  const url=`${location.origin}${location.pathname.replace(/actas\.html$/,"")}${ACTA_URL}?lote=${encodeURIComponent(l.lote)}&modo=cliente`;
-  const msg=`BATAB · Certificado de calidad\nLote ${l.lote} — ${l.articulo}\nConsulta el acta con fotos aquí:\n${url}`;
-  return `https://wa.me/?text=${encodeURIComponent(msg)}`;
+async function compartir(lote){
+  const s=sesionActiva(); if(!s){ mostrarLogin(); return; }
+  const l=(DATA||[]).find(x=>x.lote===lote)||{};
+  let w=null; try{ w=window.open("","_blank"); }catch(_){}
+  try{
+    const j=await jget(`${FN}?action=share&lote=${encodeURIComponent(lote)}&stoken=${encodeURIComponent(s.token||"")}`);
+    if(!j.ok||!j.url){ if(w){try{w.close()}catch(_){}} if(j&&j.auth){ cerrarSesion(); return; } alert("No se pudo generar el enlace. Reintenta."); return; }
+    const msg=`BATAB · Certificado de calidad\nLote ${lote} — ${l.articulo||""}\nConsulta el acta con fotos aquí:\n${j.url}`;
+    const wa=`https://wa.me/?text=${encodeURIComponent(msg)}`;
+    if(w){ w.location.href=wa; } else { window.location.href=wa; }
+  }catch(e){ if(w){try{w.close()}catch(_){}} alert("Error al generar el enlace. Reintenta."); }
 }
 
 function gpill(label,res){
@@ -269,7 +276,7 @@ function card(l){
     ${progress(l)}
     <div class="actions">
       <a class="btn ${acta?"":"off"}" href="${acta?`${ACTA_URL}?lote=${encodeURIComponent(l.lote)}`:"#"}">${acta?"Ver acta":"Sin ensaye"}</a>
-      <a class="btn wa ${acta?"":"off"}" ${acta?`href="${waLink(l)}" target="_blank" rel="noopener"`:""}>Compartir</a>
+      <a class="btn wa ${acta?"":"off"}" ${acta?`href="#" onclick="compartir('${esc(l.lote)}');return false;"`:""}>Compartir</a>
     </div>
   </div>`;
 }
