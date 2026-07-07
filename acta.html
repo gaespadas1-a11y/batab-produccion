@@ -132,6 +132,18 @@ const T = (qs.get("t")||"").trim();                 // token de cliente (enlace)
 const MODO = (T || (qs.get("modo")||"").toLowerCase()==="cliente") ? "cliente" : "interno";
 if(MODO==="cliente") document.body.classList.add("cliente");
 
+const ACTA_VER = "2026-07-07-diag1";
+(function beacon(){
+  try{
+    const standalone = (window.navigator.standalone===true) || (window.matchMedia && matchMedia("(display-mode: standalone)").matches);
+    fetch(FN.replace("/functions/v1/actas","/rest/v1/diag_acta"),{
+      method:"POST",
+      headers:{apikey:KEY,Authorization:"Bearer "+KEY,"Content-Type":"application/json",Prefer:"return=minimal"},
+      body:JSON.stringify({version:ACTA_VER,standalone:!!standalone,modo:MODO,ua:navigator.userAgent,ref:document.referrer||"",url:location.href})
+    }).catch(()=>{});
+  }catch(_){}
+})();
+
 const esc = s => (s==null?"":String(s)).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const nf = (n,d=0)=> n==null||isNaN(n) ? "—" : Number(n).toLocaleString("es-MX",{minimumFractionDigits:d,maximumFractionDigits:d});
 
