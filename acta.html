@@ -150,13 +150,15 @@ async function jget(u){
     return j;
   }catch(e){ clearTimeout(to); return {ok:false,error: e.name==="AbortError" ? "Tardó demasiado (timeout ~60 s). NetSuite puede estar lento — reintenta." : "Error de red: "+e.message}; }
 }
+function sesTok(){ try{ const l=localStorage.getItem("batab_calidad_sesion"); if(l){ const o=JSON.parse(l); if(o&&o.exp>Date.now()&&o.op&&o.op.token) return o.op.token; } const s=sessionStorage.getItem("batab_session"); if(s){ const o=JSON.parse(s); if(o&&o.token) return o.token; } }catch(_){} return ""; }
 async function load(){
   if(!LOTE){ noLote(); return; }
   document.getElementById("app").innerHTML=`<div class="state"><div class="spin"></div>Consultando NetSuite… (puede tardar ~15 s)</div>`;
   let u=`${FN}?action=acta&lote=${encodeURIComponent(LOTE)}`;
-  if(T) u += `&t=${encodeURIComponent(T)}`;
+  if(T){ u += `&t=${encodeURIComponent(T)}`; }
+  else { const stk=sesTok(); if(stk) u += `&stoken=${encodeURIComponent(stk)}`; }
   const j = await jget(u);
-  if(j.auth){ fail(T ? "El enlace no es válido o expiró. Solicita uno nuevo a BATAB." : "No se pudo cargar el acta."); return; }
+  if(j.auth){ fail(T ? "El enlace no es válido o expiró. Solicita uno nuevo a BATAB." : "Abre el acta desde el módulo de Calidad (inicia sesión con tu código y PIN)."); return; }
   if(!j.ok){ fail(j.error||"No se pudo cargar el acta"); return; }
   render(j);
 }
