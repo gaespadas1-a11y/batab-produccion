@@ -257,11 +257,20 @@ function photo(url,cap){
 function setupShare(L){
   if(MODO==="cliente") return; // el cliente no genera enlaces
   const bar = document.getElementById("sharebar"); if(bar) bar.style.display="block";
-  const clientUrl = `${location.origin}${location.pathname}?lote=${encodeURIComponent(L.lote)}&modo=cliente`;
-  const msg = `BATAB · Certificado de calidad\nLote ${L.lote} — ${L.articulo}\nConsulta el acta con fotos aquí:\n${clientUrl}`;
-  const wa = document.getElementById("waBtn"); if(wa){ wa.textContent="Compartir por WhatsApp"; wa.href = `https://wa.me/?text=${encodeURIComponent(msg)}`; }
-  const cb = document.getElementById("copyBtn"); if(cb) cb.onclick = async ()=>{ try{ await navigator.clipboard.writeText(clientUrl); cb.textContent="✓"; setTimeout(()=>cb.textContent="🔗",1500);}catch(_){} };
-  const mb = document.getElementById("modeBtn"); if(mb) mb.href = clientUrl;
+  const wa = document.getElementById("waBtn");
+  const cb = document.getElementById("copyBtn");
+  const mb = document.getElementById("modeBtn");
+  let signed=""; // enlace firmado del cliente (acta.html?lote=..&t=..)
+  async function getUrl(){
+    if(signed) return signed;
+    const stk=sesTok();
+    const j=await jget(`${FN}?action=share&lote=${encodeURIComponent(L.lote)}&stoken=${encodeURIComponent(stk)}`);
+    if(j&&j.ok&&j.url){ signed=j.url; }
+    return signed;
+  }
+  if(wa){ wa.textContent="Compartir por WhatsApp"; wa.href="#"; wa.onclick=async(e)=>{ e.preventDefault(); let w=null; try{w=window.open("","_blank");}catch(_){}; const url=await getUrl(); if(!url){ if(w){try{w.close()}catch(_){}} alert("No se pudo generar el enlace. Reintenta."); return; } const msg=`BATAB · Certificado de calidad\nLote ${L.lote} — ${L.articulo||""}\nConsulta el acta con fotos aquí:\n${url}`; const wl=`https://wa.me/?text=${encodeURIComponent(msg)}`; if(w){w.location.href=wl;}else{window.location.href=wl;} }; }
+  if(cb){ cb.onclick=async()=>{ const url=await getUrl(); if(!url){ alert("No se pudo generar el enlace."); return; } try{ await navigator.clipboard.writeText(url); cb.textContent="✓"; setTimeout(()=>cb.textContent="🔗",1500);}catch(_){} }; }
+  if(mb){ mb.href="#"; mb.onclick=async(e)=>{ e.preventDefault(); const url=await getUrl(); if(url) window.location.href=url; else alert("No se pudo generar el enlace."); }; }
 }
 load();
 </script>
