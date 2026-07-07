@@ -172,7 +172,10 @@ async function entrar(){
     const row=Array.isArray(rows)?rows[0]:rows;
     if(!row||!row.exito){ err.textContent=(row&&row.mensaje)||"Código o PIN incorrecto"; btn.disabled=false; btn.textContent="Entrar"; return; }
     if(!CODIGOS_OK.includes(String(row.codigo||"").toUpperCase())){ err.textContent="Acceso solo para Calidad: Capetillo, Ana o Gerardo"; btn.disabled=false; btn.textContent="Entrar"; return; }
-    const op={id:row.operador_id,codigo:row.codigo,nombre:row.nombre,rol:row.rol,email:row.email};
+    let tok="";
+    try{ const lr=await fetch(`${FN}?action=login`,{method:"POST",headers:{apikey:KEY,Authorization:"Bearer "+KEY,"Content-Type":"application/json"},body:JSON.stringify({codigo,pin})}); const lj=await lr.json(); if(lj&&lj.ok&&lj.token) tok=lj.token; }catch(_){}
+    if(!tok){ err.textContent="No se pudo iniciar sesión con el servidor. Reintenta."; btn.disabled=false; btn.textContent="Entrar"; return; }
+    const op={id:row.operador_id,codigo:row.codigo,nombre:row.nombre,rol:row.rol,email:row.email,token:tok};
     guardarSesion(op);
     const ov=document.getElementById("calov"); if(ov)ov.remove();
     load();
@@ -207,10 +210,12 @@ async function jget(u){
   }catch(e){ clearTimeout(to); return {ok:false,error: e.name==="AbortError" ? "Tardó demasiado (timeout ~60 s). Reintenta." : "Error de red: "+e.message}; }
 }
 async function load(){
-  if(!sesionActiva()){ mostrarLogin(); return; }
+  const _s=sesionActiva();
+  if(!_s){ mostrarLogin(); return; }
   document.getElementById("list").innerHTML=`<div class="state"><div class="spin"></div>Consultando NetSuite… (puede tardar ~15 s)</div>`;
-  const j=await jget(`${FN}?action=list&dias=90`);
-  if(!j.ok){ document.getElementById("list").innerHTML=`<div class="state">⚠️ ${esc(j.error||"Error")}<br><br><button class="btn" style="max-width:220px;margin:0 auto" onclick="load()">Reintentar</button></div>`; return; }
+  const stk=_s.token?`&stoken=${encodeURIComponent(_s.token)}`:"";
+  const j=await jget(`${FN}?action=list&dias=90${stk}`);
+  if(!j.ok){ if(j.auth){ cerrarSesion(); return; } document.getElementById("list").innerHTML=`<div class="state">⚠️ ${esc(j.error||"Error")}<br><br><button class="btn" style="max-width:220px;margin:0 auto" onclick="load()">Reintentar</button></div>`; return; }
   DATA=j.lotes||[];
   document.getElementById("sub").textContent=`${DATA.length} lotes · últimos 90 días`;
   render();
