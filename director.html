@@ -91,6 +91,11 @@
 </div>
 <div id="contenido"><div class="loading"><div class="spinner"></div><div style="margin-top: 12px;">Cargando lotes pendientes...</div></div></div>
 <div style="margin-top:26px;display:flex;align-items:center;gap:10px;">
+  <h2 style="font-size:14px;text-transform:uppercase;letter-spacing:.06em;color:#1667b0;margin:0;font-weight:700;">Transferencias por aprobar</h2>
+  <div style="flex:1;height:1px;background:#e5e7eb;"></div>
+</div>
+<div id="transf-pend" style="margin-top:14px;"><div class="loading"><div class="spinner"></div><div style="margin-top:12px;">Cargando transferencias...</div></div></div>
+<div style="margin-top:26px;display:flex;align-items:center;gap:10px;">
   <h2 style="font-size:14px;text-transform:uppercase;letter-spacing:.06em;color:#0a3d62;margin:0;font-weight:700;">Aprobación de materias primas</h2>
   <div style="flex:1;height:1px;background:#e5e7eb;"></div>
 </div>
@@ -107,6 +112,10 @@
 const SB='https://szrcmvlgxxpmvgrfmxak.supabase.co';
 const NS_PROXY=SB+'/functions/v1/netsuite-proxy';
 const CERRAR=SB+'/functions/v1/director-cerrar-lote';
+const TRANSF_EJECUTAR=SB+'/functions/v1/transferencias-ejecutar';
+const TRANSF_ANON='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN6cmNtdmxneHhwbXZncmZteGFrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1MzYxMTAsImV4cCI6MjA5MjExMjExMH0.ztJ5YzeFe9Ta-6ORZBnGYNpg7gN9fwAWZMnD33N80PM';
+const TRANSF_H={'apikey':TRANSF_ANON,'Authorization':'Bearer '+TRANSF_ANON,'Content-Type':'application/json'};
+let TRANSF_PIN=null;
 const DENS_POLVO=1650; const DENS_SELLO=1550;
 let lotesData=[]; let currentFilter='all';
 async function suiteql(sql){
@@ -272,9 +281,42 @@ async function rechazarOC(id,tranid,btn){
   }catch(e){alert('Error: '+e.message);}
   cargarOCs();
 }
-document.getElementById('btn-refresh').onclick=()=>{cargarLotes();cargarOCs();};
+document.getElementById('btn-refresh').onclick=()=>{cargarLotes();cargarOCs();cargarTransferencias();};
 document.querySelectorAll('[data-filter]').forEach(b=>{b.onclick=()=>{document.querySelectorAll('[data-filter]').forEach(x=>x.classList.remove('active'));b.classList.add('active');currentFilter=b.dataset.filter;renderLotes();};});
-cargarLotes(); cargarOCs();
+
+async function cargarTransferencias(){
+  const cont=document.getElementById('transf-pend');
+  try{
+    const r=await fetch(SB+'/rest/v1/transferencias_pendientes?estatus=eq.pendiente&select=*&order=created_at.asc',{headers:TRANSF_H});
+    const rows=await r.json();
+    if(!Array.isArray(rows)||!rows.length){cont.innerHTML='<div style="text-align:center;color:#9ca3af;padding:18px;">No hay transferencias pendientes.</div>';return;}
+    cont.innerHTML=rows.map(tarjetaTransf).join('');
+  }catch(e){cont.innerHTML='<div style="text-align:center;color:#ef4444;padding:18px;">Error: '+e.message+'</div>';}
+}
+function tarjetaTransf(s){
+  return '<div class="card" id="tr-'+s.id+'" style="border-left:4px solid #1667b0;">'
+   +'<div style="display:flex;justify-content:space-between;align-items:center;"><div style="font-size:20px;font-weight:800;color:#0a3d62;">'+Number(s.cantidad).toLocaleString('es-MX')+' pz</div><span class="badge" style="background:#eef2f7;color:#0a3d62;">'+s.ubicacion_nombre+'</span></div>'
+   +'<div style="margin:8px 0;font-weight:600;">'+s.articulo_origen_nombre+' <span style="color:#1667b0;font-weight:800;">&rarr;</span> '+s.articulo_destino_nombre+'</div>'
+   +'<div style="font-size:13px;color:#6b7280;">Lote <b>'+s.lote+'</b> &middot; Solicit&oacute; '+s.solicitante+' &middot; '+new Date(s.created_at).toLocaleString('es-MX')+'</div>'
+   +'<div style="display:flex;gap:10px;margin-top:12px;"><button class="btn-primary" style="flex:1;" onclick="decidirTransf('+s.id+',\'aprobar\')">Aprobar</button><button class="btn-secondary" style="flex:1;" onclick="decidirTransf('+s.id+',\'rechazar\')">Rechazar</button></div>'
+   +'<div id="tr-msg-'+s.id+'" style="margin-top:10px;font-size:13px;font-weight:600;"></div></div>';
+}
+async function decidirTransf(id,accion){
+  if(!TRANSF_PIN){TRANSF_PIN=prompt('PIN de director para aprobar transferencias:');if(!TRANSF_PIN)return;}
+  const card=document.getElementById('tr-'+id),msg=document.getElementById('tr-msg-'+id);
+  card.querySelectorAll('button').forEach(b=>b.disabled=true);
+  msg.style.color='#12558f';msg.innerHTML=(accion==='aprobar'?'Ejecutando en NetSuite...':'Rechazando...');
+  try{
+    const r=await fetch(TRANSF_EJECUTAR,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({solicitud_id:id,accion:accion,director_pin:TRANSF_PIN})});
+    const j=await r.json();
+    if(!j.success){if(String(j.error||'').indexOf('PIN')>=0)TRANSF_PIN=null;msg.style.color='#b02a20';msg.innerHTML='&#10006; '+(j.error||'Error');card.querySelectorAll('button').forEach(b=>b.disabled=false);return;}
+    if(accion==='rechazar'){msg.style.color='#6b7280';msg.innerHTML='Rechazada.';}
+    else{msg.style.color='#0f7a45';msg.innerHTML='&#10004; Ejecutado. Ajuste NetSuite #'+j.ns_ia_id+' ('+(j.departamento_id===6?'Comercializaci\u00f3n':'Producci\u00f3n')+').';}
+    setTimeout(cargarTransferencias,1200);
+  }catch(e){msg.style.color='#b02a20';msg.innerHTML='Error: '+e.message;card.querySelectorAll('button').forEach(b=>b.disabled=false);}
+}
+
+cargarLotes(); cargarOCs(); cargarTransferencias();
 </script>
 </body>
 </html>
