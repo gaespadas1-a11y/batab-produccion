@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>BATAB · Transferencias</title>
+<style>
+  :root{--azul:#0b3d6b;--azul2:#1667b0;--verde:#1a9e5f;--rojo:#c0392b;--gris:#f2f4f7;--linea:#dde3ea;--txt:#1b2733;--suave:#6b7887;}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{margin:0;font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:var(--gris);color:var(--txt);font-size:16px}
+  header{background:var(--azul);color:#fff;padding:14px 16px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:10}
+  header .logo{background:#f4c20d;color:var(--azul);font-weight:800;border-radius:6px;padding:3px 8px;font-size:15px;letter-spacing:.5px}
+  header h1{font-size:17px;margin:0;font-weight:700;flex:1}
+  header .salir{color:#cfe0f0;font-size:13px;font-weight:700;cursor:pointer}
+  .wrap{max-width:520px;margin:0 auto;padding:16px}
+  label{display:block;font-size:13px;font-weight:700;color:var(--suave);margin:14px 0 6px;text-transform:uppercase;letter-spacing:.4px}
+  select,input{width:100%;padding:13px;border:1.5px solid var(--linea);border-radius:10px;font-size:16px;background:#fff;color:var(--txt)}
+  select:disabled{background:#f0f2f5;color:#9aa7b4}
+  select:focus,input:focus{outline:none;border-color:var(--azul2)}
+  .btn{width:100%;padding:15px;border:none;border-radius:12px;font-size:16px;font-weight:800;color:#fff;background:var(--azul2);cursor:pointer;margin-top:20px}
+  .btn:disabled{background:#a9b6c4}
+  .muted{color:var(--suave);font-size:13px}
+  .hint{font-size:12px;color:var(--suave);margin-top:6px}
+  .disp{font-weight:800;color:var(--verde)}
+  .msg{padding:12px;border-radius:10px;margin-top:14px;font-weight:600;font-size:14px;display:none}
+  .msg.ok{background:#e6f7ee;color:#0f7a45;display:block}
+  .msg.err{background:#fdeaea;color:#b02a20;display:block}
+  .msg.info{background:#eaf2fb;color:#12558f;display:block}
+  .who{background:#fff;border:1px solid var(--linea);border-radius:12px;padding:12px 14px;margin-bottom:4px;display:flex;align-items:center;gap:10px}
+  .who .ini{width:38px;height:38px;border-radius:50%;background:var(--azul2);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800}
+  .who b{display:block} .who .u{font-size:12px;color:var(--suave)}
+  .login{max-width:340px;margin:60px auto;text-align:center;padding:0 20px}
+  .login .pin{letter-spacing:8px;text-align:center;font-size:26px;font-weight:800}
+  .login h2{color:var(--azul);margin-bottom:4px}
+  .arrow{color:var(--azul2);font-weight:800;margin:0 6px}
+  .spin{display:inline-block;width:16px;height:16px;border:2px solid #fff;border-top-color:transparent;border-radius:50%;animation:s .7s linear infinite;vertical-align:-3px}
+  @keyframes s{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<header>
+  <span class="logo">BATAB</span>
+  <h1>Transferencias</h1>
+  <span class="salir" id="salir" style="display:none" onclick="logout()">Salir</span>
+</header>
+
+<!-- LOGIN -->
+<div class="login" id="view-login">
+  <h2>Acceso</h2>
+  <p class="muted">Escribe tu PIN para solicitar transferencias.</p>
+  <input class="pin" id="pin" type="password" inputmode="numeric" maxlength="8" placeholder="••••" autofocus>
+  <button class="btn" id="btn-login" onclick="login()">Entrar</button>
+  <div class="msg" id="msg-login"></div>
+</div>
+
+<!-- FORM -->
+<div class="wrap" id="view-form" style="display:none">
+  <div class="who"><div class="ini" id="ini"></div><div><b id="who-nom"></b><span class="u" id="who-ubic"></span></div></div>
+
+  <label>Artículo origen (de dónde sale)</label>
+  <select id="origen" onchange="onOrigen()"><option value="">— Selecciona —</option></select>
+
+  <label>Artículo destino (a qué se convierte)</label>
+  <select id="destino" onchange="onDestino()" disabled><option value="">— Primero elige el origen —</option></select>
+
+  <label>Lote (con existencia real)</label>
+  <select id="lote" onchange="onLote()" disabled><option value="">—</option></select>
+  <div class="hint" id="lote-hint"></div>
+
+  <label>Cantidad (piezas)</label>
+  <input id="cantidad" type="number" inputmode="numeric" min="1" step="1" placeholder="0" disabled oninput="validarCant()">
+  <div class="hint" id="cant-hint"></div>
+
+  <button class="btn" id="btn-enviar" onclick="enviar()" disabled>Enviar solicitud</button>
+  <div class="msg" id="msg-form"></div>
+</div>
+
+<script>
+const SB="https://szrcmvlgxxpmvgrfmxak.supabase.co";
+const ANON="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN6cmNtdmxneHhwbXZncmZteGFrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1MzYxMTAsImV4cCI6MjA5MjExMjExMH0.ztJ5YzeFe9Ta-6ORZBnGYNpg7gN9fwAWZMnD33N80PM";
+const H={"apikey":ANON,"Authorization":"Bearer "+ANON,"Content-Type":"application/json"};
+let U=null, PARES=[], LOTES={}, LOTE_SEL=null;
+
+function m(id,txt,cls){const e=document.getElementById(id);e.className='msg '+cls;e.innerHTML=txt;}
+
+async function login(){
+  const pin=document.getElementById('pin').value.trim();
+  if(!pin){m('msg-login','Escribe tu PIN.','err');return;}
+  const b=document.getElementById('btn-login');b.disabled=true;b.innerHTML='<span class="spin"></span> Validando…';
+  try{
+    const r=await fetch(`${SB}/functions/v1/transferencias-login`,{method:'POST',headers:H,body:JSON.stringify({pin})});
+    const j=await r.json();
+    if(!j.ok){m('msg-login',j.error||'PIN incorrecto','err');b.disabled=false;b.innerHTML='Entrar';return;}
+    if(j.rol!=='solicitante'){m('msg-login','Este acceso es para almacenistas. Los directores aprueban desde la app BATAB Director.','err');b.disabled=false;b.innerHTML='Entrar';return;}
+    U=j; entrar();
+  }catch(e){m('msg-login','Error: '+e.message,'err');b.disabled=false;b.innerHTML='Entrar';}
+}
+function entrar(){
+  document.getElementById('view-login').style.display='none';
+  document.getElementById('view-form').style.display='block';
+  document.getElementById('salir').style.display='inline';
+  document.getElementById('ini').textContent=U.nombre.charAt(0).toUpperCase();
+  document.getElementById('who-nom').textContent=U.nombre;
+  document.getElementById('who-ubic').textContent=U.ubicacion_nombre;
+  cargarPares();
+}
+function logout(){U=null;document.getElementById('pin').value='';document.getElementById('view-login').style.display='block';document.getElementById('view-form').style.display='none';document.getElementById('salir').style.display='none';document.getElementById('btn-login').disabled=false;document.getElementById('btn-login').innerHTML='Entrar';document.getElementById('msg-login').style.display='none';}
+
+async function cargarPares(){
+  try{
+    const r=await fetch(`${SB}/rest/v1/transferencias_pares?activo=eq.true&select=*&order=familia,origen_nombre`,{headers:H});
+    PARES=await r.json();
+  }catch(e){PARES=[];}
+  const origenes=[...new Map(PARES.map(p=>[p.origen_id,p.origen_nombre])).entries()];
+  document.getElementById('origen').innerHTML='<option value="">— Selecciona —</option>'+origenes.map(([id,nom])=>`<option value="${id}">${nom}</option>`).join('');
+}
+function onOrigen(){
+  const oid=document.getElementById('origen').value;
+  const dSel=document.getElementById('destino');
+  resetDesde('destino');
+  if(!oid){dSel.disabled=true;dSel.innerHTML='<option value="">— Primero elige el origen —</option>';return;}
+  const dests=PARES.filter(p=>String(p.origen_id)===String(oid));
+  dSel.disabled=false;
+  dSel.innerHTML='<option value="">— Selecciona destino —</option>'+dests.map(p=>`<option value="${p.destino_id}" data-nom="${p.destino_nombre}">${p.destino_nombre}</option>`).join('');
+}
+function resetDesde(campo){
+  const orden=['destino','lote','cantidad'];const i=orden.indexOf(campo);
+  for(let k=i;k<orden.length;k++){const el=document.getElementById(orden[k]);if(orden[k]==='cantidad'){el.value='';el.disabled=true;}else{el.disabled=true;el.innerHTML='<option value="">—</option>';}}
+  document.getElementById('lote-hint').textContent='';document.getElementById('cant-hint').textContent='';document.getElementById('btn-enviar').disabled=true;
+}
+async function onDestino(){
+  const did=document.getElementById('destino').value;
+  const oid=document.getElementById('origen').value;
+  resetDesde('lote');
+  if(!did){return;}
+  const loteSel=document.getElementById('lote');
+  document.getElementById('lote-hint').innerHTML='<span class="spin" style="border-color:#1667b0;border-top-color:transparent"></span> Buscando lotes con existencia en '+U.ubicacion_nombre+'…';
+  loteSel.disabled=true;loteSel.innerHTML='<option value="">Cargando…</option>';
+  const q=`SELECT inum.inventorynumber AS lote, SUM(ib.quantityavailable) AS disp FROM inventorybalance ib JOIN inventorynumber inum ON inum.id=ib.inventorynumber WHERE ib.item=${oid} AND ib.location=${U.ubicacion_id} AND ib.quantityavailable>0 GROUP BY inum.inventorynumber ORDER BY inum.inventorynumber`;
+  try{
+    const r=await fetch(`${SB}/functions/v1/netsuite-proxy`,{method:'POST',headers:H,body:JSON.stringify({endpoint:"/services/rest/query/v1/suiteql",method:"POST",payload:{q},extraHeaders:{Prefer:"transient"}})});
+    const j=await r.json();const items=(j.data&&j.data.items)||[];LOTES={};
+    if(!items.length){loteSel.innerHTML='<option value="">— Sin lotes disponibles —</option>';document.getElementById('lote-hint').textContent='No hay existencia de ese artículo en '+U.ubicacion_nombre+'.';return;}
+    loteSel.innerHTML='<option value="">— Selecciona lote —</option>'+items.map(it=>{LOTES[it.lote]=+it.disp;return `<option value="${it.lote}">${it.lote} · ${(+it.disp).toLocaleString('es-MX')} pz</option>`;}).join('');
+    loteSel.disabled=false;document.getElementById('lote-hint').textContent=items.length+' lote(s) con existencia.';
+  }catch(e){loteSel.innerHTML='<option value="">Error</option>';document.getElementById('lote-hint').textContent='No se pudo consultar NetSuite: '+e.message;}
+}
+function onLote(){
+  const l=document.getElementById('lote').value;const c=document.getElementById('cantidad');
+  if(!l){c.disabled=true;c.value='';document.getElementById('btn-enviar').disabled=true;document.getElementById('cant-hint').textContent='';return;}
+  LOTE_SEL=l;const disp=LOTES[l]||0;c.disabled=false;c.max=disp;c.value='';
+  document.getElementById('cant-hint').innerHTML='Disponible: <span class="disp">'+disp.toLocaleString('es-MX')+' pz</span>';validarCant();
+}
+function validarCant(){
+  const c=document.getElementById('cantidad');const v=+c.value;const disp=LOTES[LOTE_SEL]||0;const btn=document.getElementById('btn-enviar');const h=document.getElementById('cant-hint');
+  if(!v||v<=0){btn.disabled=true;return;}
+  if(v>disp){btn.disabled=true;h.innerHTML='<span style="color:#c0392b;font-weight:700">No puedes pedir más de '+disp.toLocaleString('es-MX')+' pz.</span>';return;}
+  h.innerHTML='Disponible: <span class="disp">'+disp.toLocaleString('es-MX')+' pz</span>';btn.disabled=false;
+}
+async function enviar(){
+  const oSel=document.getElementById('origen'),dSel=document.getElementById('destino');
+  const oid=oSel.value,onom=oSel.options[oSel.selectedIndex].text;
+  const did=dSel.value,dnom=dSel.options[dSel.selectedIndex].getAttribute('data-nom');
+  const cant=+document.getElementById('cantidad').value,lote=LOTE_SEL;
+  const btn=document.getElementById('btn-enviar');btn.disabled=true;btn.innerHTML='<span class="spin"></span> Enviando…';
+  const row={solicitante:U.nombre,ubicacion_id:U.ubicacion_id,ubicacion_nombre:U.ubicacion_nombre,departamento_id:U.departamento_id,articulo_origen_id:oid,articulo_origen_nombre:onom,articulo_destino_id:did,articulo_destino_nombre:dnom,lote,cantidad:cant,saldo_disponible_solicitud:LOTES[lote]||null,estatus:'pendiente'};
+  try{
+    const r=await fetch(`${SB}/rest/v1/transferencias_pendientes`,{method:'POST',headers:{...H,Prefer:'return=representation'},body:JSON.stringify(row)});
+    if(!r.ok)throw new Error(await r.text());
+    m('msg-form','✔ Solicitud enviada. Queda pendiente de aprobación del director.','ok');
+    document.getElementById('origen').value='';onOrigen();
+  }catch(e){m('msg-form','No se pudo enviar: '+e.message,'err');}
+  btn.innerHTML='Enviar solicitud';
+}
+document.getElementById('pin').addEventListener('keydown',e=>{if(e.key==='Enter')login();});
+</script>
+</body>
+</html>
