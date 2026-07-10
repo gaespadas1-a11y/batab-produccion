@@ -298,6 +298,7 @@ async function cargarTransferencias(){
         +'<h3 style="font-size:16px;color:#0a3d62;margin:0;">'+s.articulo_origen_nombre+' &rarr; '+s.articulo_destino_nombre+' <span style="font-size:11px;background:#dbeafe;color:#1e40af;padding:2px 8px;border-radius:10px;font-weight:600;">'+cant+' pz</span></h3>'
         +'<div style="font-size:13px;color:#6b7280;margin-top:4px;">Lote '+s.lote+' &middot; '+s.ubicacion_nombre+'</div>'
         +'<div style="font-size:12px;color:#9ca3af;margin-top:2px;">Solicit&oacute; '+s.solicitante+' &middot; '+fecha+'</div>'
+        +(s.motivo?'<div style="font-size:13px;color:#0a3d62;margin-top:5px;font-weight:600;">Motivo: '+s.motivo+(s.motivo_detalle?' &mdash; '+s.motivo_detalle:'')+'</div>':'')
         +'<div style="margin-top:13px;display:flex;gap:8px;">'
         +'<button style="padding:10px 18px;border:none;border-radius:8px;font-weight:600;cursor:pointer;font-size:14px;background:#10b981;color:#fff;" onclick="aprobarTransf('+s.id+',\''+lbl+'\',this)">APROBAR</button>'
         +'<button style="padding:10px 16px;border:none;border-radius:8px;font-weight:600;cursor:pointer;font-size:14px;background:#fee2e2;color:#991b1b;" onclick="rechazarTransf('+s.id+',\''+lbl+'\',this)">Rechazar</button>'
