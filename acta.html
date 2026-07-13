@@ -128,11 +128,12 @@ const KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZi
 
 const qs = new URLSearchParams(location.search);
 const LOTE = (qs.get("lote")||"").trim();
+const ID   = (qs.get("id")||"").replace(/[^0-9]/g,"");   // CR-1417 id (unico). El lote NO lo es.
 const T = (qs.get("t")||"").trim();                 // token de cliente (enlace)
 const MODO = (T || (qs.get("modo")||"").toLowerCase()==="cliente") ? "cliente" : "interno";
 if(MODO==="cliente") document.body.classList.add("cliente");
 
-const ACTA_VER = "2026-07-07-diag1";
+const ACTA_VER = "2026-07-13-idfix";
 (function beacon(){
   try{
     const standalone = (window.navigator.standalone===true) || (window.matchMedia && matchMedia("(display-mode: standalone)").matches);
@@ -162,6 +163,7 @@ async function load(){
   if(!LOTE){ noLote(); return; }
   document.getElementById("app").innerHTML=`<div class="state"><div class="spin"></div>Consultando NetSuite… (puede tardar ~15 s)</div>`;
   let u=`${FN}?action=acta&lote=${encodeURIComponent(LOTE)}`;
+  if(ID){ u += `&id=${encodeURIComponent(ID)}`; }
   if(T){ u += `&t=${encodeURIComponent(T)}`; }
   else { const stk=sesTok(); if(stk) u += `&stoken=${encodeURIComponent(stk)}`; }
   const j = await jget(u);
@@ -183,6 +185,13 @@ function noLote(){
 function render(j){
   const L = j.lote, gates = j.gates||[];
   const etapaCls = L.etapa||"";
+  let aviso = "";
+  if(j.ambiguo && Array.isArray(j.alternativas) && j.alternativas.length>1){
+    const ops = j.alternativas.map(a=>`<a href="acta.html?lote=${encodeURIComponent(L.lote)}&id=${encodeURIComponent(a.id)}" style="color:#22c55e;text-decoration:underline">${esc(a.articulo||"")} · ${esc(a.folio||"")}</a>`).join(" &nbsp;|&nbsp; ");
+    aviso = `<div style="background:#3a2a12;border:1px solid #7c5a1e;border-radius:9px;padding:10px 12px;margin:10px 0;font-size:13px;color:#f5d68a">
+      ⚠️ El lote <b>${esc(L.lote)}</b> corresponde a <b>${j.alternativas.length} artículos distintos</b> del mismo día/turno/línea. Se está mostrando <b>${esc(L.articulo||"")}</b> (folio ${esc(L.folio||"")}).<br>Ver el otro: ${ops}
+    </div>`;
+  }
   let html = `<header>
     <div class="brand"><span class="mk">B</span> BATAB · ${MODO==="cliente"?"Certificado de calidad":"Acta de ensaye"}</div>
     <div class="lote">${esc(L.lote)} <span class="etapa ${etapaCls}">${esc(L.etapa_label||"")}</span></div>
@@ -194,7 +203,7 @@ function render(j){
       <span class="chip">Fecha <b>${esc(L.fecha||"—")}</b></span>
       <span class="chip only-int">Folio <b>${esc(L.folio||"—")}</b></span>
       <span class="chip only-int">Lote CR1417 <b>#${esc(L.id)}</b></span>
-    </div></header>`;
+    </div></header>` + aviso;
 
   if(!gates.length){
     html += `<div class="state">Este lote todavía no tiene ensayes de calidad capturados.</div>`;
@@ -271,7 +280,7 @@ function setupShare(L){
   async function getUrl(){
     if(signed) return signed;
     const stk=sesTok();
-    const j=await jget(`${FN}?action=share&lote=${encodeURIComponent(L.lote)}&stoken=${encodeURIComponent(stk)}`);
+    const j=await jget(`${FN}?action=share&lote=${encodeURIComponent(L.lote)}&id=${encodeURIComponent(L.id)}&stoken=${encodeURIComponent(stk)}`);
     if(j&&j.ok&&j.url){ signed=j.url; }
     return signed;
   }
