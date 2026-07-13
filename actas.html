@@ -234,12 +234,13 @@ function match(l){
   return true;
 }
 
-async function compartir(lote){
+async function compartir(id){
   const s=sesionActiva(); if(!s){ mostrarLogin(); return; }
-  const l=(DATA||[]).find(x=>x.lote===lote)||{};
+  const l=(DATA||[]).find(x=>String(x.id)===String(id))||{};
+  const lote=l.lote||"";
   let w=null; try{ w=window.open("","_blank"); }catch(_){}
   try{
-    const j=await jget(`${FN}?action=share&lote=${encodeURIComponent(lote)}&stoken=${encodeURIComponent(s.token||"")}`);
+    const j=await jget(`${FN}?action=share&lote=${encodeURIComponent(lote)}&id=${encodeURIComponent(id)}&stoken=${encodeURIComponent(s.token||"")}`);
     if(!j.ok||!j.url){ if(w){try{w.close()}catch(_){}} if(j&&j.auth){ cerrarSesion(); return; } alert("No se pudo generar el enlace. Reintenta."); return; }
     const msg=`BATAB · Certificado de calidad\nLote ${lote} — ${l.articulo||""}\nConsulta el acta con fotos aquí:\n${j.url}`;
     const wa=`https://wa.me/?text=${encodeURIComponent(msg)}`;
@@ -275,8 +276,8 @@ function card(l){
     </div>
     ${progress(l)}
     <div class="actions">
-      <a class="btn ${acta?"":"off"}" href="${acta?`${ACTA_URL}?lote=${encodeURIComponent(l.lote)}`:"#"}">${acta?"Ver acta":"Sin ensaye"}</a>
-      <a class="btn wa ${acta?"":"off"}" ${acta?`href="#" onclick="compartir('${esc(l.lote)}');return false;"`:""}>Compartir</a>
+      <a class="btn ${acta?"":"off"}" href="${acta?`${ACTA_URL}?lote=${encodeURIComponent(l.lote)}&id=${encodeURIComponent(l.id)}`:"#"}">${acta?"Ver acta":"Sin ensaye"}</a>
+      <a class="btn wa ${acta?"":"off"}" ${acta?`href="#" onclick="compartir('${esc(l.id)}');return false;"`:""}>Compartir</a>
     </div>
   </div>`;
 }
