@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<!-- ====== CANDADO DE VERSION BATAB (auto-actualizacion) ====== -->
+<!-- Sube APP_VERSION en CADA deploy, igual que el valor "v" de version.json -->
+<script>
+(function () {
+  var APP_VERSION = '2026-06-09-paros';
+  try {
+    fetch('version.json?t=' + Date.now(), { cache: 'no-store' })
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        if (!d || !d.v || d.v === APP_VERSION) return;
+        if (sessionStorage.getItem('batab_vr_try') === d.v) return;
+        sessionStorage.setItem('batab_vr_try', d.v);
+        location.replace(location.pathname + '?v=' + encodeURIComponent(d.v));
+      })
+      .catch(function () {});
+  } catch (e) {}
+})();
+</script>
+<!-- ====== FIN CANDADO DE VERSION BATAB ====== -->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BATAB Director - Aprobacion Final v3.8.4</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f6f8; color: #1a1a1a; padding: 16px; max-width: 980px; margin: 0 auto; }
+  .deploy-banner { background: #d1fae5; border: 2px solid #10b981; color: #065f46; padding: 10px 14px; border-radius: 8px; margin-bottom: 12px; font-size: 13px; font-weight: 600; text-align: center; }
+  header { background: #0a3d62; color: white; padding: 20px 24px; border-radius: 12px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+  header h1 { font-size: 22px; font-weight: 700; }
+  header .badge { background: rgba(255,255,255,0.2); padding: 6px 12px; border-radius: 20px; font-size: 13px; }
+  .toolbar { display: flex; gap: 8px; margin-bottom: 16px; align-items: center; flex-wrap: wrap; }
+  .toolbar button { padding: 10px 16px; border: none; border-radius: 8px; background: white; cursor: pointer; font-weight: 600; font-size: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+  .toolbar button.active { background: #0a3d62; color: white; }
+  .lotes-grid { display: grid; gap: 14px; }
+  .lote-card { background: white; border-radius: 12px; padding: 18px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); border-left: 4px solid #ccc; }
+  .lote-card.listo { border-left-color: #10b981; }
+  .lote-card.falta-build { border-left-color: #f59e0b; }
+  .lote-card .row { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+  .lote-card h3 { font-size: 17px; color: #0a3d62; margin-bottom: 4px; }
+  .lote-card .lote-num { font-family: 'Courier New', monospace; background: #f1f5f9; padding: 2px 8px; border-radius: 4px; font-size: 13px; color: #475569; }
+  .lote-card .meta { font-size: 13px; color: #6b7280; margin-top: 8px; }
+  .lote-card .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px; margin-top: 12px; padding-top: 12px; border-top: 1px solid #e5e7eb; }
+  .stat { background: #f9fafb; padding: 8px 10px; border-radius: 6px; }
+  .stat .lbl { font-size: 11px; color: #6b7280; text-transform: uppercase; font-weight: 600; }
+  .stat .val { font-size: 18px; font-weight: 700; margin-top: 2px; }
+  .stat .val.aprob { color: #10b981; }
+  .stat .val.rech { color: #ef4444; }
+  .stat .val.desp { color: #f59e0b; }
+  .actions { margin-top: 14px; display: flex; gap: 8px; flex-wrap: wrap; }
+  .actions button { padding: 10px 18px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 14px; }
+  .btn-primary { background: #10b981; color: white; }
+  .btn-primary:disabled { background: #d1d5db; cursor: not-allowed; }
+  .btn-secondary { background: #f3f4f6; color: #374151; }
+  .btn-warning { background: #f59e0b; color: white; }
+  .empty { text-align: center; padding: 60px 20px; color: #6b7280; }
+  .empty .icon { font-size: 48px; margin-bottom: 12px; }
+  .loading { text-align: center; padding: 40px; color: #6b7280; }
+  .spinner { display: inline-block; width: 32px; height: 32px; border: 3px solid #e5e7eb; border-top-color: #0a3d62; border-radius: 50%; animation: spin 1s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 100; padding: 20px; }
+  .modal-overlay.show { display: flex; }
+  .modal { background: white; border-radius: 12px; padding: 24px; max-width: 540px; width: 100%; max-height: 85vh; overflow-y: auto; }
+  .modal h2 { color: #0a3d62; margin-bottom: 16px; font-size: 18px; }
+  .modal .summary-line { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f3f4f6; font-size: 13px; gap: 8px; align-items: baseline; }
+  .modal .summary-line:last-child { border-bottom: none; }
+  .modal .summary-line .equiv-m3 { font-size: 11px; color: #9ca3af; font-weight: 400; margin-left: 6px; }
+  .modal .actions { margin-top: 20px; }
+  .alert { padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; font-size: 14px; }
+  .alert-info { background: #dbeafe; color: #1e40af; }
+  .alert-success { background: #d1fae5; color: #065f46; }
+  .alert-error { background: #fee2e2; color: #991b1b; }
+  .alert-warning { background: #fef3c7; color: #92400e; }
+  .result-detail { font-family: 'Courier New', monospace; font-size: 11px; background: #f9fafb; padding: 12px; border-radius: 6px; margin-top: 8px; max-height: 200px; overflow-y: auto; white-space: pre-wrap; word-break: break-all; }
+  .version-tag { text-align: center; font-size: 11px; color: #9ca3af; margin-top: 20px; padding: 8px; }
+  .kg-real { background: #10b981; color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; }
+</style>
+</head>
+<body>
+<div class="deploy-banner">APP ACTUALIZADA v3.8.4 - ajustes de humedad en KG - backend v1.4.0 (auto-resuelve item y lote)</div>
+<header>
+  <div><h1>BATAB Director</h1><div style="font-size: 13px; opacity: 0.8; margin-top: 4px;">Aprobacion final de lotes productivos</div></div>
+  <span class="badge" id="badge-count">Cargando...</span>
+</header>
+<div class="toolbar">
+  <button id="btn-refresh">Refrescar</button>
+  <button class="active" data-filter="all">Todos</button>
+  <button data-filter="listo">Listos</button>
+  <button data-filter="falta-build">Falta Build</button>
+</div>
+<div id="contenido"><div class="loading"><div class="spinner"></div><div style="margin-top: 12px;">Cargando lotes pendientes...</div></div></div>
+<div style="margin-top:26px;display:flex;align-items:center;gap:10px;">
+  <h2 style="font-size:14px;text-transform:uppercase;letter-spacing:.06em;color:#1667b0;margin:0;font-weight:700;">Transferencias por aprobar</h2>
+  <div style="flex:1;height:1px;background:#e5e7eb;"></div>
+</div>
+<div id="transf-pend" style="margin-top:14px;"><div class="loading"><div class="spinner"></div><div style="margin-top:12px;">Cargando transferencias...</div></div></div>
+<div style="margin-top:26px;display:flex;align-items:center;gap:10px;">
+  <h2 style="font-size:14px;text-transform:uppercase;letter-spacing:.06em;color:#0a3d62;margin:0;font-weight:700;">Aprobación de materias primas</h2>
+  <div style="flex:1;height:1px;background:#e5e7eb;"></div>
+</div>
+<div id="ocs-mp" style="margin-top:14px;"><div class="loading"><div class="spinner"></div><div style="margin-top:12px;">Cargando órdenes...</div></div></div>
+<div style="margin-top:26px;display:flex;align-items:center;gap:10px;">
+  <h2 style="font-size:14px;text-transform:uppercase;letter-spacing:.06em;color:#6b7280;margin:0;font-weight:700;">Otras órdenes de compra</h2>
+  <div style="flex:1;height:1px;background:#e5e7eb;"></div>
+</div>
+<div id="ocs-otras" style="margin-top:14px;"></div>
+<div class="version-tag">v3.8.4 - GitHub Pages - backend director-cerrar-lote v1.4.0</div>
+<div class="modal-overlay" id="modal-confirm"><div class="modal"><h2>Confirmar cierre del lote</h2><div id="modal-body"></div></div></div>
+<div class="modal-overlay" id="modal-resultado"><div class="modal"><h2 id="resultado-title">Resultado</h2><div id="resultado-body"></div><div class="actions"><button class="btn-secondary" onclick="document.getElementById('modal-resultado').classList.remove('show'); cargarLotes();">Cerrar</button></div></div></div>
+<script>
+const SB='https://szrcmvlgxxpmvgrfmxak.supabase.co';
+const NS_PROXY=SB+'/functions/v1/netsuite-proxy';
+const CERRAR=SB+'/functions/v1/director-cerrar-lote';
+const TRANSF_EJECUTAR=SB+'/functions/v1/transferencias-ejecutar';
+const TRANSF_ANON='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN6cmNtdmxneHhwbXZncmZteGFrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1MzYxMTAsImV4cCI6MjA5MjExMjExMH0.ztJ5YzeFe9Ta-6ORZBnGYNpg7gN9fwAWZMnD33N80PM';
+const TRANSF_H={'apikey':TRANSF_ANON,'Authorization':'Bearer '+TRANSF_ANON,'Content-Type':'application/json'};
+const DENS_POLVO=1650; const DENS_SELLO=1550;
+let lotesData=[]; let currentFilter='all';
+async function suiteql(sql){
+  const res=await fetch(NS_PROXY,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({method:'POST',endpoint:'/services/rest/query/v1/suiteql?limit=100',payload:{q:sql},extraHeaders:{'Prefer':'transient'}})});
+  return await res.json();
+}
+async function cargarLotes(){
+  document.getElementById('contenido').innerHTML='<div class="loading"><div class="spinner"></div><div style="margin-top:12px;">Consultando NetSuite...</div></div>';
+  const sql="SELECT cr.id, cr.name AS folio, cr.custrecord_batab_status AS status, cr.custrecord_batab_lote AS lote, cr.custrecord_batab_cantidad_aprobada AS aprob, cr.custrecord_batab_cantidad_rechazo AS rech, cr.custrecord_batab_cantidad_desperdicio AS desp, cr.custrecord_batab_workorder AS wo, cr.custrecord_batab_build_id AS build_id, cr.custrecord_batab_humedad_pct AS humedad, cr.custrecord_batab_articulo AS articulo FROM customrecord_batab_produccion cr WHERE cr.custrecord_batab_status = '12' ORDER BY cr.lastmodified DESC";
+  try{const r=await suiteql(sql);if(!r.success||!r.data||!r.data.items){document.getElementById('contenido').innerHTML='<div class="empty"><div class="icon">!</div><div>Error consultando NetSuite</div></div>';return;}lotesData=r.data.items;renderLotes();}catch(e){document.getElementById('contenido').innerHTML='<div class="empty"><div class="icon">X</div><div>Error de conexion</div></div>';}
+}
+function renderLotes(){
+  let f=lotesData;
+  if(currentFilter==='listo')f=lotesData.filter(l=>l.build_id);
+  if(currentFilter==='falta-build')f=lotesData.filter(l=>!l.build_id);
+  document.getElementById('badge-count').textContent=f.length+' lote'+(f.length===1?'':'s');
+  if(f.length===0){document.getElementById('contenido').innerHTML='<div class="empty"><div class="icon">OK</div><div>No hay lotes pendientes</div><div style="font-size:14px;margin-top:8px;color:#9ca3af;">Todos cerrados o esperando Fase 2.</div></div>';return;}
+  let h='<div class="lotes-grid">';
+  for(const l of f){
+    const tb=!!l.build_id;
+    const k=tb?'listo':'falta-build';
+    const st=tb?'Listo para cerrar':'Falta crear Build en NetSuite';
+    const totalPzs=(Number(l.aprob)||0)+(Number(l.rech)||0)+(Number(l.desp)||0);
+    h+='<div class="lote-card '+k+'"><div class="row"><div><h3>'+(l.folio||'Sin folio')+'</h3><div style="font-size:13px;color:#6b7280;margin-top:2px;">Lote <span class="lote-num">'+(l.lote||'?')+'</span></div><div class="meta">'+st+'</div></div><div style="text-align:right;font-size:12px;color:#6b7280;">';
+    if(l.wo)h+='WO #'+l.wo+'<br>';
+    if(l.build_id)h+='Build #'+l.build_id+'<br>';
+    if(l.humedad)h+='Humedad '+l.humedad+'%';
+    h+='</div></div><div class="stats"><div class="stat"><div class="lbl">Aprobadas</div><div class="val aprob">'+(Number(l.aprob)||0)+'</div></div><div class="stat"><div class="lbl">Rechazo</div><div class="val rech">'+(Number(l.rech)||0)+'</div></div><div class="stat"><div class="lbl">Desperdicio</div><div class="val desp">'+(Number(l.desp)||0)+'</div></div><div class="stat"><div class="lbl">Total</div><div class="val">'+totalPzs+'</div></div></div><div class="actions">';
+    if(!tb&&l.wo){h+='<button class="btn-warning" onclick="window.open(\'https://7905968.app.netsuite.com/app/accounting/transactions/workord.nl?id='+l.wo+'\',\'_blank\')">Abrir WO</button><button class="btn-secondary" onclick="cargarLotes()">Refrescar</button>';}else if(tb){h+='<button class="btn-primary" onclick="confirmarCierre('+l.id+')">APROBAR Y CERRAR LOTE</button><button class="btn-secondary" onclick="window.open(\'https://7905968.app.netsuite.com/app/accounting/transactions/assyitem.nl?id='+l.build_id+'\',\'_blank\')">Ver Build</button>';}
+    h+='</div></div>';
+  }
+  h+='</div>';
+  document.getElementById('contenido').innerHTML=h;
+}
+async function confirmarCierre(crId){
+  const l=lotesData.find(x=>x.id==crId); if(!l)return;
+  document.getElementById('modal-body').innerHTML='<div class="loading"><div class="spinner"></div><div style="margin-top:12px;">Calculando ajustes...</div></div>';
+  document.getElementById('modal-confirm').classList.add('show');
+  // v3.8.4: solo consultamos consumos del Build para calcular humedad en kg. NO consultamos inventorynumber (backend lo resuelve).
+  const sB="SELECT tl.item, i.itemid AS item_code, tl.quantity FROM transactionline tl LEFT JOIN item i ON i.id = tl.item WHERE tl.transaction = "+l.build_id+" AND i.itemid IN ('MATERIAS PRIMAS - AGREGADOS - POLVO 3/16 AFI', 'MATERIAS PRIMAS - AGREGADOS - SELLO3/8')";
+  const rB=await suiteql(sB);
+  if(!rB.success){document.getElementById('modal-body').innerHTML='<div class="alert alert-error">Error obteniendo consumos del Build.</div><div class="actions"><button class="btn-secondary" onclick="document.getElementById(\'modal-confirm\').classList.remove(\'show\')">Cerrar</button></div>';return;}
+  let pM=0, sM=0;
+  const items=(rB.data&&rB.data.items)||[];
+  for(const it of items){
+    if(it.item_code==='MATERIAS PRIMAS - AGREGADOS - POLVO 3/16 AFI') pM=Math.abs(parseFloat(it.quantity));
+    if(it.item_code==='MATERIAS PRIMAS - AGREGADOS - SELLO3/8') sM=Math.abs(parseFloat(it.quantity));
+  }
+  const hp=parseFloat(l.humedad)||0;
+  const apM3=pM*hp/100, asM3=sM*hp/100;
+  const apKg=apM3*DENS_POLVO, asKg=asM3*DENS_SELLO;
+  const fmtKg=(n)=>n.toLocaleString('es-MX',{maximumFractionDigits:2});
+  const fmtM3=(n)=>n.toFixed(6);
+  const totalPzs=(Number(l.aprob)||0)+(Number(l.rech)||0)+(Number(l.desp)||0);
+  let h='<div class="alert alert-info">Se crearan los siguientes documentos en NetSuite:</div>';
+  h+='<div class="summary-line"><span><b>Lote:</b></span><span>'+l.lote+'</span></div>';
+  h+='<div class="summary-line"><span><b>Folio:</b></span><span>'+l.folio+'</span></div>';
+  h+='<div class="summary-line"><span><b>Articulo:</b></span><span style="text-align:right;font-size:12px">'+(l.articulo||'?')+'</span></div>';
+  h+='<div class="summary-line"><span><b>Build:</b></span><span>#'+l.build_id+'</span></div>';
+  h+='<div class="summary-line"><span><b>Aprobadas:</b></span><span style="color:#10b981;font-weight:600">'+(Number(l.aprob)||0)+' pzs</span></div>';
+  if(Number(l.rech)>0)h+='<div class="summary-line"><span>Adj rechazo:</span><span>-'+(Number(l.rech)||0)+' pzs (1374)</span></div>';
+  if(Number(l.desp)>0)h+='<div class="summary-line"><span>Adj desperdicio:</span><span>-'+(Number(l.desp)||0)+' pzs (1474)</span></div>';
+  h+='<div class="summary-line"><span><b>Total:</b></span><span>'+totalPzs+' pzs</span></div>';
+  if(hp>0){
+    h+='<div class="summary-line"><span>Humedad:</span><span>'+hp+'%</span></div>';
+    if(pM>0)h+='<div class="summary-line"><span>Adj humedad polvo:</span><span><b style="color:#10b981">+'+fmtKg(apKg)+' kg</b> <span class="kg-real">KG</span><span class="equiv-m3">('+fmtM3(apM3)+' m&sup3;)</span></span></div>';
+    if(sM>0)h+='<div class="summary-line"><span>Adj humedad sello:</span><span><b style="color:#10b981">+'+fmtKg(asKg)+' kg</b> <span class="kg-real">KG</span><span class="equiv-m3">('+fmtM3(asM3)+' m&sup3;)</span></span></div>';
+  }
+  if(Number(l.aprob)>0)h+='<div class="summary-line"><span style="color:#0a3d62;font-weight:600">Transfer Order:</span><span style="color:#0a3d62;font-weight:600">'+(Number(l.aprob)||0)+' pzs MP &rarr; Teapa</span></div>';
+  h+='<div class="summary-line"><span><b>CR 1417:</b></span><span>status -> 7</span></div>';
+  // v3.8.4: payload SIMPLIFICADO - NO mandamos item_assembly_id ni lote_id (backend v1.4.0 los resuelve)
+  h+='<div class="actions" style="margin-top:20px;"><button class="btn-primary" id="btn-ejecutar" onclick="ejecutarCierre('+crId+','+l.build_id+',\''+l.lote+'\','+(Number(l.aprob)||0)+','+(Number(l.rech)||0)+','+(Number(l.desp)||0)+','+hp+','+pM+','+sM+')">CONFIRMAR Y EJECUTAR</button><button class="btn-secondary" onclick="document.getElementById(\'modal-confirm\').classList.remove(\'show\')">Cancelar</button></div>';
+  document.getElementById('modal-body').innerHTML=h;
+}
+async function ejecutarCierre(c,b,n,a,r,d,h,p,s){
+  document.getElementById('btn-ejecutar').disabled=true;
+  document.getElementById('btn-ejecutar').textContent='Ejecutando...';
+  try{
+    // v3.8.4: payload simplificado - sin item_assembly_id ni lote_id
+    const res=await fetch(CERRAR,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({cr_id:c,build_id:b,lote_nombre:n,cantidad_aprobada:a,cantidad_rechazo:r,cantidad_desperdicio:d,humedad_pct:h,polvo_m3_consumido:p,sello_m3_consumido:s,autorizado_por:'Director (v3.8.4 GitHub Pages)'})});
+    const j=await res.json();
+    document.getElementById('modal-confirm').classList.remove('show');
+    if(j.success){
+      document.getElementById('resultado-title').textContent='Lote cerrado exitosamente';
+      let html='<div class="alert alert-success">El lote <b>'+n+'</b> quedo cerrado en NetSuite. CR 1417 status = 7.</div>';
+      html+='<h3 style="margin-bottom:8px;font-size:14px;color:#374151;">Documentos creados:</h3>';
+      html+='<div class="summary-line"><span>Item resuelto:</span><span style="font-size:12px">'+(j.item_assembly_name||'?')+' (id '+(j.item_assembly_id_resuelto||'?')+')</span></div>';
+      html+='<div class="summary-line"><span>Lote internal ID:</span><span style="font-size:12px">'+(j.lote_id_resuelto||'?')+'</span></div>';
+      const adj=j.adjustments_created||{};
+      if(adj.rechazo)html+='<div class="summary-line"><span>Adj Rechazo:</span><span>#'+adj.rechazo.id+'</span></div>';
+      if(adj.desperdicio)html+='<div class="summary-line"><span>Adj Desperdicio:</span><span>#'+adj.desperdicio.id+'</span></div>';
+      if(adj.humedad_polvo)html+='<div class="summary-line"><span>Adj Humedad Polvo:</span><span>#'+adj.humedad_polvo.id+' (+'+(adj.humedad_polvo.qty_kg||0).toLocaleString('es-MX')+' kg)</span></div>';
+      if(adj.humedad_sello)html+='<div class="summary-line"><span>Adj Humedad Sello:</span><span>#'+adj.humedad_sello.id+' (+'+(adj.humedad_sello.qty_kg||0).toLocaleString('es-MX')+' kg)</span></div>';
+      if(j.transfer_created)html+='<div class="summary-line"><span><b>Transfer Order:</b></span><span style="color:#0a3d62;font-weight:600">#'+j.transfer_created.id+' ('+j.transfer_created.qty+' pzs)</span></div>';
+      if(j.warnings)html+='<div class="alert alert-warning" style="margin-top:12px;"><b>Avisos:</b><div class="result-detail">'+JSON.stringify(j.warnings,null,2)+'</div></div>';
+      document.getElementById('resultado-body').innerHTML=html;
+    }else{
+      document.getElementById('resultado-title').textContent='Error al cerrar lote';
+      let html='<div class="alert alert-error">Error en paso: <b>'+(j.error_at||'desconocido')+'</b></div>';
+      html+='<div class="result-detail">'+(j.error_detail||j.error||JSON.stringify(j))+'</div>';
+      document.getElementById('resultado-body').innerHTML=html;
+    }
+    document.getElementById('modal-resultado').classList.add('show');
+  }catch(e){alert('Error: '+e.message);document.getElementById('btn-ejecutar').disabled=false;document.getElementById('btn-ejecutar').textContent='CONFIRMAR Y EJECUTAR';}
+}
+const APROBAR_OC=SB+'/functions/v1/aprobar-oc';
+async function cargarOCs(){
+  const sql="SELECT t.id, t.tranid, BUILTIN.DF(t.entity) AS proveedor, ABS(t.total) AS total, t.memo, TO_CHAR(t.trandate,'DD/MM/YYYY') AS fecha, (SELECT NVL(SUM(tl.quantity),0) FROM transactionline tl WHERE tl.transaction=t.id AND tl.item IN (1230,1232)) AS cem_kg, (SELECT COUNT(*) FROM transactionline tl2 JOIN item i2 ON i2.id=tl2.item WHERE tl2.transaction=t.id AND UPPER(i2.fullname) LIKE 'MATERIAS PRIMA%') AS mp FROM transaction t WHERE t.recordtype='purchaseorder' AND t.approvalstatus='1' ORDER BY t.trandate DESC, t.id DESC";
+  try{
+    const r=await suiteql(sql);
+    if(!r.success||!r.data){document.getElementById('ocs-mp').innerHTML='<div class="empty"><div>Error consultando ordenes</div></div>';return;}
+    const items=r.data.items||[];
+    renderSeg(items.filter(o=>Number(o.mp||0)>0),'ocs-mp','No hay materias primas pendientes');
+    renderSeg(items.filter(o=>!(Number(o.mp||0)>0)),'ocs-otras','No hay otras ordenes pendientes');
+  }catch(e){document.getElementById('ocs-mp').innerHTML='<div class="empty"><div>Error de conexion</div></div>';}
+}
+function renderSeg(items,containerId,vacio){
+  const box=document.getElementById(containerId);
+  if(!items.length){box.innerHTML='<div class="empty" style="padding:22px 20px;color:#9ca3af;"><div>'+vacio+'</div></div>';return;}
+  let h='';
+  for(const o of items){
+    const cem=Number(o.cem_kg||0)>0;
+    const ton=cem?(Math.round(Number(o.cem_kg)/1000*10)/10+' t'):'';
+    const total=Number(o.total||0).toLocaleString('es-MX',{minimumFractionDigits:2});
+    h+='<div style="background:#fff;border-radius:12px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,.06);border-left:4px solid '+(cem?'#0a3d62':'#9ca3af')+';margin-bottom:12px;">'
+      +'<h3 style="font-size:16px;color:#0a3d62;margin:0;">'+o.tranid+(cem?' <span style="font-size:11px;background:#dbeafe;color:#1e40af;padding:2px 8px;border-radius:10px;font-weight:600;">CEMENTO '+ton+'</span>':'')+'</h3>'
+      +'<div style="font-size:13px;color:#6b7280;margin-top:4px;">'+(o.proveedor||'')+'</div>'
+      +'<div style="font-size:12px;color:#9ca3af;margin-top:2px;">'+(o.fecha||'')+' &middot; $'+total+' MXN</div>'
+      +(o.memo?'<div style="font-size:11px;color:#9ca3af;margin-top:5px;">'+o.memo+'</div>':'')
+      +'<div style="margin-top:13px;display:flex;gap:8px;">'
+      +'<button style="padding:10px 18px;border:none;border-radius:8px;font-weight:600;cursor:pointer;font-size:14px;background:#10b981;color:#fff;" onclick="aprobarOC('+o.id+',\''+o.tranid+'\','+(cem?'true':'false')+',this)">APROBAR</button>'
+      +'<button style="padding:10px 16px;border:none;border-radius:8px;font-weight:600;cursor:pointer;font-size:14px;background:#fee2e2;color:#991b1b;" onclick="rechazarOC('+o.id+',\''+o.tranid+'\',this)">Rechazar</button>'
+      +'<button style="padding:10px 16px;border:none;border-radius:8px;font-weight:600;cursor:pointer;font-size:14px;background:#f3f4f6;color:#374151;" onclick="window.open(\'https://7905968.app.netsuite.com/app/accounting/transactions/purchord.nl?id='+o.id+'\',\'_blank\')">Ver OC</button>'
+      +'</div></div>';
+  }
+  box.innerHTML=h;
+}
+async function aprobarOC(id,tranid,cem,btn){
+  if(!confirm('Aprobar la orden '+tranid+'?'+(cem?' Se notificara por correo a los gerentes.':''))) return;
+  if(btn){btn.disabled=true;btn.textContent='Aprobando...';}
+  try{
+    const res=await fetch(APROBAR_OC,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({poId:String(id)})});
+    const j=await res.json();
+    const aprobOk=j.ok&&j.aprobacion&&j.aprobacion.ok!==false;
+    if(aprobOk){
+      let msg='Orden '+tranid+' aprobada.';
+      if(j.correo&&j.correo.enviado) msg+=' Correo enviado a '+((j.correo.destinatarios||[]).length)+' destinatarios.';
+      alert(msg);
+    }else{
+      alert('No se pudo aprobar: '+JSON.stringify((j.aprobacion&&j.aprobacion.error)||j.error||j));
+    }
+  }catch(e){alert('Error: '+e.message);}
+  cargarOCs();
+}
+async function rechazarOC(id,tranid,btn){
+  if(!confirm('Rechazar la orden '+tranid+'? Quedara anulada y saldra de la lista.')) return;
+  if(btn){btn.disabled=true;btn.textContent='Rechazando...';}
+  try{
+    const res=await fetch(APROBAR_OC,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({poId:String(id),accion:'rechazar'})});
+    const j=await res.json();
+    if(j.ok&&j.rechazo&&j.rechazo.ok!==false){alert('Orden '+tranid+' rechazada.');}
+    else{alert('No se pudo rechazar: '+JSON.stringify((j.rechazo&&j.rechazo.error)||j.error||j));}
+  }catch(e){alert('Error: '+e.message);}
+  cargarOCs();
+}
+document.getElementById('btn-refresh').onclick=()=>{cargarLotes();cargarOCs();cargarTransferencias();};
+document.querySelectorAll('[data-filter]').forEach(b=>{b.onclick=()=>{document.querySelectorAll('[data-filter]').forEach(x=>x.classList.remove('active'));b.classList.add('active');currentFilter=b.dataset.filter;renderLotes();};});
+
+async function cargarTransferencias(){
+  const cont=document.getElementById('transf-pend');
+  try{
+    const r=await fetch(SB+'/rest/v1/transferencias_pendientes?estatus=eq.pendiente&select=*&order=created_at.asc',{headers:TRANSF_H});
+    const rows=await r.json();
+    if(!Array.isArray(rows)||!rows.length){cont.innerHTML='<div class="empty" style="padding:22px 20px;color:#9ca3af;"><div>No hay transferencias pendientes</div></div>';return;}
+    let h='';
+    for(const s of rows){
+      const cant=Number(s.cantidad||0).toLocaleString('es-MX');
+      const fecha=new Date(s.created_at).toLocaleString('es-MX');
+      const lbl=(s.articulo_origen_nombre+' a '+s.articulo_destino_nombre).replace(/'/g,'');
+      h+='<div style="background:#fff;border-radius:12px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,.06);border-left:4px solid #1667b0;margin-bottom:12px;">'
+        +'<h3 style="font-size:16px;color:#0a3d62;margin:0;">'+s.articulo_origen_nombre+' &rarr; '+s.articulo_destino_nombre+' <span style="font-size:11px;background:#dbeafe;color:#1e40af;padding:2px 8px;border-radius:10px;font-weight:600;">'+cant+' pz</span></h3>'
+        +'<div style="font-size:13px;color:#6b7280;margin-top:4px;">Lote '+s.lote+' &middot; '+s.ubicacion_nombre+'</div>'
+        +'<div style="font-size:12px;color:#9ca3af;margin-top:2px;">Solicit&oacute; '+s.solicitante+' &middot; '+fecha+'</div>'
+        +(s.motivo?'<div style="font-size:13px;color:#0a3d62;margin-top:5px;font-weight:600;">Motivo: '+s.motivo+(s.motivo_detalle?' &mdash; '+s.motivo_detalle:'')+'</div>':'')
+        +'<div style="margin-top:13px;display:flex;gap:8px;">'
+        +'<button style="padding:10px 18px;border:none;border-radius:8px;font-weight:600;cursor:pointer;font-size:14px;background:#10b981;color:#fff;" onclick="aprobarTransf('+s.id+',\''+lbl+'\',this)">APROBAR</button>'
+        +'<button style="padding:10px 16px;border:none;border-radius:8px;font-weight:600;cursor:pointer;font-size:14px;background:#fee2e2;color:#991b1b;" onclick="rechazarTransf('+s.id+',\''+lbl+'\',this)">Rechazar</button>'
+        +'</div></div>';
+    }
+    cont.innerHTML=h;
+  }catch(e){cont.innerHTML='<div class="empty" style="padding:22px 20px;color:#ef4444;"><div>Error de conexion</div></div>';}
+}
+async function aprobarTransf(id,lbl,btn){
+  if(!confirm('Aprobar la transferencia?\n'+lbl+'\nSe creara el ajuste en NetSuite.')) return;
+  if(btn){btn.disabled=true;btn.textContent='Aprobando...';}
+  try{
+    const res=await fetch(TRANSF_EJECUTAR,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({solicitud_id:id,accion:'aprobar'})});
+    const j=await res.json();
+    if(j.success){alert('Transferencia aprobada. Ajuste NetSuite #'+j.ns_ia_id+' ('+(j.departamento_id===6?'Comercializacion':'Produccion')+').');}
+    else{alert('No se pudo aprobar: '+(j.error||JSON.stringify(j)));}
+  }catch(e){alert('Error: '+e.message);}
+  cargarTransferencias();
+}
+async function rechazarTransf(id,lbl,btn){
+  if(!confirm('Rechazar la transferencia?\n'+lbl)) return;
+  if(btn){btn.disabled=true;btn.textContent='Rechazando...';}
+  try{
+    const res=await fetch(TRANSF_EJECUTAR,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({solicitud_id:id,accion:'rechazar'})});
+    const j=await res.json();
+    if(j.success){alert('Transferencia rechazada.');}else{alert('No se pudo rechazar: '+(j.error||''));}
+  }catch(e){alert('Error: '+e.message);}
+  cargarTransferencias();
+}
+
+cargarLotes(); cargarOCs(); cargarTransferencias();
+</script>
+</body>
+</html>
