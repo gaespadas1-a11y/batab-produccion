@@ -22,7 +22,7 @@
 <!-- ====== FIN CANDADO DE VERSION BATAB ====== -->
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BATAB Director - Aprobacion Final v3.8.4</title>
+<title>BATAB Director - Aprobacion Final v3.8.5</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f6f8; color: #1a1a1a; padding: 16px; max-width: 980px; margin: 0 auto; }
@@ -78,7 +78,7 @@
 </style>
 </head>
 <body>
-<div class="deploy-banner">APP ACTUALIZADA v3.8.4 - ajustes de humedad en KG - backend v1.4.0 (auto-resuelve item y lote)</div>
+<div class="deploy-banner">APP ACTUALIZADA v3.8.5 - aprobacion de OC de servicios restaurada (carril no-MP)</div>
 <header>
   <div><h1>BATAB Director</h1><div style="font-size: 13px; opacity: 0.8; margin-top: 4px;">Aprobacion final de lotes productivos</div></div>
   <span class="badge" id="badge-count">Cargando...</span>
@@ -105,7 +105,7 @@
   <div style="flex:1;height:1px;background:#e5e7eb;"></div>
 </div>
 <div id="ocs-otras" style="margin-top:14px;"></div>
-<div class="version-tag">v3.8.4 - GitHub Pages - backend director-cerrar-lote v1.4.0</div>
+<div class="version-tag">v3.8.5 - GitHub Pages - cerrar-lote v1.4.0 - aprobar-oc-general v1.0</div>
 <div class="modal-overlay" id="modal-confirm"><div class="modal"><h2>Confirmar cierre del lote</h2><div id="modal-body"></div></div></div>
 <div class="modal-overlay" id="modal-resultado"><div class="modal"><h2 id="resultado-title">Resultado</h2><div id="resultado-body"></div><div class="actions"><button class="btn-secondary" onclick="document.getElementById('modal-resultado').classList.remove('show'); cargarLotes();">Cerrar</button></div></div></div>
 <script>
@@ -221,6 +221,10 @@ async function ejecutarCierre(c,b,n,a,r,d,h,p,s){
   }catch(e){alert('Error: '+e.message);document.getElementById('btn-ejecutar').disabled=false;document.getElementById('btn-ejecutar').textContent='CONFIRMAR Y EJECUTAR';}
 }
 const APROBAR_OC=SB+'/functions/v1/aprobar-oc';
+// v3.8.5 (14-jul-2026): carril para OC que NO son materias primas. aprobar-oc quedo endurecido el 12-jul
+// (solo cemento CEMEX/HOLCIM con topes) y tumbaba las OC de servicios con "La OC no contiene cemento".
+const APROBAR_OC_GEN=SB+'/functions/v1/aprobar-oc-general';
+const epOC=mp=>mp?APROBAR_OC:APROBAR_OC_GEN;
 async function cargarOCs(){
   const sql="SELECT t.id, t.tranid, BUILTIN.DF(t.entity) AS proveedor, ABS(t.total) AS total, t.memo, TO_CHAR(t.trandate,'DD/MM/YYYY') AS fecha, (SELECT NVL(SUM(tl.quantity),0) FROM transactionline tl WHERE tl.transaction=t.id AND tl.item IN (1230,1232)) AS cem_kg, (SELECT COUNT(*) FROM transactionline tl2 JOIN item i2 ON i2.id=tl2.item WHERE tl2.transaction=t.id AND UPPER(i2.fullname) LIKE 'MATERIAS PRIMA%') AS mp FROM transaction t WHERE t.recordtype='purchaseorder' AND t.approvalstatus='1' ORDER BY t.trandate DESC, t.id DESC";
   try{
@@ -237,6 +241,7 @@ function renderSeg(items,containerId,vacio){
   let h='';
   for(const o of items){
     const cem=Number(o.cem_kg||0)>0;
+    const mp=Number(o.mp||0)>0;
     const ton=cem?(Math.round(Number(o.cem_kg)/1000*10)/10+' t'):'';
     const total=Number(o.total||0).toLocaleString('es-MX',{minimumFractionDigits:2});
     h+='<div style="background:#fff;border-radius:12px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,.06);border-left:4px solid '+(cem?'#0a3d62':'#9ca3af')+';margin-bottom:12px;">'
@@ -245,18 +250,18 @@ function renderSeg(items,containerId,vacio){
       +'<div style="font-size:12px;color:#9ca3af;margin-top:2px;">'+(o.fecha||'')+' &middot; $'+total+' MXN</div>'
       +(o.memo?'<div style="font-size:11px;color:#9ca3af;margin-top:5px;">'+o.memo+'</div>':'')
       +'<div style="margin-top:13px;display:flex;gap:8px;">'
-      +'<button style="padding:10px 18px;border:none;border-radius:8px;font-weight:600;cursor:pointer;font-size:14px;background:#10b981;color:#fff;" onclick="aprobarOC('+o.id+',\''+o.tranid+'\','+(cem?'true':'false')+',this)">APROBAR</button>'
-      +'<button style="padding:10px 16px;border:none;border-radius:8px;font-weight:600;cursor:pointer;font-size:14px;background:#fee2e2;color:#991b1b;" onclick="rechazarOC('+o.id+',\''+o.tranid+'\',this)">Rechazar</button>'
+      +'<button style="padding:10px 18px;border:none;border-radius:8px;font-weight:600;cursor:pointer;font-size:14px;background:#10b981;color:#fff;" onclick="aprobarOC('+o.id+',\''+o.tranid+'\','+(cem?'true':'false')+','+(mp?'true':'false')+',this)">APROBAR</button>'
+      +'<button style="padding:10px 16px;border:none;border-radius:8px;font-weight:600;cursor:pointer;font-size:14px;background:#fee2e2;color:#991b1b;" onclick="rechazarOC('+o.id+',\''+o.tranid+'\','+(mp?'true':'false')+',this)">Rechazar</button>'
       +'<button style="padding:10px 16px;border:none;border-radius:8px;font-weight:600;cursor:pointer;font-size:14px;background:#f3f4f6;color:#374151;" onclick="window.open(\'https://7905968.app.netsuite.com/app/accounting/transactions/purchord.nl?id='+o.id+'\',\'_blank\')">Ver OC</button>'
       +'</div></div>';
   }
   box.innerHTML=h;
 }
-async function aprobarOC(id,tranid,cem,btn){
+async function aprobarOC(id,tranid,cem,mp,btn){
   if(!confirm('Aprobar la orden '+tranid+'?'+(cem?' Se notificara por correo a los gerentes.':''))) return;
   if(btn){btn.disabled=true;btn.textContent='Aprobando...';}
   try{
-    const res=await fetch(APROBAR_OC,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({poId:String(id)})});
+    const res=await fetch(epOC(mp),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({poId:String(id)})});
     const j=await res.json();
     const aprobOk=j.ok&&j.aprobacion&&j.aprobacion.ok!==false;
     if(aprobOk){
@@ -269,11 +274,11 @@ async function aprobarOC(id,tranid,cem,btn){
   }catch(e){alert('Error: '+e.message);}
   cargarOCs();
 }
-async function rechazarOC(id,tranid,btn){
+async function rechazarOC(id,tranid,mp,btn){
   if(!confirm('Rechazar la orden '+tranid+'? Quedara anulada y saldra de la lista.')) return;
   if(btn){btn.disabled=true;btn.textContent='Rechazando...';}
   try{
-    const res=await fetch(APROBAR_OC,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({poId:String(id),accion:'rechazar'})});
+    const res=await fetch(epOC(mp),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({poId:String(id),accion:'rechazar'})});
     const j=await res.json();
     if(j.ok&&j.rechazo&&j.rechazo.ok!==false){alert('Orden '+tranid+' rechazada.');}
     else{alert('No se pudo rechazar: '+JSON.stringify((j.rechazo&&j.rechazo.error)||j.error||j));}
