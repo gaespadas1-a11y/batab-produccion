@@ -22,7 +22,7 @@
 <!-- ====== FIN CANDADO DE VERSION BATAB ====== -->
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BATAB Director - Aprobacion Final v3.8.5</title>
+<title>BATAB Director - Aprobacion Final v3.8.6</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f6f8; color: #1a1a1a; padding: 16px; max-width: 980px; margin: 0 auto; }
@@ -78,7 +78,7 @@
 </style>
 </head>
 <body>
-<div class="deploy-banner">APP ACTUALIZADA v3.8.5 - aprobacion de OC de servicios restaurada (carril no-MP)</div>
+<div class="deploy-banner">APP ACTUALIZADA v3.8.6 - se envia el folio al cerrar (asegura el ajuste de humedad)</div>
 <header>
   <div><h1>BATAB Director</h1><div style="font-size: 13px; opacity: 0.8; margin-top: 4px;">Aprobacion final de lotes productivos</div></div>
   <span class="badge" id="badge-count">Cargando...</span>
@@ -105,7 +105,7 @@
   <div style="flex:1;height:1px;background:#e5e7eb;"></div>
 </div>
 <div id="ocs-otras" style="margin-top:14px;"></div>
-<div class="version-tag">v3.8.5 - GitHub Pages - cerrar-lote v1.4.0 - aprobar-oc-general v1.0</div>
+<div class="version-tag">v3.8.6 - GitHub Pages - cerrar-lote v1.9.2 - aprobar-oc-general v1.0</div>
 <div class="modal-overlay" id="modal-confirm"><div class="modal"><h2>Confirmar cierre del lote</h2><div id="modal-body"></div></div></div>
 <div class="modal-overlay" id="modal-resultado"><div class="modal"><h2 id="resultado-title">Resultado</h2><div id="resultado-body"></div><div class="actions"><button class="btn-secondary" onclick="document.getElementById('modal-resultado').classList.remove('show'); cargarLotes();">Cerrar</button></div></div></div>
 <script>
@@ -186,15 +186,15 @@ async function confirmarCierre(crId){
   if(Number(l.aprob)>0)h+='<div class="summary-line"><span style="color:#0a3d62;font-weight:600">Transfer Order:</span><span style="color:#0a3d62;font-weight:600">'+(Number(l.aprob)||0)+' pzs MP &rarr; Teapa</span></div>';
   h+='<div class="summary-line"><span><b>CR 1417:</b></span><span>status -> 7</span></div>';
   // v3.8.4: payload SIMPLIFICADO - NO mandamos item_assembly_id ni lote_id (backend v1.4.0 los resuelve)
-  h+='<div class="actions" style="margin-top:20px;"><button class="btn-primary" id="btn-ejecutar" onclick="ejecutarCierre('+crId+','+l.build_id+',\''+l.lote+'\','+(Number(l.aprob)||0)+','+(Number(l.rech)||0)+','+(Number(l.desp)||0)+','+hp+','+pM+','+sM+')">CONFIRMAR Y EJECUTAR</button><button class="btn-secondary" onclick="document.getElementById(\'modal-confirm\').classList.remove(\'show\')">Cancelar</button></div>';
+  h+='<div class="actions" style="margin-top:20px;"><button class="btn-primary" id="btn-ejecutar" onclick="ejecutarCierre('+crId+','+l.build_id+',\''+l.lote+'\','+(Number(l.aprob)||0)+','+(Number(l.rech)||0)+','+(Number(l.desp)||0)+','+hp+','+pM+','+sM+',\''+(l.folio||'')+'\')">CONFIRMAR Y EJECUTAR</button><button class="btn-secondary" onclick="document.getElementById(\'modal-confirm\').classList.remove(\'show\')">Cancelar</button></div>';
   document.getElementById('modal-body').innerHTML=h;
 }
-async function ejecutarCierre(c,b,n,a,r,d,h,p,s){
+async function ejecutarCierre(c,b,n,a,r,d,h,p,s,fol){
   document.getElementById('btn-ejecutar').disabled=true;
   document.getElementById('btn-ejecutar').textContent='Ejecutando...';
   try{
     // v3.8.4: payload simplificado - sin item_assembly_id ni lote_id
-    const res=await fetch(CERRAR,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({cr_id:c,build_id:b,lote_nombre:n,cantidad_aprobada:a,cantidad_rechazo:r,cantidad_desperdicio:d,humedad_pct:h,polvo_m3_consumido:p,sello_m3_consumido:s,autorizado_por:'Director (v3.8.4 GitHub Pages)'})});
+    const res=await fetch(CERRAR,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({cr_id:c,build_id:b,lote_nombre:n,folio:fol||undefined,cantidad_aprobada:a,cantidad_rechazo:r,cantidad_desperdicio:d,humedad_pct:h,polvo_m3_consumido:p,sello_m3_consumido:s,autorizado_por:'Director (v3.8.6 GitHub Pages)'})});
     const j=await res.json();
     document.getElementById('modal-confirm').classList.remove('show');
     if(j.success){
