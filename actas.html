@@ -148,7 +148,7 @@ async function sbRpc(fn,params){
   return r.json();
 }
 const SESS_KEY="batab_calidad_sesion";
-const CODIGOS_OK=["GEH","JRC","AAC"]; // Gerardo (director), Capetillo (supervisor), Ana (calidad)
+const CODIGOS_OK=["GEH","JRC","AAC","EHC"]; // Gerardo (director), Capetillo (supervisor), Ana (calidad), Elias (calidad)
 const okUser = o => !!(o && CODIGOS_OK.includes(String(o.codigo||"").toUpperCase()));
 function sesionActiva(){
   try{
@@ -171,7 +171,7 @@ async function entrar(){
     const rows=await sbRpc("validar_operador_pin",{p_codigo:codigo,p_pin:pin});
     const row=Array.isArray(rows)?rows[0]:rows;
     if(!row||!row.exito){ err.textContent=(row&&row.mensaje)||"Código o PIN incorrecto"; btn.disabled=false; btn.textContent="Entrar"; return; }
-    if(!CODIGOS_OK.includes(String(row.codigo||"").toUpperCase())){ err.textContent="Acceso solo para Calidad: Capetillo, Ana o Gerardo"; btn.disabled=false; btn.textContent="Entrar"; return; }
+    if(!CODIGOS_OK.includes(String(row.codigo||"").toUpperCase())){ err.textContent="Acceso solo para Calidad: Capetillo, Ana, Elías o Gerardo"; btn.disabled=false; btn.textContent="Entrar"; return; }
     let tok="";
     try{ const lr=await fetch(`${FN}?action=login`,{method:"POST",headers:{apikey:KEY,Authorization:"Bearer "+KEY,"Content-Type":"application/json"},body:JSON.stringify({codigo,pin})}); const lj=await lr.json(); if(lj&&lj.ok&&lj.token) tok=lj.token; }catch(_){}
     if(!tok){ err.textContent="No se pudo iniciar sesión con el servidor. Reintenta."; btn.disabled=false; btn.textContent="Entrar"; return; }
