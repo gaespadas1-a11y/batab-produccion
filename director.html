@@ -5,7 +5,7 @@
 <!-- Sube APP_VERSION en CADA deploy, igual que el valor "v" de version.json -->
 <script>
 (function () {
-  var APP_VERSION = '2026-06-09-paros';
+  var APP_VERSION = '2026-08-06-nc';
   try {
     fetch('version.json?t=' + Date.now(), { cache: 'no-store' })
       .then(function (r) { return r.json(); })
@@ -22,7 +22,7 @@
 <!-- ====== FIN CANDADO DE VERSION BATAB ====== -->
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BATAB Director - Aprobacion Final v3.8.6</title>
+<title>BATAB Director - Aprobacion Final v3.9.0</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f6f8; color: #1a1a1a; padding: 16px; max-width: 980px; margin: 0 auto; }
@@ -78,7 +78,7 @@
 </style>
 </head>
 <body>
-<div class="deploy-banner">APP ACTUALIZADA v3.8.6 - se envia el folio al cerrar (asegura el ajuste de humedad)</div>
+<div class="deploy-banner">APP ACTUALIZADA v3.9.0 - nuevo carril: autorizacion de notas de credito</div>
 <header>
   <div><h1>BATAB Director</h1><div style="font-size: 13px; opacity: 0.8; margin-top: 4px;">Aprobacion final de lotes productivos</div></div>
   <span class="badge" id="badge-count">Cargando...</span>
@@ -105,7 +105,12 @@
   <div style="flex:1;height:1px;background:#e5e7eb;"></div>
 </div>
 <div id="ocs-otras" style="margin-top:14px;"></div>
-<div class="version-tag">v3.8.6 - GitHub Pages - cerrar-lote v1.9.2 - aprobar-oc-general v1.0</div>
+<div style="margin-top:26px;display:flex;align-items:center;gap:10px;">
+  <h2 style="font-size:14px;text-transform:uppercase;letter-spacing:.06em;color:#6b7280;margin:0;font-weight:700;">Notas de credito</h2>
+  <div style="flex:1;height:1px;background:#e5e7eb;"></div>
+</div>
+<div id="ncs-pend" style="margin-top:14px;"><div class="loading"><div class="spinner"></div><div style="margin-top:12px;">Cargando notas de credito...</div></div></div>
+<div class="version-tag">v3.9.0 - GitHub Pages - cerrar-lote v1.9.2 - aprobar-oc-general v1.0 - aprobar-nota-credito v1.0</div>
 <div class="modal-overlay" id="modal-confirm"><div class="modal"><h2>Confirmar cierre del lote</h2><div id="modal-body"></div></div></div>
 <div class="modal-overlay" id="modal-resultado"><div class="modal"><h2 id="resultado-title">Resultado</h2><div id="resultado-body"></div><div class="actions"><button class="btn-secondary" onclick="document.getElementById('modal-resultado').classList.remove('show'); cargarLotes();">Cerrar</button></div></div></div>
 <script>
@@ -285,7 +290,7 @@ async function rechazarOC(id,tranid,mp,btn){
   }catch(e){alert('Error: '+e.message);}
   cargarOCs();
 }
-document.getElementById('btn-refresh').onclick=()=>{cargarLotes();cargarOCs();cargarTransferencias();};
+document.getElementById('btn-refresh').onclick=()=>{cargarLotes();cargarOCs();cargarTransferencias();cargarNCs();};
 document.querySelectorAll('[data-filter]').forEach(b=>{b.onclick=()=>{document.querySelectorAll('[data-filter]').forEach(x=>x.classList.remove('active'));b.classList.add('active');currentFilter=b.dataset.filter;renderLotes();};});
 
 async function cargarTransferencias(){
@@ -334,7 +339,74 @@ async function rechazarTransf(id,lbl,btn){
   cargarTransferencias();
 }
 
-cargarLotes(); cargarOCs(); cargarTransferencias();
+
+// ===== NOTAS DE CREDITO (v3.9.0 - 06-ago-2026) =====
+// NetSuite no tiene aprobacion nativa para NC: el control son dos campos personalizados
+// (custbody_requiere_autorizacion / custbody_nc_autorizado). Entran al carril las NC con
+// el articulo de descuento 1555 O las marcadas por el capturista.
+const APROBAR_NC=SB+'/functions/v1/aprobar-nota-credito';
+const NC_DESDE='2026-07-01';
+async function cargarNCs(){
+  const cont=document.getElementById('ncs-pend');
+  const sql="SELECT t.id, t.tranid, BUILTIN.DF(t.entity) AS cliente, ABS(t.foreigntotal) AS total, t.memo, TO_CHAR(t.trandate,'DD/MM/YYYY') AS fecha, t.custbody_mx_cfdi_uuid AS uuid, NVL(t.custbody_requiere_autorizacion,'F') AS marcada, (SELECT NVL(SUM(ABS(tl.foreignamount)),0) FROM transactionline tl WHERE tl.transaction=t.id AND tl.item=1555) AS descuento FROM transaction t WHERE t.type='CustCred' AND t.voided='F' AND NVL(t.custbody_nc_autorizado,'F')='F' AND t.trandate >= TO_DATE('"+NC_DESDE+"','YYYY-MM-DD') AND (NVL(t.custbody_requiere_autorizacion,'F')='T' OR EXISTS (SELECT 1 FROM transactionline tl2 WHERE tl2.transaction=t.id AND tl2.item=1555)) ORDER BY t.trandate DESC, t.id DESC";
+  try{
+    const r=await suiteql(sql);
+    if(!r.success||!r.data){cont.innerHTML='<div class="empty"><div>Error consultando notas de credito</div></div>';return;}
+    renderNCs(r.data.items||[]);
+  }catch(e){cont.innerHTML='<div class="empty"><div>Error de conexion</div></div>';}
+}
+function renderNCs(items){
+  const box=document.getElementById('ncs-pend');
+  if(!items.length){box.innerHTML='<div class="empty" style="padding:22px 20px;color:#9ca3af;"><div>No hay notas de credito por autorizar</div></div>';return;}
+  let h='';
+  for(const n of items){
+    const desc=Number(n.descuento||0);
+    const total=Number(n.total||0).toLocaleString('es-MX',{minimumFractionDigits:2});
+    const timbrada=!!(n.uuid&&String(n.uuid).trim());
+    const marcada=String(n.marcada||'F')==='T';
+    h+='<div style="background:#fff;border-radius:12px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,.06);border-left:4px solid '+(timbrada?'#f59e0b':'#7c3aed')+';margin-bottom:12px;">'
+      +'<h3 style="font-size:16px;color:#0a3d62;margin:0;">'+n.tranid
+      +(desc>0?' <span style="font-size:11px;background:#ede9fe;color:#5b21b6;padding:2px 8px;border-radius:10px;font-weight:600;">DESCUENTO $'+desc.toLocaleString('es-MX')+'</span>':'')
+      +(marcada?' <span style="font-size:11px;background:#e0f2fe;color:#075985;padding:2px 8px;border-radius:10px;font-weight:600;">SOLICITADA</span>':'')
+      +'</h3>'
+      +'<div style="font-size:13px;color:#6b7280;margin-top:4px;">'+(n.cliente||'')+'</div>'
+      +'<div style="font-size:12px;color:#9ca3af;margin-top:2px;">'+(n.fecha||'')+' &middot; $'+total+' MXN</div>'
+      +(n.memo?'<div style="font-size:11px;color:#9ca3af;margin-top:5px;">'+n.memo+'</div>':'')
+      +(timbrada?'<div style="font-size:11px;color:#b45309;margin-top:6px;font-weight:600;">Ya timbrada (UUID emitido) &mdash; tu sello queda posterior al CFDI</div>':'<div style="font-size:11px;color:#5b21b6;margin-top:6px;font-weight:600;">Sin timbrar &mdash; el timbrado espera tu autorizacion</div>')
+      +'<div style="margin-top:13px;display:flex;gap:8px;">'
+      +'<button style="padding:10px 18px;border:none;border-radius:8px;font-weight:600;cursor:pointer;font-size:14px;background:#10b981;color:#fff;" onclick="aprobarNC('+n.id+',\''+n.tranid+'\',this)">AUTORIZAR</button>'
+      +'<button style="padding:10px 16px;border:none;border-radius:8px;font-weight:600;cursor:pointer;font-size:14px;background:#fee2e2;color:#991b1b;" onclick="rechazarNC('+n.id+',\''+n.tranid+'\',this)">Rechazar</button>'
+      +'<button style="padding:10px 16px;border:none;border-radius:8px;font-weight:600;cursor:pointer;font-size:14px;background:#f3f4f6;color:#374151;" onclick="window.open(\'https://7905968.app.netsuite.com/app/accounting/transactions/custcred.nl?id='+n.id+'\',\'_blank\')">Ver NC</button>'
+      +'</div></div>';
+  }
+  box.innerHTML=h;
+}
+async function aprobarNC(id,tranid,btn){
+  if(!confirm('Autorizar la nota de credito '+tranid+'?')) return;
+  if(btn){btn.disabled=true;btn.textContent='Autorizando...';}
+  try{
+    const res=await fetch(APROBAR_NC,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ncId:String(id)})});
+    const j=await res.json();
+    const ok=j.ok&&j.autorizacion&&j.autorizacion.ok!==false;
+    if(ok){alert('Nota de credito '+tranid+' autorizada.'+(j.advertencia?'\n\n'+j.advertencia:''));}
+    else{alert('No se pudo autorizar: '+JSON.stringify((j.autorizacion&&j.autorizacion.error)||j.error||j));}
+  }catch(e){alert('Error: '+e.message);}
+  cargarNCs();
+}
+async function rechazarNC(id,tranid,btn){
+  const motivo=prompt('Motivo del rechazo de '+tranid+' (queda en observaciones del revisor):','');
+  if(motivo===null) return;
+  if(btn){btn.disabled=true;btn.textContent='Rechazando...';}
+  try{
+    const res=await fetch(APROBAR_NC,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ncId:String(id),accion:'rechazar',motivo:motivo})});
+    const j=await res.json();
+    if(j.ok&&j.rechazo&&j.rechazo.ok!==false){alert('Nota de credito '+tranid+' rechazada.');}
+    else{alert('No se pudo rechazar: '+JSON.stringify((j.rechazo&&j.rechazo.error)||j.error||j));}
+  }catch(e){alert('Error: '+e.message);}
+  cargarNCs();
+}
+
+cargarLotes(); cargarOCs(); cargarTransferencias(); cargarNCs();
 </script>
 </body>
 </html>
