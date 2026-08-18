@@ -56,7 +56,7 @@ var NAMES={cemento:'Cemento',agregado:'Agregados',aditivo:'Aditivos',pigmento:'P
 var DATA={};var SEL='cemento';
 function fmt(n){return Math.round(n).toLocaleString('es-MX');}
 function pigColor(m){var x={pig_amarillo:'#D9A441',pig_rojo:'#A0392C',pig_chocolate:'#5E3A24',pig_negro:'#2E2E2E',pig_adobe:'#B5733F'};return x[m]||'#9C9A92';}
-function aggColor(m){var x={polvo:['#A3A29C','#7E7D78','#C2C1BB',false],arena_fina:['#CDB68C','#AE966C','#E2D2AE',false],sello_14:['#BEBBB3','#969389','#D6D3CB',true],sello_38:['#94918A','#706D66','#B3B0A8',true],arena_gruesa:['#BC9F70','#9C8252','#D7C094',true]};return x[m]||['#9C9A92','#7C7A73','#BAB8B0',false];}
+function aggColor(m){var x={polvo:['#A3A29C','#7E7D78','#C2C1BB',false],arena_fina:['#CDB68C','#AE966C','#E2D2AE',false],sello_14:['#BEBBB3','#969389','#D6D3CB',true],sello_38:['#94918A','#706D66','#B3B0A8',true],grava_12:['#8A8780','#66635C','#A9A69E',true],arena_gruesa:['#BC9F70','#9C8252','#D7C094',true]};return x[m]||['#9C9A92','#7C7A73','#BAB8B0',false];}
 function operando(f){var fam=DATA[f];return f==='cemento'||(fam&&fam.total_nivel>0);}
 function stat(c,op){if(!op&&c.nivel<=0)return'sinoperar';if(c.nivel<=0||c.nivel<c.minimo)return'critico';if(c.minimo>0&&c.nivel<c.minimo*1.3)return'precaucion';return'ok';}
 var SC={ok:{t:'SUFICIENTE',b:'#E1F5EE',c:'var(--green)',f:'#1D9E75'},precaucion:{t:'PRECAUCIÓN',b:'#FAEEDA',c:'var(--amber)',f:'#E0922F'},critico:{t:'CRÍTICO',b:'#FCEBEB',c:'var(--red)',f:'#D14C3C'},sinoperar:{t:'SIN OPERAR',b:'#EFEEE9',c:'var(--gray)',f:'#C9C5BC'}};
