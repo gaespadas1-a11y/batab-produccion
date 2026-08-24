@@ -5,7 +5,7 @@
 <!-- Sube APP_VERSION en CADA deploy, igual que el valor "v" de version.json -->
 <script>
 (function () {
-  var APP_VERSION = '2026-08-06-nc';
+  var APP_VERSION = '2026-08-24-nc-restlet';
   try {
     fetch('version.json?t=' + Date.now(), { cache: 'no-store' })
       .then(function (r) { return r.json(); })
@@ -22,7 +22,7 @@
 <!-- ====== FIN CANDADO DE VERSION BATAB ====== -->
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BATAB Director - Aprobacion Final v3.9.0</title>
+<title>BATAB Director - Aprobacion Final v3.9.1</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f6f8; color: #1a1a1a; padding: 16px; max-width: 980px; margin: 0 auto; }
@@ -78,7 +78,7 @@
 </style>
 </head>
 <body>
-<div class="deploy-banner">APP ACTUALIZADA v3.9.0 - nuevo carril: autorizacion de notas de credito</div>
+<div class="deploy-banner">APP ACTUALIZADA v3.9.1 - notas de credito: sello via RESTlet (libra el candado del flujo)</div>
 <header>
   <div><h1>BATAB Director</h1><div style="font-size: 13px; opacity: 0.8; margin-top: 4px;">Aprobacion final de lotes productivos</div></div>
   <span class="badge" id="badge-count">Cargando...</span>
@@ -110,7 +110,7 @@
   <div style="flex:1;height:1px;background:#e5e7eb;"></div>
 </div>
 <div id="ncs-pend" style="margin-top:14px;"><div class="loading"><div class="spinner"></div><div style="margin-top:12px;">Cargando notas de credito...</div></div></div>
-<div class="version-tag">v3.9.0 - GitHub Pages - cerrar-lote v1.9.2 - aprobar-oc-general v1.0 - aprobar-nota-credito v1.0</div>
+<div class="version-tag">v3.9.1 - GitHub Pages - cerrar-lote v1.9.2 - aprobar-oc-general v1.0 - aprobar-nota-credito v1.1</div>
 <div class="modal-overlay" id="modal-confirm"><div class="modal"><h2>Confirmar cierre del lote</h2><div id="modal-body"></div></div></div>
 <div class="modal-overlay" id="modal-resultado"><div class="modal"><h2 id="resultado-title">Resultado</h2><div id="resultado-body"></div><div class="actions"><button class="btn-secondary" onclick="document.getElementById('modal-resultado').classList.remove('show'); cargarLotes();">Cerrar</button></div></div></div>
 <script>
@@ -381,6 +381,29 @@ function renderNCs(items){
   }
   box.innerHTML=h;
 }
+// Traduce el error crudo de NetSuite a algo que se pueda leer y accionar.
+// El caso mas comun: el workflow bloquea la NC mientras esta pendiente y el
+// REST no puede escribir. La via buena es el RESTlet bat_nc_autorizar.
+function explicarErrorNC(j,det){
+  const crudo=String((det&&(det.error||det.error_restlet))||j.error||JSON.stringify(j||{}));
+  if((det&&det.bloqueada_por_workflow)||/bloqueado por un flujo de trabajo|blocked by a user defined workflow/i.test(crudo)){
+    return 'La nota de credito esta BLOQUEADA por un flujo de trabajo de NetSuite.\n\n'
+      +'La app no puede escribir el sello mientras el candado este puesto. Autorizala '
+      +'directamente en NetSuite con el boton del flujo, o revisa que el RESTlet '
+      +'bat_nc_autorizar siga desplegado.';
+  }
+  if(/SSS_INVALID_SCRIPTLET_ID|Suitelet is invalid/i.test(crudo)){
+    return 'El RESTlet bat_nc_autorizar no responde (no desplegado, inactivo o sin el rol '
+      +'integrador en la audiencia). Sin el, las NC bloqueadas por el flujo no se pueden sellar '
+      +'desde la app.';
+  }
+  if(/fuera del carril/i.test(crudo)){
+    return 'Esta NC no entra al carril de autorizacion: no trae el articulo de descuento 1555 '
+      +'ni viene marcada "Requiere autorizacion".';
+  }
+  if(/anulada|voided/i.test(crudo)) return 'La nota de credito esta anulada. No se sella.';
+  return crudo.substring(0,500);
+}
 async function aprobarNC(id,tranid,btn){
   if(!confirm('Autorizar la nota de credito '+tranid+'?')) return;
   if(btn){btn.disabled=true;btn.textContent='Autorizando...';}
@@ -389,7 +412,7 @@ async function aprobarNC(id,tranid,btn){
     const j=await res.json();
     const ok=j.ok&&j.autorizacion&&j.autorizacion.ok!==false;
     if(ok){alert('Nota de credito '+tranid+' autorizada.'+(j.advertencia?'\n\n'+j.advertencia:''));}
-    else{alert('No se pudo autorizar: '+JSON.stringify((j.autorizacion&&j.autorizacion.error)||j.error||j));}
+    else{alert('No se pudo autorizar '+tranid+'.\n\n'+explicarErrorNC(j,j.autorizacion));}
   }catch(e){alert('Error: '+e.message);}
   cargarNCs();
 }
@@ -401,7 +424,7 @@ async function rechazarNC(id,tranid,btn){
     const res=await fetch(APROBAR_NC,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ncId:String(id),accion:'rechazar',motivo:motivo})});
     const j=await res.json();
     if(j.ok&&j.rechazo&&j.rechazo.ok!==false){alert('Nota de credito '+tranid+' rechazada.');}
-    else{alert('No se pudo rechazar: '+JSON.stringify((j.rechazo&&j.rechazo.error)||j.error||j));}
+    else{alert('No se pudo rechazar '+tranid+'.\n\n'+explicarErrorNC(j,j.rechazo));}
   }catch(e){alert('Error: '+e.message);}
   cargarNCs();
 }
