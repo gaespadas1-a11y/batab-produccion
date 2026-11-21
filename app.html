@@ -5,7 +5,7 @@
 <!-- Sube APP_VERSION en CADA deploy, igual que el valor "v" de version.json -->
 <script>
 (function () {
-  var APP_VERSION = '2026-06-09-paros';
+  var APP_VERSION = '2026-11-21-sync';
   try {
     fetch('version.json?t=' + Date.now(), { cache: 'no-store' })
       .then(function (r) { return r.json(); })
@@ -1721,29 +1721,67 @@ let _sbLoaded=false;
 // Síncrono (uso interno del app): devuelve caché en memoria
 const getRecords=()=>_records;
 
-// Síncrono: actualiza caché y dispara save a Supabase en background
-const saveRecords=r=>{_records=[...r];_syncRecordsToSb(r);};
+// ═══ v3.8 SYNC ROBUSTO (21-nov-2026) ═══
+// Antes: cada guardado re-subia TODO el historial (con fotos) y el registro nuevo
+// quedaba al final; si la subida se cortaba, el registro nuevo nunca llegaba al
+// servidor y los errores se ocultaban. Ahora: solo se suben los registros que
+// cambiaron, el nuevo primero, se verifica la respuesta, se reintenta y lo que
+// no sube queda en una cola local que sobrevive a cerrar la app.
+const _sig={};
+const PEND_KEY='batab_pending_sync';
+function _sinFotos(r){return {...r,dosiPhoto:null,dosiPhoto2:null,dosiPhotosExtra:[],pesajes:Array.isArray(r.pesajes)?r.pesajes.map(p=>({...p,photo:null,photoVacia:null,photoLlena:null})):r.pesajes};}
+function _firma(rec){try{return JSON.stringify(_sinFotos(rec));}catch(e){return 'x'+Math.random();}}
+function _marcarSincronizado(rec){if(rec&&rec.id)_sig[rec.id]=_firma(rec);}
+function _pendLeer(){try{return JSON.parse(localStorage.getItem(PEND_KEY)||'[]');}catch(e){return [];}}
+function _pendGuardar(a){try{localStorage.setItem(PEND_KEY,JSON.stringify(a));return true;}catch(e){try{localStorage.setItem(PEND_KEY,JSON.stringify(a.map(_sinFotos)));return true;}catch(e2){return false;}}}
+function _pendAgregar(rec){const a=_pendLeer().filter(x=>x.id!==rec.id);a.push(rec);_pendGuardar(a);}
+function _pendQuitar(rec){const a=_pendLeer();const b=a.filter(x=>x.id!==rec.id);if(b.length!==a.length)_pendGuardar(b);}
+function _pendientesCount(){return _pendLeer().length;}
 
-// Persiste el arreglo completo → upsert por folio en produccion_logs
-async function _syncRecordsToSb(recs){
-  try{
-    for(const rec of recs){
-      const row={
-        folio:      rec.folio||(''+rec.id),
-        payload:    rec,
-        http_status:isApproved(rec.status)?200:0,
-        record_id:  rec.netsuiteRecordId||null,
-        error:      null
-      };
-      // Upsert: insert o actualiza si ya existe el folio
-      await fetch(SB_URL+'/rest/v1/produccion_logs?on_conflict=folio',{
+// Sube UN registro y verifica la respuesta. soloInsertar=true: no sobreescribe
+// un folio existente (devuelve duplicado:true si el folio ya existe).
+async function syncRecordNow(rec,opts){
+  opts=opts||{};
+  const row={folio:rec.folio||(''+rec.id),payload:rec,http_status:isApproved(rec.status)?200:0,record_id:rec.netsuiteRecordId||null,error:null};
+  let ultimo='';
+  for(let i=0;i<3;i++){
+    try{
+      const r=await fetch(SB_URL+'/rest/v1/produccion_logs'+(opts.soloInsertar?'':'?on_conflict=folio'),{
         method:'POST',
-        headers:{...sbH,'Prefer':'resolution=merge-duplicates,return=minimal'},
+        headers:{...sbH,'Prefer':opts.soloInsertar?'return=minimal':'resolution=merge-duplicates,return=minimal'},
         body:JSON.stringify(row)
-      }).catch(()=>{});
-    }
-  }catch(e){console.warn('Supabase sync error:',e);}
+      });
+      if(r.ok){_marcarSincronizado(rec);_pendQuitar(rec);return {ok:true};}
+      const t=await r.text().catch(()=>'');
+      if(r.status===409)return {ok:false,duplicado:true,error:'El folio '+row.folio+' ya existe en el servidor'};
+      ultimo='HTTP '+r.status+' '+t.substring(0,150);
+    }catch(e){ultimo=(e&&e.message)||String(e);}
+    await new Promise(res=>setTimeout(res,1500*(i+1)));
+  }
+  _pendAgregar(rec);
+  return {ok:false,error:ultimo||'sin conexion'};
 }
+
+// Síncrono: actualiza caché y sube en background SOLO lo que cambió
+const saveRecords=r=>{_records=[...r];_syncRecordsToSb(r);};
+let _syncCorriendo=false,_syncOtraVez=false;
+async function _syncRecordsToSb(recs){
+  if(_syncCorriendo){_syncOtraVez=true;return;}
+  _syncCorriendo=true;
+  try{
+    do{
+      _syncOtraVez=false;
+      const lista=(_records||[]).filter(r=>r&&r.id&&_sig[r.id]!==_firma(r))
+        .sort((a,b)=>String(b.createdAt||'').localeCompare(String(a.createdAt||'')));
+      let fallos=0;
+      for(const rec of lista){const res=await syncRecordNow(rec);if(!res.ok)fallos++;}
+      if(fallos>0)showToast('⚠️ '+fallos+' registro(s) NO se subieron al servidor. Se reintentará solo; no borres la app.','red');
+    }while(_syncOtraVez);
+  }catch(e){console.warn('Supabase sync error:',e);}
+  finally{_syncCorriendo=false;}
+}
+// Reintento automático de la cola local cada 60 s
+setInterval(()=>{if(_pendientesCount()>0)_syncRecordsToSb(_records);},60000);
 
 // Carga registros desde Supabase al iniciar
 async function loadRecordsFromSb(){
@@ -1764,13 +1802,31 @@ async function loadRecordsFromSb(){
     try{_records=JSON.parse(localStorage.getItem('batab_records')||'[]');}catch{}
     console.warn('Supabase no disponible, usando localStorage:',e);
   }
+  // v3.8: lo cargado ya está en el servidor; solo la cola local queda por subir
+  try{
+    (_records||[]).forEach(_marcarSincronizado);
+    const pend=_pendLeer();
+    pend.forEach(p=>{
+      const i=_records.findIndex(r=>r.id===p.id||(p.folio&&r.folio===p.folio&&!r.netsuiteRecordId&&!isApproved(r.status)));
+      if(i>=0)_records[i]=p;else _records.unshift(p);
+      delete _sig[p.id];
+    });
+    if(pend.length>0)setTimeout(()=>_syncRecordsToSb(_records),1500);
+  }catch(e){console.warn('cola pendiente:',e);}
 }
 
 // OCR key: usa Supabase app_credentials (columna ocr_key)
 let _ocrKey='';
 const getOcrKey=()=>_ocrKey;
 
-// Contadores de folio: siguen en localStorage (son locales al turno)
+// v3.8: folios reservados en el servidor (atómico) — antes eran locales al teléfono
+async function incCounterRemote(l){
+  const v = await sbRpc('siguiente_folio',{p_linea:l,p_anio:new Date().getFullYear()});
+  const n = parseInt(v);
+  if(!n) throw new Error('respuesta invalida del servidor');
+  localStorage.setItem('batab_ctr_'+l, n);
+  return n;
+}
 const getCounter=l=>parseInt(localStorage.getItem('batab_ctr_'+l)||'0');
 const incCounter=l=>{const n=getCounter(l)+1;localStorage.setItem('batab_ctr_'+l,n);return n;};
 
@@ -3096,10 +3152,15 @@ function buildResumen(){
   const rendEl = document.getElementById('resumen-rendimiento');
   if(rendEl) rendEl.innerHTML = rendimientoHTML;
 }
-function saveRecord(){
+async function saveRecord(){
   const d=collectFormData();
   const linea=d.linea;
-  const num=incCounter(linea),year=new Date().getFullYear();
+  showLoading('Reservando folio en servidor...');
+  let num;
+  try{ num = await incCounterRemote(linea); }
+  catch(e){ hideLoading(); showToast('No se pudo reservar folio (¿sin señal?): '+e.message,'red'); return; }
+  hideLoading();
+  const year=new Date().getFullYear();
   d.folio=`${linea}-${year}-${String(num).padStart(4,'0')}`;
   const rec={...d,id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),
     dosiPhoto:S.dosiPhotoB64,dosiPhoto2:S.dosiPhotoB64_2||null,dosiPhotosExtra:[...S.dosiPhotosExtra],createdAt:new Date().toISOString(),piezasEstimadas:S.piezasEstimadas||null,pesoHumedo:S.pesoHumedo||null,
@@ -3109,16 +3170,20 @@ function saveRecord(){
     merma:null, pctMerma:null, eficiencia:null,
     status:'4',                          // Pendiente (numérico NetSuite)
     netsuiteWO:null, approvedBy:null, approvedAt:null};
-  const recs=getRecords();recs.push(rec);
-  try{
-    saveRecords(recs);
-  }catch(e){
-    // localStorage lleno — guardar sin fotos para no perder el registro
-    const recSinFotos={...rec,dosiPhoto:null,dosiPhoto2:null,dosiPhotosExtra:[],pesajes:rec.pesajes?.map(p=>({...p,photo:null,photoVacia:null,photoLlena:null}))||[]};
-    const recsSinFotos=getRecords();recsSinFotos.push(recSinFotos);
-    try{ saveRecords(recsSinFotos); }
-    catch(e2){ showToast('Error al guardar: almacenamiento lleno','red'); return; }
-    showToast('⚠️ Guardado SIN FOTOS — espacio lleno. Libera espacio en Ajustes','red');setTimeout(()=>showToast('Ve a Ajustes → Limpiar aprobados para liberar espacio','red'),3200);
+  // v3.8: el registro nuevo se sube PRIMERO y se confirma antes de continuar
+  _records=[...getRecords(),rec];
+  _pendAgregar(rec);
+  showLoading('Guardando en servidor...');
+  let res=await syncRecordNow(rec,{soloInsertar:true});
+  for(let k=0;k<3&&res.duplicado;k++){
+    // El folio ya existía: reservar otro y reintentar
+    try{ const n2=await incCounterRemote(linea); rec.folio=d.folio=`${linea}-${year}-${String(n2).padStart(4,'0')}`; }
+    catch(e){ break; }
+    res=await syncRecordNow(rec,{soloInsertar:true});
+  }
+  hideLoading();
+  if(!res.ok){
+    alert('⚠️ El registro '+d.folio+' quedó guardado en ESTE teléfono pero NO llegó al servidor.\n\n'+(res.error||'')+'\n\nSe reintentará automáticamente. NO desinstales la app ni borres datos. Si sigue fallando, avisa al supervisor.');
   }
   document.getElementById('success-folio').textContent=d.folio;
   // Supervisor/director → ir directo a revisar el registro recién guardado
@@ -3419,7 +3484,7 @@ function renderReviewScreen(rec){
     const _banner = document.createElement('div');
     _banner.id = 'fase1-info-banner';
     _banner.style.cssText = 'background:#E8F5E9;color:#1B5E20;padding:14px 16px;border-radius:8px;margin:12px 4px;font-weight:600;text-align:center;border:2px solid #4CAF50;line-height:1.5;font-size:14px;';
-    _banner.innerHTML = '✅ <b>FASE 1 — Validación inicial</b><br>Al aprobar se crea la Work Order en NetSuite.<br><br>📝 Cantidad aprobada / rechazo / desperdicio se capturan en <b>Fase 2</b>, después de G1 y empaque final.<br><br><span style="font-size:11px;color:#2E7D32;">build v3.7.4 ✓</span>';
+    _banner.innerHTML = '✅ <b>FASE 1 — Validación inicial</b><br>Al aprobar se crea la Work Order en NetSuite.<br><br>📝 Cantidad aprobada / rechazo / desperdicio se capturan en <b>Fase 2</b>, después de G1 y empaque final.<br><br><span style="font-size:11px;color:#2E7D32;">build v3.8.0 ✓</span>';
     _cierreSec.parentNode.insertBefore(_banner, _cierreSec);
   }
 
@@ -3570,6 +3635,12 @@ async function doApprove(){
     return;
   }
 
+  // v3.8: asegurar que el registro exista en el servidor antes de aprobar
+  if(_sig[rec.id]!==_firma(rec) && !rec.netsuiteRecordId){
+    showLoading('Subiendo registro al servidor...');
+    const _s=await syncRecordNow(rec);
+    if(!_s.ok){ hideLoading(); showToast('❌ No se pudo subir el registro al servidor ('+_s.error+'). Revisa la señal e intenta de nuevo.','red'); return; }
+  }
   // ─── LLAMADA ATÓMICA AL BACKEND (crea WO + CR 1417 + actualiza Supabase) ──
   showLoading('Aprobando y generando WO en NetSuite...');
   try{
